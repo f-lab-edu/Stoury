@@ -52,6 +52,6 @@ class MemberServiceTest {
 
     private void assertFailByException(MemberDto noUsername) {
         assertThatThrownBy(() -> memberService.createMember(noUsername))
-                .isInstanceOf(Exception.class);
+                .isInstanceOf(IllegalStateException.class);
     }
 }
