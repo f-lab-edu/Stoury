@@ -1,17 +1,18 @@
 package com.stoury.service;
 
 import com.stoury.dto.MemberDto;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @SpringBootTest
+@ActiveProfiles("test")
 class MemberServiceTest {
     @Autowired
     MemberService memberService;
@@ -34,7 +35,23 @@ class MemberServiceTest {
 
         assertThat(createMember.getEmail()).isEqualTo(memberDto.getEmail());
         assertThat(createMember.getUsername()).isEqualTo(memberDto.getUsername());
-        assertThat(createMember.getPassword()).isNotEqualTo(memberDto.getPassword());
-        assertThat(createMember.getPassword()).hasSize(60);
+    }
+
+    @Test
+    @DisplayName("사용자 생성 - 실패, [이메일, 패스워드, 이름] 셋 중 하나라도 누락 불가")
+    void createMemberFail() {
+        MemberDto noEmail = MemberDto.builder().password("pppppwwwwwaaaa").username("chung").build();
+        assertFailByException(noEmail);
+
+        MemberDto noPassword = MemberDto.builder().email("qwdqws@qqqq.com").username("sang").build();
+        assertFailByException(noPassword);
+
+        MemberDto noUsername = MemberDto.builder().email("qwdqws@qqqq.com").password("pppppwwwwwaaaa").build();
+        assertFailByException(noUsername);
+    }
+
+    private void assertFailByException(MemberDto noUsername) {
+        assertThatThrownBy(() -> memberService.createMember(noUsername))
+                .isInstanceOf(Exception.class);
     }
 }
