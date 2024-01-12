@@ -15,6 +15,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -137,5 +139,21 @@ class MemberServiceTest {
 
         assertThatThrownBy(()->memberService.updateMember(requestUpdateMember))
                 .isInstanceOf(NullPointerException.class);
+    }
+
+    @Test
+    @DisplayName("사용자 검색")
+    void getMembers() {
+        Member member1 = Member.builder().email("mem1@aaaa.com").encryptedPassword("pwdpwdpwdpwd").username("member1").build();
+        Member member2 = Member.builder().email("mem2@aaaa.com").encryptedPassword("pwdpwdpwdpwd").username("member2").build();
+        Member member3 = Member.builder().email("men3@aaaa.com").encryptedPassword("pwdpwdpwdpwd").username("member3").build();
+        Member member4 = Member.builder().email("nem4@aaaa.com").encryptedPassword("pwdpwdpwdpwd").username("member4").build();
+
+        List<ResponseMember> foundMembers = memberService.getMembers("mem");
+
+        foundMembers.sort(Comparator.comparing(ResponseMember::username));
+
+        assertThat(foundMembers.get(0).username()).isEqualTo(member1.getUsername());
+        assertThat(foundMembers.get(1).username()).isEqualTo(member2.getUsername());
     }
 }
