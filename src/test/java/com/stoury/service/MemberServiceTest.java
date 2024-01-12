@@ -3,7 +3,6 @@ package com.stoury.service;
 import com.stoury.dto.RequestMember;
 import com.stoury.dto.ResponseMember;
 import com.stoury.exception.MemberCreateException;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -24,20 +23,15 @@ class MemberServiceTest {
     @Autowired
     MemberService memberService;
 
-    static RequestMember requestMember;
-
-    @BeforeAll
-    static void setup() {
-        requestMember = RequestMember.builder()
+    @Test
+    @DisplayName("사용자 생성 - 성공")
+    void createMemberSuccess() {
+        RequestMember requestMember = RequestMember.builder()
                 .email("dddd@cccc.com")
                 .password("notencryptedpwd")
                 .username("jzakka")
                 .build();
-    }
 
-    @Test
-    @DisplayName("사용자 생성 - 성공")
-    void createMemberSuccess() {
         ResponseMember createMember = memberService.createMember(requestMember);
 
         assertThat(createMember.email()).isEqualTo(requestMember.email());
