@@ -122,4 +122,20 @@ class MemberServiceTest {
         assertThat(updatedMember.profileImagePath()).isEqualTo(requestUpdateMember.profileImagePath());
         assertThat(updatedMember.introduction()).isEqualTo(requestUpdateMember.introduction());
     }
+
+    @Test
+    @DisplayName("사용자 정보 업데이트 - 실패, 사용자 이름이 없음")
+    void updateMemberFail() {
+        Member member1 = Member.builder().email("mem1@dddd.com").encryptedPassword("vurhf2").username("member1").build();
+        memberRepository.save(member1);
+
+        RequestUpdateMember requestUpdateMember = RequestUpdateMember.builder()
+                .email(member1.getEmail())
+                .profileImagePath("/profile/images/member1")
+                .introduction("I have no name")
+                .build();
+
+        assertThatThrownBy(()->memberService.updateMember(requestUpdateMember))
+                .isInstanceOf(NullPointerException.class);
+    }
 }
