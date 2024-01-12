@@ -83,4 +83,19 @@ class MemberServiceTest {
         assertThat(deleteMembersIds).hasSize(1);
         assertThat(deleteMembersIds).containsExactly(member1Id);
     }
+
+    @Test
+    @DisplayName("사용자 삭제 - 실패, 존재하지 않는 사용자")
+    void deleteMemberFail() {
+        Member member1 = Member.builder().email("mem1@dddd.com").encryptedPassword("vurhf2").username("member1").build();
+        Member member2 = Member.builder().email("mem2@dddd.com").encryptedPassword("qwerty").username("member2").build();
+        memberRepository.save(member1);
+        memberRepository.save(member2);
+
+        assertThatThrownBy(()->memberService.deleteMember("nosuch@email.com"))
+                .isInstanceOf(MemberDeleteException.class);
+
+        assertThatThrownBy(() -> memberService.deleteMember(null))
+                .isInstanceOf(NullPointerException.class);
+    }
 }
