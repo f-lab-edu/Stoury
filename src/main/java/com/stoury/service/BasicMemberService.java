@@ -1,10 +1,10 @@
 package com.stoury.service;
 
 import com.stoury.domain.Member;
-import com.stoury.dto.MemberDto;
+import com.stoury.dto.RequestMember;
+import com.stoury.dto.ResponseMember;
 import com.stoury.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
-import org.modelmapper.ModelMapper;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -12,17 +12,20 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class BasicMemberService implements MemberService {
     private final MemberRepository memberRepository;
-    private final ModelMapper modelMapper;
     private final PasswordEncoder passwordEncoder;
     @Override
-    public MemberDto createMember(MemberDto memberDto) {
-        Member member = modelMapper.map(memberDto, Member.class);
+    public ResponseMember createMember(RequestMember requestMember) {
+        String encryptedPassword = passwordEncoder.encode(requestMember.password());
 
-        String encryptedPassword = passwordEncoder.encode(memberDto.getPassword());
-        member.setEncryptedPassword(encryptedPassword);
+        Member member = Member.builder()
+                .email(requestMember.email())
+                .username(requestMember.username())
+                .encryptedPassword(encryptedPassword)
+                .introduction(requestMember.introduction())
+                .build();
 
-        memberRepository.save(member);
+        Member newMember = memberRepository.save(member);
 
-        return modelMapper.map(member, MemberDto.class);
+        return ResponseMember.from(newMember);
     }
 }

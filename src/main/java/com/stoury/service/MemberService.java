@@ -1,9 +1,10 @@
 package com.stoury.service;
 
-import com.stoury.dto.MemberDto;
+import com.stoury.dto.RequestMember;
+import com.stoury.dto.ResponseMember;
 import org.springframework.transaction.annotation.Transactional;
 
 @Transactional
 public interface MemberService {
-    MemberDto createMember(MemberDto memberDto);
+    ResponseMember createMember(RequestMember memberDto);
 }

@@ -5,10 +5,7 @@ import lombok.*;
 
 @Entity
 @Getter
-@Setter
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Member {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -27,4 +24,12 @@ public class Member {
 
     @Column(columnDefinition = "TEXT")
     private String introduction;
+
+    @Builder
+    public Member(String email, String encryptedPassword, String username, String introduction) {
+        this.email = email;
+        this.encryptedPassword = encryptedPassword;
+        this.username = username;
+        this.introduction = introduction;
+    }
 }
