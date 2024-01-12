@@ -111,7 +111,7 @@ class MemberServiceTest {
 
         RequestUpdateMember requestUpdateMember = RequestUpdateMember.builder()
                 .email(member1.getEmail())
-                .username("changedMember1")
+                .username("changed1")
                 .profileImagePath("/profile/images/member1")
                 .introduction("Member1's introduction was changed!")
                 .build();
