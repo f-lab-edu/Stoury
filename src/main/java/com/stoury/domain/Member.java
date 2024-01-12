@@ -27,6 +27,9 @@ public class Member {
     @Column(name = "INTRODUCTION", columnDefinition = "TEXT")
     private String introduction;
 
+    @Column(name = "DELETED", nullable = false)
+    private boolean deleted;
+
     @Builder
     public Member(String email, String encryptedPassword, String username, String introduction) {
         this.email = email;
