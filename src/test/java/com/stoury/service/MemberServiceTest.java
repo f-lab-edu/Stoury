@@ -156,4 +156,10 @@ class MemberServiceTest {
         assertThat(foundMembers.get(0).username()).isEqualTo(member1.getUsername());
         assertThat(foundMembers.get(1).username()).isEqualTo(member2.getUsername());
     }
+
+    @Test
+    @DisplayName("사용자 검색 실패 - null로 검색")
+    void getMembersFail() {
+        assertThatThrownBy(() -> memberService.getMembers(null)).isInstanceOf(NullPointerException.class);
+    }
 }
