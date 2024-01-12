@@ -10,4 +10,6 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
     Optional<Member> findByEmail(String email);
 
     List<Member> findAllByDeleted(boolean deleted);
+
+    List<Member> findAllByUsernameLikeIgnoreCaseOrderByUsername(String username);
 }
