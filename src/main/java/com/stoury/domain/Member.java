@@ -6,23 +6,25 @@ import lombok.*;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Table(name = "MEMBER")
 public class Member {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(unique = true, nullable = false, length = 25)
+    @Column(name = "EMAIL", unique = true, nullable = false, length = 25)
     private String email;
 
-    @Column(nullable = false, length = 60)
+    @Column(name = "ENCRYPTED_PASSWORD", nullable = false, length = 60)
     private String encryptedPassword;
 
-    @Column(nullable = false, length = 10)
+    @Column(name = "USERNAME", nullable = false, length = 10)
     private String username;
 
+    @Column(name = "PROFILE_IMAGE_PATH")
     private String profileImagePath;
 
-    @Column(columnDefinition = "TEXT")
+    @Column(name = "INTRODUCTION", columnDefinition = "TEXT")
     private String introduction;
 
     @Builder
