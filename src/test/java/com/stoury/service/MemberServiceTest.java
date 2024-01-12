@@ -146,8 +146,8 @@ class MemberServiceTest {
     void getMembers() {
         Member member1 = Member.builder().email("mem1@aaaa.com").encryptedPassword("pwdpwdpwdpwd").username("member1").build();
         Member member2 = Member.builder().email("mem2@aaaa.com").encryptedPassword("pwdpwdpwdpwd").username("member2").build();
-        Member member3 = Member.builder().email("men3@aaaa.com").encryptedPassword("pwdpwdpwdpwd").username("member3").build();
-        Member member4 = Member.builder().email("nem4@aaaa.com").encryptedPassword("pwdpwdpwdpwd").username("member4").build();
+        Member member3 = Member.builder().email("mem3@aaaa.com").encryptedPassword("pwdpwdpwdpwd").username("menber3").build();
+        Member member4 = Member.builder().email("mem4@aaaa.com").encryptedPassword("pwdpwdpwdpwd").username("nember4").build();
         memberRepository.saveAll(List.of(member1, member2, member3, member4));
 
         List<ResponseMember> foundMembers = memberService.getMembers("mem");
