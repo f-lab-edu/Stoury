@@ -10,13 +10,13 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.core.env.Environment;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -27,6 +27,8 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 @ActiveProfiles("test")
 @Transactional
 class MemberServiceTest {
+    @Autowired
+    Environment env;
     @Autowired
     MemberService memberService;
     @Autowired
@@ -161,5 +163,28 @@ class MemberServiceTest {
     @DisplayName("사용자 검색 실패 - null로 검색")
     void getMembersFail() {
         assertThatThrownBy(() -> memberService.getMembers(null)).isInstanceOf(NullPointerException.class);
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"", " ", "\t", "\r", "\n"})
+    @DisplayName("사용자 검색 - 공백 혹은 빈 문자열은 페이지 크기만큼 사용자 가져옴")
+    void getMembersByBlank(String searchKeyword) {
+        prepareMembers(20);
+
+        int pageSize = Integer.parseInt(env.getProperty("members.pagesize"));
+
+        List<ResponseMember> foundByEmptyString = memberService.getMembers(searchKeyword);
+        assertThat(foundByEmptyString).hasSize(pageSize);
+    }
+
+    private void prepareMembers(int totalMembers) {
+        for (int i = 0; i < totalMembers; i++) {
+            Member member = Member.builder()
+                    .email("mem"+i+"@aaaa.com")
+                    .encryptedPassword("pwdpwdpwdpwd")
+                    .username("member" + i)
+                    .build();
+            memberRepository.save(member);
+        }
     }
 }
