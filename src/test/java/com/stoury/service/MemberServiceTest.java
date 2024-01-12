@@ -148,11 +148,11 @@ class MemberServiceTest {
         Member member2 = Member.builder().email("mem2@aaaa.com").encryptedPassword("pwdpwdpwdpwd").username("member2").build();
         Member member3 = Member.builder().email("men3@aaaa.com").encryptedPassword("pwdpwdpwdpwd").username("member3").build();
         Member member4 = Member.builder().email("nem4@aaaa.com").encryptedPassword("pwdpwdpwdpwd").username("member4").build();
+        memberRepository.saveAll(List.of(member1, member2, member3, member4));
 
         List<ResponseMember> foundMembers = memberService.getMembers("mem");
 
-        foundMembers.sort(Comparator.comparing(ResponseMember::username));
-
+        assertThat(foundMembers).hasSize(2);
         assertThat(foundMembers.get(0).username()).isEqualTo(member1.getUsername());
         assertThat(foundMembers.get(1).username()).isEqualTo(member2.getUsername());
     }
