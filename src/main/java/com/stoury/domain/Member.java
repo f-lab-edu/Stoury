@@ -37,4 +37,14 @@ public class Member {
         this.username = username;
         this.introduction = introduction;
     }
+
+    public void update(String username, String profileImagePath, String introduction) {
+        this.username = username;
+        this.profileImagePath = profileImagePath;
+        this.introduction = introduction;
+    }
+
+    public void delete() {
+        this.deleted = true;
+    }
 }
