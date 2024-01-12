@@ -1,6 +1,7 @@
 package com.stoury.service;
 
 import com.stoury.dto.MemberDto;
+import com.stoury.exception.MemberCreateException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -52,6 +53,6 @@ class MemberServiceTest {
 
     private void assertFailByException(MemberDto noUsername) {
         assertThatThrownBy(() -> memberService.createMember(noUsername))
-                .isInstanceOf(IllegalStateException.class);
+                .isInstanceOf(MemberCreateException.class);
     }
 }
