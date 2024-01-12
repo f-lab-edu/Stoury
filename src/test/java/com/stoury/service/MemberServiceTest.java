@@ -23,11 +23,11 @@ class MemberServiceTest {
 
     @BeforeEach
     void setup() {
-        requestMember = new RequestMember(
-                "dddd@cccc.com",
-                "notencryptedpwd",
-                "jzakka",
-                null);
+        requestMember = RequestMember.builder()
+                .email("dddd@cccc.com")
+                .password("notencryptedpwd")
+                .username("jzakka")
+                .build();
     }
 
     @Test
@@ -42,13 +42,13 @@ class MemberServiceTest {
     @Test
     @DisplayName("사용자 생성 - 실패, [이메일, 패스워드, 이름] 셋 중 하나라도 누락 불가")
     void createMemberFail() {
-        RequestMember noEmail = new RequestMember(null,"pppppwwwwwaaaa","chung", null);
+        RequestMember noEmail = RequestMember.builder().password("pppppwwwwwaaaa").username("chung").build();
         assertFailByException(noEmail);
 
-        RequestMember noPassword = new RequestMember("qwdqws@qqqq.com", null, "sang", null);
+        RequestMember noPassword = RequestMember.builder().email("qwdqws@qqqq.com").username("sang").build();
         assertFailByException(noPassword);
 
-        RequestMember noUsername = new RequestMember("qwdqws@qqqq.com", "pppppwwwwwaaaa", null, null);
+        RequestMember noUsername = RequestMember.builder().email("qwdqws@qqqq.com").password("pppppwwwwwaaaa").build();
         assertFailByException(noUsername);
     }
 
