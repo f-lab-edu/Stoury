@@ -13,6 +13,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Stream;
@@ -22,6 +23,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @SpringBootTest
 @ActiveProfiles("test")
+@Transactional
 class MemberServiceTest {
     @Autowired
     MemberService memberService;
@@ -97,5 +99,27 @@ class MemberServiceTest {
 
         assertThatThrownBy(() -> memberService.deleteMember(null))
                 .isInstanceOf(NullPointerException.class);
+    }
+
+    @Test
+    @DisplayName("사용자 정보 업데이트 - 성공")
+    void updateMemberSuccess() {
+        Member member1 = Member.builder().email("mem1@dddd.com").encryptedPassword("vurhf2").username("member1").build();
+        Member member2 = Member.builder().email("mem2@dddd.com").encryptedPassword("qwerty").username("member2").build();
+        memberRepository.save(member1);
+        memberRepository.save(member2);
+
+        RequestUpdateMember requestUpdateMember = RequestUpdateMember.builder()
+                .email(member1.getEmail())
+                .username("changedMember1")
+                .profileImagePath("/profile/images/member1")
+                .introduction("Member1's introduction was changed!")
+                .build();
+        ResponseMember updatedMember = memberService.updateMember(requestUpdateMember);
+
+        assertThat(updatedMember.email()).isEqualTo(requestUpdateMember.email());
+        assertThat(updatedMember.username()).isEqualTo(requestUpdateMember.username());
+        assertThat(updatedMember.profileImagePath()).isEqualTo(requestUpdateMember.profileImagePath());
+        assertThat(updatedMember.introduction()).isEqualTo(requestUpdateMember.introduction());
     }
 }
