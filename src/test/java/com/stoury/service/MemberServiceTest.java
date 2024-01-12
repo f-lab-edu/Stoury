@@ -3,6 +3,7 @@ package com.stoury.service;
 import com.stoury.dto.RequestMember;
 import com.stoury.dto.ResponseMember;
 import com.stoury.exception.MemberCreateException;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -19,10 +20,10 @@ class MemberServiceTest {
     @Autowired
     MemberService memberService;
 
-    RequestMember requestMember;
+    static RequestMember requestMember;
 
-    @BeforeEach
-    void setup() {
+    @BeforeAll
+    static void setup() {
         requestMember = RequestMember.builder()
                 .email("dddd@cccc.com")
                 .password("notencryptedpwd")
