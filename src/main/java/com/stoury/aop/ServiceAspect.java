@@ -11,13 +11,13 @@ import org.springframework.stereotype.Component;
 @Component
 public class ServiceAspect {
     @Around("execution(* com.stoury.service.*Service.createMember(..))")
-    public Object handleExceptions(ProceedingJoinPoint joinPoint) {
+    public Object handleExceptions(ProceedingJoinPoint joinPoint) throws Throwable {
         try {
             return joinPoint.proceed();
-        } catch (DataAccessException | IllegalArgumentException e) {
+        } catch (DataAccessException e) {
             throw new MemberCreateException(e);
         } catch (Throwable e) {
-            throw new RuntimeException(e);
+            throw e;
         }
     }
 }
