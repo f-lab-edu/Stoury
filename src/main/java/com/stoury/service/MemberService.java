@@ -6,6 +6,7 @@ import com.stoury.dto.MemberResponse;
 import com.stoury.exception.MemberCreateException;
 import com.stoury.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.core.env.Environment;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -15,6 +16,7 @@ import org.springframework.util.StringUtils;
 public class MemberService {
     private final MemberRepository memberRepository;
     private final PasswordEncoder passwordEncoder;
+    private final Environment env;
 
     public MemberResponse createMember(MemberCreateRequest memberCreateRequest) {
         validateRequestMember(memberCreateRequest);
@@ -45,14 +47,17 @@ public class MemberService {
 
     private boolean validatePassword(String password) {
         return StringUtils.hasText(password)
-                && password.length() >= 8 && password.length() <= 30;
+                && password.length() >= Integer.parseInt(env.getProperty("member.password.length.min"))
+                && password.length() <= Integer.parseInt(env.getProperty("member.password.length.max"));
     }
 
     private boolean validateUserName(String username) {
-        return StringUtils.hasText(username) && username.length() <= 10;
+        return StringUtils.hasText(username)
+                && username.length() <= Integer.parseInt(env.getProperty("member.username.length.max"));
     }
 
     private boolean validateEmail(String email) {
-        return StringUtils.hasText(email) && email.length() <= 25;
+        return StringUtils.hasText(email)
+                && email.length() <= Integer.parseInt(env.getProperty("member.email.length.max"));
     }
 }

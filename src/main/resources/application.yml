@@ -1,1 +1,11 @@
-
+member:
+  email:
+    length:
+      max: 25
+  username:
+    length:
+      max: 10
+  password:
+    length:
+      min: 8
+      max: 30
