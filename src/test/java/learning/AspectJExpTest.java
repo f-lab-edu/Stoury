@@ -1,7 +1,7 @@
 package learning;
 
 import com.stoury.dto.MemberCreateRequest;
-import com.stoury.service.BasicMemberService;
+import com.stoury.service.MemberService;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -16,8 +16,8 @@ public class AspectJExpTest {
         AspectJExpressionPointcut pointcut = new AspectJExpressionPointcut();
         pointcut.setExpression("execution(* com.stoury.service.*Service.*(..))");
 
-        Method createMember = BasicMemberService.class.getMethod("createMember", MemberCreateRequest.class);
+        Method createMember = MemberService.class.getMethod("createMember", MemberCreateRequest.class);
 
-        Assertions.assertThat(pointcut.matches(createMember, BasicMemberService.class)).isTrue();
+        Assertions.assertThat(pointcut.matches(createMember, MemberService.class)).isTrue();
     }
 }
