@@ -1,7 +1,7 @@
 package com.stoury.service;
 
-import com.stoury.dto.RequestMember;
-import com.stoury.dto.ResponseMember;
+import com.stoury.dto.MemberCreateRequest;
+import com.stoury.dto.MemberResponse;
 import com.stoury.exception.MemberCreateException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -26,35 +26,38 @@ class MemberServiceTest {
     @Test
     @DisplayName("사용자 생성 - 성공")
     void createMemberSuccess() {
-        RequestMember requestMember = RequestMember.builder()
+        MemberCreateRequest memberCreateRequest = MemberCreateRequest.builder()
                 .email("dddd@cccc.com")
                 .password("notencryptedpwd")
                 .username("jzakka")
                 .build();
 
-        ResponseMember createMember = memberService.createMember(requestMember);
+        MemberResponse createMember = memberService.createMember(memberCreateRequest);
 
-        assertThat(createMember.email()).isEqualTo(requestMember.email());
-        assertThat(createMember.username()).isEqualTo(requestMember.username());
+        assertThat(createMember.email()).isEqualTo(memberCreateRequest.email());
+        assertThat(createMember.username()).isEqualTo(memberCreateRequest.username());
     }
 
     @ParameterizedTest
     @MethodSource("invalidRequestMembers")
     @DisplayName("사용자 생성 - 실패, [이메일, 패스워드, 이름] 셋 중 하나라도 누락 불가")
-    void createMemberFail(RequestMember requestMember) {
-        assertFailByException(requestMember);
+    void createMemberFail(MemberCreateRequest defectiveMemberCreateRequest) {
+        assertThatThrownBy(() -> memberService.createMember(defectiveMemberCreateRequest))
+                .isInstanceOf(MemberCreateException.class);
     }
 
     private static Stream<Arguments> invalidRequestMembers() {
-        return Stream.of(
-                Arguments.of(RequestMember.builder().password("pppppwwwwwaaaa").username("chung").build()),
-                Arguments.of(RequestMember.builder().email("qwdqws@qqqq.com").username("sang").build()),
-                Arguments.of(RequestMember.builder().email("qwdqws@qqqq.com").password("pppppwwwwwaaaa").build())
-        );
-    }
+        MemberCreateRequest noEmail = new MemberCreateRequest(null, "pppppwwwwwaaaa",
+                "chung", "I have no email");
+        MemberCreateRequest noPassword = new MemberCreateRequest("qwdqws@qqqq.com", null,
+                "sang", "I have no password");
+        MemberCreateRequest noUsername = new MemberCreateRequest("qwdqws@qqqq.com", "pppppwwwwwaaaa",
+                null, "I have no username");
 
-    private void assertFailByException(RequestMember noUsername) {
-        assertThatThrownBy(() -> memberService.createMember(noUsername))
-                .isInstanceOf(MemberCreateException.class);
+        return Stream.of(
+                Arguments.of(noEmail),
+                Arguments.of(noPassword),
+                Arguments.of(noUsername)
+        );
     }
 }
