@@ -22,12 +22,7 @@ public class MemberService {
         validateRequestMember(memberCreateRequest);
         String encryptedPassword = passwordEncoder.encode(memberCreateRequest.password());
 
-        Member member = Member.builder()
-                .email(memberCreateRequest.email())
-                .username(memberCreateRequest.username())
-                .encryptedPassword(encryptedPassword)
-                .introduction(memberCreateRequest.introduction())
-                .build();
+        Member member = memberCreateRequest.toEntity(encryptedPassword);
 
         Member newMember = memberRepository.save(member);
 
