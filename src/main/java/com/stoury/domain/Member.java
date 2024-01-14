@@ -27,11 +27,24 @@ public class Member {
     @Column(name = "INTRODUCTION", columnDefinition = "TEXT")
     private String introduction;
 
+    @Column(name = "DELETED", nullable = false)
+    private boolean deleted;
+
     @Builder
     public Member(String email, String encryptedPassword, String username, String introduction) {
         this.email = email;
         this.encryptedPassword = encryptedPassword;
         this.username = username;
         this.introduction = introduction;
+    }
+
+    public void update(String username, String profileImagePath, String introduction) {
+        this.username = username;
+        this.profileImagePath = profileImagePath;
+        this.introduction = introduction;
+    }
+
+    public void delete() {
+        this.deleted = true;
     }
 }
