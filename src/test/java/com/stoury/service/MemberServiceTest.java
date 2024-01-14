@@ -2,7 +2,9 @@ package com.stoury.service;
 
 import com.stoury.dto.MemberCreateRequest;
 import com.stoury.dto.MemberResponse;
+import com.stoury.domain.Member;
 import com.stoury.exception.MemberCreateException;
+import com.stoury.repository.MemberRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -12,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
+import java.util.List;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -22,9 +25,11 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 class MemberServiceTest {
     @Autowired
     MemberService memberService;
-
+    @Autowired
+    MemberRepository memberRepository;
     @Test
     @DisplayName("사용자 생성 - 성공")
+
     void createMemberSuccess() {
         MemberCreateRequest memberCreateRequest = MemberCreateRequest.builder()
                 .email("dddd@cccc.com")
@@ -59,5 +64,23 @@ class MemberServiceTest {
                 Arguments.of(noPassword),
                 Arguments.of(noUsername)
         );
+    }
+
+    @Test
+    @DisplayName("사용자 삭제 - 성공")
+    void deleteMemberSuccess() {
+        Member member1 = Member.builder().email("mem1@dddd.com").encryptedPassword("vurhf2").username("member1").build();
+        Member member2 = Member.builder().email("mem2@dddd.com").encryptedPassword("qwerty").username("member2").build();
+        Long member1Id = memberRepository.save(member1).getId();
+        Long member2Id = memberRepository.save(member2).getId();
+
+        memberService.deleteMember(member1Id);
+
+        List<Long> deleteMembersIds = memberRepository.findAllByDeletedIsTrue().stream()
+                .map(Member::getId)
+                .toList();
+
+        assertThat(deleteMembersIds).hasSize(1);
+        assertThat(deleteMembersIds).containsExactly(member1Id);
     }
 }
