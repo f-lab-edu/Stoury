@@ -6,6 +6,7 @@ import com.stoury.domain.Member;
 import com.stoury.dto.MemberUpdateRequest;
 import com.stoury.exception.MemberCreateException;
 import com.stoury.exception.MemberDeleteException;
+import com.stoury.exception.MemberSearchException;
 import com.stoury.repository.MemberRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -156,7 +157,7 @@ class MemberServiceTest {
         Member member4 = Member.builder().email("mem4@aaaa.com").encryptedPassword("pwdpwdpwdpwd").username("nember4").build();
         memberRepository.saveAll(List.of(member1, member2, member3, member4));
 
-        List<MemberResponse> foundMembers = memberService.getMembers("mem");
+        List<MemberResponse> foundMembers = memberService.searchMembers("mem");
 
         assertThat(foundMembers).hasSize(2);
         assertThat(foundMembers.get(0).username()).isEqualTo(member1.getUsername());
@@ -166,7 +167,8 @@ class MemberServiceTest {
     @Test
     @DisplayName("사용자 검색 실패 - null로 검색")
     void getMembersFail() {
-        assertThatThrownBy(() -> memberService.getMembers(null)).isInstanceOf(NullPointerException.class);
+        assertThatThrownBy(() -> memberService.searchMembers(null))
+                .isInstanceOf(MemberSearchException.class);
     }
 
     @ParameterizedTest
@@ -177,7 +179,7 @@ class MemberServiceTest {
 
         int pageSize = Integer.parseInt(env.getProperty("member.pagesize"));
 
-        List<MemberResponse> foundByEmptyString = memberService.getMembers(searchKeyword);
+        List<MemberResponse> foundByEmptyString = memberService.searchMembers(searchKeyword);
         assertThat(foundByEmptyString).hasSize(pageSize);
     }
 
