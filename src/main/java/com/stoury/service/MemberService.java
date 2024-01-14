@@ -79,7 +79,6 @@ public class MemberService {
                  .orElseThrow(MemberDeleteException::new);
 
         deleteMember.delete();
-        memberRepository.save(deleteMember);
     }
 
     @Transactional
@@ -92,8 +91,7 @@ public class MemberService {
                 memberUpdateRequest.introduction()
         );
 
-        Member updated = memberRepository.save(updateMember);
-        return MemberResponse.from(updated);
+        return MemberResponse.from(updateMember);
     }
 
     private Member findByIdOrEmail(MemberUpdateRequest memberUpdateRequest) {
