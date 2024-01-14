@@ -3,7 +3,9 @@ package com.stoury.service;
 import com.stoury.dto.MemberCreateRequest;
 import com.stoury.dto.MemberResponse;
 import com.stoury.domain.Member;
+import com.stoury.dto.MemberUpdateRequest;
 import com.stoury.exception.MemberCreateException;
+import com.stoury.exception.MemberDeleteException;
 import com.stoury.repository.MemberRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -98,11 +100,13 @@ class MemberServiceTest {
         memberRepository.save(member1);
         memberRepository.save(member2);
 
-        assertThatThrownBy(()->memberService.deleteMember("nosuch@email.com"))
+        Long notExistingId = member1.getId() + member2.getId();
+
+        assertThatThrownBy(()->memberService.deleteMember(notExistingId))
                 .isInstanceOf(MemberDeleteException.class);
 
         assertThatThrownBy(() -> memberService.deleteMember(null))
-                .isInstanceOf(NullPointerException.class);
+                .isInstanceOf(MemberDeleteException.class);
     }
 
     @Test
@@ -113,18 +117,18 @@ class MemberServiceTest {
         memberRepository.save(member1);
         memberRepository.save(member2);
 
-        RequestUpdateMember requestUpdateMember = RequestUpdateMember.builder()
+        MemberUpdateRequest MemberUpdateRequest = com.stoury.dto.MemberUpdateRequest.builder()
                 .email(member1.getEmail())
                 .username("changed1")
                 .profileImagePath("/profile/images/member1")
                 .introduction("Member1's introduction was changed!")
                 .build();
-        ResponseMember updatedMember = memberService.updateMember(requestUpdateMember);
+        MemberResponse updatedMember = memberService.updateMember(MemberUpdateRequest);
 
-        assertThat(updatedMember.email()).isEqualTo(requestUpdateMember.email());
-        assertThat(updatedMember.username()).isEqualTo(requestUpdateMember.username());
-        assertThat(updatedMember.profileImagePath()).isEqualTo(requestUpdateMember.profileImagePath());
-        assertThat(updatedMember.introduction()).isEqualTo(requestUpdateMember.introduction());
+        assertThat(updatedMember.email()).isEqualTo(MemberUpdateRequest.email());
+        assertThat(updatedMember.username()).isEqualTo(MemberUpdateRequest.username());
+        assertThat(updatedMember.profileImagePath()).isEqualTo(MemberUpdateRequest.profileImagePath());
+        assertThat(updatedMember.introduction()).isEqualTo(MemberUpdateRequest.introduction());
     }
 
     @Test
@@ -133,13 +137,13 @@ class MemberServiceTest {
         Member member1 = Member.builder().email("mem1@dddd.com").encryptedPassword("vurhf2").username("member1").build();
         memberRepository.save(member1);
 
-        RequestUpdateMember requestUpdateMember = RequestUpdateMember.builder()
+        MemberUpdateRequest memberUpdateRequest = MemberUpdateRequest.builder()
                 .email(member1.getEmail())
                 .profileImagePath("/profile/images/member1")
                 .introduction("I have no name")
                 .build();
 
-        assertThatThrownBy(()->memberService.updateMember(requestUpdateMember))
+        assertThatThrownBy(()->memberService.updateMember(memberUpdateRequest))
                 .isInstanceOf(NullPointerException.class);
     }
 
@@ -152,7 +156,7 @@ class MemberServiceTest {
         Member member4 = Member.builder().email("mem4@aaaa.com").encryptedPassword("pwdpwdpwdpwd").username("nember4").build();
         memberRepository.saveAll(List.of(member1, member2, member3, member4));
 
-        List<ResponseMember> foundMembers = memberService.getMembers("mem");
+        List<MemberResponse> foundMembers = memberService.getMembers("mem");
 
         assertThat(foundMembers).hasSize(2);
         assertThat(foundMembers.get(0).username()).isEqualTo(member1.getUsername());
@@ -171,9 +175,9 @@ class MemberServiceTest {
     void getMembersByBlank(String searchKeyword) {
         prepareMembers(20);
 
-        int pageSize = Integer.parseInt(env.getProperty("members.pagesize"));
+        int pageSize = Integer.parseInt(env.getProperty("member.pagesize"));
 
-        List<ResponseMember> foundByEmptyString = memberService.getMembers(searchKeyword);
+        List<MemberResponse> foundByEmptyString = memberService.getMembers(searchKeyword);
         assertThat(foundByEmptyString).hasSize(pageSize);
     }
 
