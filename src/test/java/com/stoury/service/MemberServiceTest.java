@@ -38,7 +38,6 @@ class MemberServiceTest {
     MemberRepository memberRepository;
     @Test
     @DisplayName("사용자 생성 - 성공")
-
     void createMemberSuccess() {
         MemberCreateRequest memberCreateRequest = MemberCreateRequest.builder()
                 .email("dddd@cccc.com")
@@ -50,6 +49,27 @@ class MemberServiceTest {
 
         assertThat(createMember.email()).isEqualTo(memberCreateRequest.email());
         assertThat(createMember.username()).isEqualTo(memberCreateRequest.username());
+    }
+
+    @Test
+    @DisplayName("사용자 생성 - 실패, 중복 이메일")
+    void createMemberFailBySameEmail() {
+        String sameEmail = "alreadt@exists.com";
+
+        Member alreadyExistMember = Member.builder().email(sameEmail)
+                .username("member1")
+                .encryptedPassword("ewodifh239")
+                .build();
+        memberRepository.save(alreadyExistMember);
+
+        MemberCreateRequest memberCreateRequest = MemberCreateRequest.builder()
+                .email(sameEmail)
+                .password("notencryptedpwd")
+                .username("member2")
+                .build();
+
+        assertThatThrownBy(()-> memberService.createMember(memberCreateRequest))
+                .isInstanceOf(MemberCreateException.class);
     }
 
     @ParameterizedTest
@@ -177,7 +197,7 @@ class MemberServiceTest {
     void getMembersByBlank(String searchKeyword) {
         prepareMembers(20);
 
-        int pageSize = Integer.parseInt(env.getProperty("member.pagesize"));
+        int pageSize = 5;
 
         List<MemberResponse> foundByEmptyString = memberService.searchMembers(searchKeyword);
         assertThat(foundByEmptyString).hasSize(pageSize);

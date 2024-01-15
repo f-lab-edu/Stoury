@@ -14,4 +14,6 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
     List<Member> findAllByUsernameLikeIgnoreCase(String username, Pageable page);
 
     List<Member> findAllByDeletedIsTrue();
+
+    boolean existsByEmail(String email);
 }

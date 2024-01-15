@@ -27,7 +27,11 @@ import java.util.Objects;
 public class MemberService {
     private final MemberRepository memberRepository;
     private final PasswordEncoder passwordEncoder;
-    private final Environment env;
+    private final static int PASSWORD_LENGTH_MIN = 8;
+    private final static int PASSWORD_LENGTH_MAX = 30;
+    private final static int USERNAME_LENGTH_MAX = 10;
+    private final static int EMAIL_LENGTH_MAX = 25;
+    private final static int PAGE_SIZE = 5;
 
     @Transactional
     public MemberResponse createMember(MemberCreateRequest memberCreateRequest) {
@@ -54,18 +58,19 @@ public class MemberService {
 
     private boolean validatePassword(String password) {
         return StringUtils.hasText(password)
-                && password.length() >= Integer.parseInt(env.getProperty("member.password.length.min"))
-                && password.length() <= Integer.parseInt(env.getProperty("member.password.length.max"));
+                && password.length() >= PASSWORD_LENGTH_MIN
+                && password.length() <= PASSWORD_LENGTH_MAX;
     }
 
     private boolean validateUserName(String username) {
         return StringUtils.hasText(username)
-                && username.length() <= Integer.parseInt(env.getProperty("member.username.length.max"));
+                && username.length() <= USERNAME_LENGTH_MAX;
     }
 
     private boolean validateEmail(String email) {
         return StringUtils.hasText(email)
-                && email.length() <= Integer.parseInt(env.getProperty("member.email.length.max"));
+                && email.length() <= EMAIL_LENGTH_MAX
+                && !memberRepository.existsByEmail(email);
     }
 
     @Transactional
@@ -116,8 +121,7 @@ public class MemberService {
 
         username = username.replaceAll("\\s+", "");
 
-        int pageSize = Integer.parseInt(env.getProperty("member.pagesize"));
-        Pageable page = PageRequest.of(0, pageSize, Sort.by("username"));
+        Pageable page = PageRequest.of(0, PAGE_SIZE, Sort.by("username"));
 
         // TODO: like %%말고 다른 방법 강구
         List<Member> foundMembers = memberRepository.findAllByUsernameLikeIgnoreCase("%"+username+"%", page);
