@@ -4,9 +4,7 @@ import com.stoury.dto.MemberCreateRequest;
 import com.stoury.dto.MemberResponse;
 import com.stoury.domain.Member;
 import com.stoury.dto.MemberUpdateRequest;
-import com.stoury.exception.MemberCreateException;
-import com.stoury.exception.MemberDeleteException;
-import com.stoury.exception.MemberSearchException;
+import com.stoury.exception.MemberCrudExceptions;
 import com.stoury.repository.MemberRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -69,7 +67,7 @@ class MemberServiceTest {
                 .build();
 
         assertThatThrownBy(()-> memberService.createMember(memberCreateRequest))
-                .isInstanceOf(MemberCreateException.class);
+                .isInstanceOf(MemberCrudExceptions.MemberCreateException.class);
     }
 
     @ParameterizedTest
@@ -77,7 +75,7 @@ class MemberServiceTest {
     @DisplayName("사용자 생성 - 실패, [이메일, 패스워드, 이름] 셋 중 하나라도 누락 불가")
     void createMemberFail(MemberCreateRequest defectiveMemberCreateRequest) {
         assertThatThrownBy(() -> memberService.createMember(defectiveMemberCreateRequest))
-                .isInstanceOf(MemberCreateException.class);
+                .isInstanceOf(MemberCrudExceptions.MemberCreateException.class);
     }
 
     private static Stream<Arguments> invalidRequestMembers() {
@@ -124,10 +122,10 @@ class MemberServiceTest {
         Long notExistingId = member1.getId() + member2.getId();
 
         assertThatThrownBy(()->memberService.deleteMember(notExistingId))
-                .isInstanceOf(MemberDeleteException.class);
+                .isInstanceOf(MemberCrudExceptions.MemberDeleteException.class);
 
         assertThatThrownBy(() -> memberService.deleteMember(null))
-                .isInstanceOf(MemberDeleteException.class);
+                .isInstanceOf(MemberCrudExceptions.MemberDeleteException.class);
     }
 
     @Test
@@ -188,7 +186,7 @@ class MemberServiceTest {
     @DisplayName("사용자 검색 실패 - null로 검색")
     void getMembersFail() {
         assertThatThrownBy(() -> memberService.searchMembers(null))
-                .isInstanceOf(MemberSearchException.class);
+                .isInstanceOf(MemberCrudExceptions.MemberSearchException.class);
     }
 
     @ParameterizedTest

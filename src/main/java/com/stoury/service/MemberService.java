@@ -4,13 +4,9 @@ import com.stoury.domain.Member;
 import com.stoury.dto.MemberCreateRequest;
 import com.stoury.dto.MemberResponse;
 import com.stoury.dto.MemberUpdateRequest;
-import com.stoury.exception.MemberCreateException;
-import com.stoury.exception.MemberDeleteException;
-import com.stoury.exception.MemberSearchException;
-import com.stoury.exception.MemberUpdateException;
+import com.stoury.exception.*;
 import com.stoury.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.core.env.Environment;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -21,6 +17,8 @@ import org.springframework.util.StringUtils;
 
 import java.util.List;
 import java.util.Objects;
+
+import static com.stoury.exception.MemberCrudExceptions.*;
 
 @Service
 @RequiredArgsConstructor
@@ -50,38 +48,44 @@ public class MemberService {
         String username = memberCreateRequest.username();
         String password = memberCreateRequest.password();
 
-        if (validateEmail(email) && validateUserName(username) && validatePassword(password)) {
+        validateEmail(email);
+        validateUserName(username);
+        validatePassword(password);
+    }
+
+    private void validatePassword(String password) {
+        if(StringUtils.hasText(password) && password.length() >= PASSWORD_LENGTH_MIN
+                && password.length() <= PASSWORD_LENGTH_MAX){
             return;
         }
-        throw new MemberCreateException();
+        throw new MemberCreateException("Invalid Password!");
     }
 
-    private boolean validatePassword(String password) {
-        return StringUtils.hasText(password)
-                && password.length() >= PASSWORD_LENGTH_MIN
-                && password.length() <= PASSWORD_LENGTH_MAX;
+    private void validateUserName(String username) {
+        if (StringUtils.hasText(username) && username.length() <= USERNAME_LENGTH_MAX) {
+            return;
+        }
+        throw new MemberCreateException("Invalid username!");
     }
 
-    private boolean validateUserName(String username) {
-        return StringUtils.hasText(username)
-                && username.length() <= USERNAME_LENGTH_MAX;
-    }
-
-    private boolean validateEmail(String email) {
-        return StringUtils.hasText(email)
-                && email.length() <= EMAIL_LENGTH_MAX
-                && !memberRepository.existsByEmail(email);
+    private void validateEmail(String email) {
+        if (!(StringUtils.hasText(email) && email.length() <= EMAIL_LENGTH_MAX)) {
+            throw new MemberCreateException("Invalid email!");
+        }
+        if (memberRepository.existsByEmail(email)) {
+            throw new MemberCreateException("The Email is already used.");
+        }
     }
 
     @Transactional
     public void deleteMember(Long memberId) {
         if (memberId == null) {
-            throw new MemberDeleteException();
+            throw new MemberDeleteException("Member id cannot be null!");
         }
 
         Member deleteMember = memberRepository
                 .findById(memberId)
-                 .orElseThrow(MemberDeleteException::new);
+                 .orElseThrow(MemberDeleteException::causeByMemberNotFound);
 
         deleteMember.delete();
     }
@@ -104,11 +108,11 @@ public class MemberService {
         if (memberUpdateRequest.id() == null) {
             updateMember = memberRepository
                     .findByEmail(memberUpdateRequest.email())
-                    .orElseThrow(MemberUpdateException::new);
+                    .orElseThrow(MemberUpdateException::causeByMemberNotFound);
         } else {
             updateMember = memberRepository
                     .findById(memberUpdateRequest.id())
-                    .orElseThrow(MemberUpdateException::new);
+                    .orElseThrow(MemberUpdateException::causeByMemberNotFound);
         }
         return updateMember;
     }
