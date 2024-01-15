@@ -51,8 +51,8 @@ public class MemberService {
     }
 
     private void validatePassword(String password) {
-        if(StringUtils.hasText(password) && password.length() >= PASSWORD_LENGTH_MIN
-                && password.length() <= PASSWORD_LENGTH_MAX){
+        if (StringUtils.hasText(password) && password.length() >= PASSWORD_LENGTH_MIN
+                && password.length() <= PASSWORD_LENGTH_MAX) {
             return;
         }
         throw new MemberCreateException("Invalid Password!");
@@ -66,7 +66,7 @@ public class MemberService {
     }
 
     private void validateEmail(String email) {
-        if (!(StringUtils.hasText(email) && email.length() <= EMAIL_LENGTH_MAX)) {
+        if (isEmpty(email) || email.length() > EMAIL_LENGTH_MAX) {
             throw new MemberCreateException("Invalid email!");
         }
         if (memberRepository.existsByEmail(email)) {
@@ -82,7 +82,7 @@ public class MemberService {
 
         Member deleteMember = memberRepository
                 .findById(memberId)
-                 .orElseThrow(MemberDeleteException::causeByMemberNotFound);
+                .orElseThrow(MemberDeleteException::causeByMemberNotFound);
 
         deleteMember.delete();
     }
