@@ -4,12 +4,9 @@ import com.stoury.domain.Member;
 import com.stoury.dto.MemberCreateRequest;
 import com.stoury.dto.MemberResponse;
 import com.stoury.dto.MemberUpdateRequest;
-import com.stoury.exception.*;
 import com.stoury.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,11 +22,11 @@ import static com.stoury.exception.MemberCrudExceptions.*;
 public class MemberService {
     private final MemberRepository memberRepository;
     private final PasswordEncoder passwordEncoder;
-    private final static int PASSWORD_LENGTH_MIN = 8;
-    private final static int PASSWORD_LENGTH_MAX = 30;
-    private final static int USERNAME_LENGTH_MAX = 10;
-    private final static int EMAIL_LENGTH_MAX = 25;
-    private final static int PAGE_SIZE = 5;
+    public final static int PASSWORD_LENGTH_MIN = 8;
+    public final static int PASSWORD_LENGTH_MAX = 30;
+    public final static int USERNAME_LENGTH_MAX = 10;
+    public final static int EMAIL_LENGTH_MAX = 25;
+    public final static int PAGE_SIZE = 5;
 
     @Transactional
     public MemberResponse createMember(MemberCreateRequest memberCreateRequest) {
@@ -118,18 +115,23 @@ public class MemberService {
     }
 
     @Transactional(readOnly = true)
-    public List<MemberResponse> searchMembers(String username) {
-        if (username == null) {
-            throw new MemberSearchException();
+    public Slice<MemberResponse> searchMembers(String keyword) {
+        if (isEmpty(keyword)) {
+            throw new MemberSearchException("No keyword for search.");
         }
-
-        username = username.replaceAll("\\s+", "");
 
         Pageable page = PageRequest.of(0, PAGE_SIZE, Sort.by("username"));
 
-        // TODO: like %%말고 다른 방법 강구
-        List<Member> foundMembers = memberRepository.findAllByUsernameLikeIgnoreCase("%"+username+"%", page);
+        Slice<Member> memberEntitySlice = memberRepository.findAllByUsername(keyword, page);
 
-        return foundMembers.stream().map(MemberResponse::from).toList();
+        List<MemberResponse> foundMembers = memberEntitySlice.stream()
+                .map(MemberResponse::from)
+                .toList();
+
+        return new SliceImpl<>(foundMembers, memberEntitySlice.getPageable(), memberEntitySlice.hasNext());
+    }
+
+    private boolean isEmpty(String keyword) {
+        return !StringUtils.hasText(keyword);
     }
 }

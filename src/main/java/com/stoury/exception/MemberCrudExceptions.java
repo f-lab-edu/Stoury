@@ -20,6 +20,9 @@ public class MemberCrudExceptions {
         }
 
 
+        public MemberSearchException(String message) {
+            super(message);
+        }
     }
 
     public static class MemberDeleteException extends RuntimeException {
