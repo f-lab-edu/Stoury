@@ -19,6 +19,8 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -78,8 +80,7 @@ public class FeedServiceTest {
     @DisplayName("피드 생성 실패, 이미지 저장 롤백")
     void createFeedFailAndRollbackGraphicContents() {
         FeedRepository mockedFeedRepository = mock(FeedRepository.class);
-        when(mockedFeedRepository.save(any(Feed.class))).thenThrow(new DataAccessException("Something Failed") {
-        });
+        when(mockedFeedRepository.save(any(Feed.class))).thenThrow(new DataAccessException("Something Failed") {});
         FileService mockedFileService = mock(FileService.class);
         FeedService failingFeedService = new FeedService(mockedFileService, mockedFeedRepository, memberRepository);
 
@@ -98,5 +99,19 @@ public class FeedServiceTest {
                 .isInstanceOf(FeedCreateException.class);
 
         verify(mockedFileService, atLeastOnce()).removeFiles(anyList());
+    }
+
+    @Test
+    @DisplayName("피드 저장 실패, 이미지 없음")
+    void createFeedFailNoGraphicContents() {
+        FeedCreateRequest createFeed = FeedCreateRequest.builder()
+                .textContent("testing")
+                .longitude(111.111)
+                .latitude(333.333)
+                .build();
+        List<MultipartFile> graphicContents = Collections.emptyList();
+
+        assertThatThrownBy(()->feedService.createFeed(writer, createFeed, graphicContents))
+                .isInstanceOf(FeedCreateException.class);
     }
 }
