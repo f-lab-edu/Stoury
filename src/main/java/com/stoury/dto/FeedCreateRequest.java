@@ -8,7 +8,7 @@ import lombok.Builder;
 import java.util.List;
 
 @Builder
-public record FeedCreateRequest(Long writerId, String textContent, Double latitude, Double longitude) {
+public record FeedCreateRequest(String textContent, Double latitude, Double longitude) {
     public Feed toEntity(Member writer, List<GraphicContent> graphicContents) {
         Feed feed = Feed.builder()
                 .member(writer)

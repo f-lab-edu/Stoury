@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Objects;
 
 @Service
@@ -24,15 +25,13 @@ public class FeedService {
     private final MemberRepository memberRepository;
 
     @Transactional
-    public FeedResponse createFeed(FeedCreateRequest feedCreateRequest, List<MultipartFile> graphicContents) {
-        Member writer = memberRepository.findById(Objects.requireNonNull(feedCreateRequest.writerId()))
-                .orElseThrow(() -> new FeedCreateException("Cannot find the member."));
-        if (graphicContents.isEmpty()) {
-            throw new FeedCreateException("You must upload with images or videos.");
-        }
-
+    public FeedResponse createFeed(Member writer, FeedCreateRequest feedCreateRequest,
+                                   List<MultipartFile> graphicContents) {
         List<GraphicContent> savedContents = null;
         try {
+            validate(graphicContents);
+            validate(writer);
+
             savedContents = graphicContents.stream()
                     .map(file -> new GraphicContent(fileService.saveFile(file)))
                     .toList();
@@ -48,6 +47,18 @@ public class FeedService {
         }
     }
 
+    private void validate(Member writer) {
+        if (!memberRepository.existsById(writer.getId())) {
+            throw new NoSuchElementException("Cannot find the member.");
+        }
+    }
+
+    private void validate(List<MultipartFile> graphicContents) {
+        if (Objects.requireNonNull(graphicContents).isEmpty()) {
+            throw new IllegalArgumentException("You must upload with images or videos.");
+        }
+    }
+
     private void manualRollback(List<GraphicContent> savedContents) {
         if (hasAnyContents(savedContents)) {
             fileService.removeFiles(savedContents.stream().map(GraphicContent::getPath).toList());
@@ -55,7 +66,6 @@ public class FeedService {
     }
 
     private boolean hasAnyContents(List<GraphicContent> savedContents) {
-        return !Objects.requireNonNull(savedContents).isEmpty();
+        return savedContents!= null && !savedContents.isEmpty();
     }
-
 }

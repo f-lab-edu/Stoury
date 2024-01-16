@@ -52,7 +52,6 @@ public class FeedServiceTest {
     @DisplayName("피드 생성 성공")
     void createFeedSuccess() {
         FeedCreateRequest createFeed = FeedCreateRequest.builder()
-                .writerId(writer.getId())
                 .textContent("testing")
                 .longitude(111.111)
                 .latitude(333.333)
@@ -63,7 +62,7 @@ public class FeedServiceTest {
                 new MockMultipartFile("Third", new byte[0])
         );
 
-        FeedResponse createdFeed = feedService.createFeed(createFeed, graphicContents);
+        FeedResponse createdFeed = feedService.createFeed(writer, createFeed, graphicContents);
 
         assertThat(createdFeed.memberResponse().id()).isEqualTo(writer.getId());
         assertThat(createdFeed.memberResponse().username()).isEqualTo(writer.getUsername());
@@ -72,6 +71,8 @@ public class FeedServiceTest {
         assertThat(createdFeed.latitude()).isEqualTo(333.333);
         assertThat(createdFeed.createdAt()).isNotNull();
     }
+
+
 
     @Test
     @DisplayName("피드 생성 실패, 이미지 저장 롤백")
@@ -83,7 +84,6 @@ public class FeedServiceTest {
         FeedService failingFeedService = new FeedService(mockedFileService, mockedFeedRepository, memberRepository);
 
         FeedCreateRequest createFeed = FeedCreateRequest.builder()
-                .writerId(writer.getId())
                 .textContent("testing")
                 .longitude(111.111)
                 .latitude(333.333)
@@ -94,7 +94,7 @@ public class FeedServiceTest {
                 new MockMultipartFile("Third", new byte[0])
         );
 
-        assertThatThrownBy(() -> failingFeedService.createFeed(createFeed, graphicContents))
+        assertThatThrownBy(() -> failingFeedService.createFeed(writer, createFeed, graphicContents))
                 .isInstanceOf(FeedCreateException.class);
 
         verify(mockedFileService, atLeastOnce()).removeFiles(anyList());
