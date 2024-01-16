@@ -1,7 +1,6 @@
 package com.stoury.repository;
 
 import com.stoury.domain.Member;
-import com.stoury.dto.MemberResponse;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;

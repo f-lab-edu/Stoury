@@ -8,13 +8,24 @@ import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.*;
+
+@SpringBootTest
+@ActiveProfiles("test")
+@Transactional
 public class FeedServiceTest {
+    @Autowired
     FeedService feedService;
+    @Autowired
     MemberRepository memberRepository;
     Member writer;
 
@@ -41,14 +52,15 @@ public class FeedServiceTest {
                 new MockMultipartFile("First", new byte[0]),
                 new MockMultipartFile("Second", new byte[0]),
                 new MockMultipartFile("Third", new byte[0])
-                );
+        );
 
         FeedResponse createdFeed = feedService.createFeed(createFeed, graphicContents);
 
-        Assertions.assertThat(createdFeed.memberResponse().id()).isEqualTo(writer.getId());
-        Assertions.assertThat(createdFeed.memberResponse().username()).isEqualTo(writer.getUsername());
-        Assertions.assertThat(createdFeed.graphicContentsPaths()).hasSize(3);
-        Assertions.assertThat(createdFeed.longitude()).isEqualTo(111.111);
-        Assertions.assertThat(createdFeed.latitude()).isEqualTo(333.333);
+        assertThat(createdFeed.memberResponse().id()).isEqualTo(writer.getId());
+        assertThat(createdFeed.memberResponse().username()).isEqualTo(writer.getUsername());
+        assertThat(createdFeed.graphicContentsPaths()).hasSize(3);
+        assertThat(createdFeed.longitude()).isEqualTo(111.111);
+        assertThat(createdFeed.latitude()).isEqualTo(333.333);
+        assertThat(createdFeed.createdAt()).isNotNull();
     }
 }
