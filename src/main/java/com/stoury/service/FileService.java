@@ -20,7 +20,7 @@ public interface FileService {
             try {
                 removeFile(path);
             } catch (Exception e) {
-                e.printStackTrace();
+                // TODO: 파일 삭제 시 생긴 에러 처리
             }
         }
     }

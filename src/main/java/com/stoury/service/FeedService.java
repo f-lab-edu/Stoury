@@ -43,11 +43,19 @@ public class FeedService {
 
             return FeedResponse.from(uploadedFeed);
         } catch (Exception e) {
-            if (savedContents != null && !savedContents.isEmpty()) {
-                fileService.removeFiles(savedContents.stream().map(GraphicContent::getPath).toList());
-            }
+            manualRollback(savedContents);
             throw new FeedCreateException(e);
         }
+    }
+
+    private void manualRollback(List<GraphicContent> savedContents) {
+        if (hasAnyContents(savedContents)) {
+            fileService.removeFiles(savedContents.stream().map(GraphicContent::getPath).toList());
+        }
+    }
+
+    private boolean hasAnyContents(List<GraphicContent> savedContents) {
+        return !Objects.requireNonNull(savedContents).isEmpty();
     }
 
 }
