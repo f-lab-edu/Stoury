@@ -18,12 +18,12 @@ import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
-@Transactional
 public class FeedService {
     private final FileService fileService;
     private final FeedRepository feedRepository;
     private final MemberRepository memberRepository;
 
+    @Transactional
     public FeedResponse createFeed(FeedCreateRequest feedCreateRequest, List<MultipartFile> graphicContents) {
         Member writer = memberRepository.findById(Objects.requireNonNull(feedCreateRequest.writerId()))
                 .orElseThrow(() -> new FeedCreateException("Cannot find the member."));
@@ -31,15 +31,23 @@ public class FeedService {
             throw new FeedCreateException("You must upload with images or videos.");
         }
 
-        List<GraphicContent> savedContents = graphicContents.stream()
-                .map(file -> new GraphicContent(fileService.saveFile(file)))
-                .toList();
+        List<GraphicContent> savedContents = null;
+        try {
+            savedContents = graphicContents.stream()
+                    .map(file -> new GraphicContent(fileService.saveFile(file)))
+                    .toList();
 
-        Feed feed = feedCreateRequest.toEntity(writer, savedContents);
+            Feed feed = feedCreateRequest.toEntity(writer, savedContents);
 
-        Feed uploadedFeed = feedRepository.save(feed);
+            Feed uploadedFeed = feedRepository.save(feed);
 
-        return FeedResponse.from(uploadedFeed);
+            return FeedResponse.from(uploadedFeed);
+        } catch (Exception e) {
+            if (savedContents != null && !savedContents.isEmpty()) {
+                fileService.removeFiles(savedContents.stream().map(GraphicContent::getPath).toList());
+            }
+            throw new FeedCreateException(e);
+        }
     }
 
 }

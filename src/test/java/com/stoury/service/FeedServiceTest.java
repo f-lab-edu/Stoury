@@ -4,6 +4,7 @@ import com.stoury.domain.Feed;
 import com.stoury.domain.Member;
 import com.stoury.dto.FeedCreateRequest;
 import com.stoury.dto.FeedResponse;
+import com.stoury.exception.FeedCreateException;
 import com.stoury.repository.FeedRepository;
 import com.stoury.repository.MemberRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -21,6 +22,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.*;
 
@@ -92,11 +94,9 @@ public class FeedServiceTest {
                 new MockMultipartFile("Third", new byte[0])
         );
 
-        try {
-            failingFeedService.createFeed(createFeed, graphicContents);
-            fail();
-        }catch (Exception ignore){}
+        assertThatThrownBy(() -> failingFeedService.createFeed(createFeed, graphicContents))
+                .isInstanceOf(FeedCreateException.class);
 
-        verify(mockedFileService, atLeastOnce()).removeFile(any(String.class));
+        verify(mockedFileService, atLeastOnce()).removeFiles(anyList());
     }
 }

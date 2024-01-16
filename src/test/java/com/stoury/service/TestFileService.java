@@ -12,4 +12,9 @@ public class TestFileService implements FileService{
     public String saveFile(MultipartFile file) {
         return PATH_PREFIX + file.hashCode();
     }
+
+    @Override
+    public boolean removeFile(String path) {
+        return true;
+    }
 }

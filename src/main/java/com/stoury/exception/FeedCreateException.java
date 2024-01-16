@@ -11,4 +11,8 @@ public class FeedCreateException extends RuntimeException {
     public FeedCreateException(String message, Throwable cause) {
         super(message, cause);
     }
+
+    public FeedCreateException(Throwable cause) {
+        super(cause);
+    }
 }
