@@ -11,6 +11,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Objects;
@@ -22,6 +23,7 @@ import static com.stoury.exception.MemberCrudExceptions.*;
 public class MemberService {
     private final MemberRepository memberRepository;
     private final PasswordEncoder passwordEncoder;
+    private final FileService fileService;
     public final static int PASSWORD_LENGTH_MIN = 8;
     public final static int PASSWORD_LENGTH_MAX = 30;
     public final static int USERNAME_LENGTH_MAX = 10;
@@ -88,12 +90,14 @@ public class MemberService {
     }
 
     @Transactional
-    public MemberResponse updateMember(MemberUpdateRequest memberUpdateRequest) {
+    public MemberResponse updateMember(MemberUpdateRequest memberUpdateRequest, MultipartFile profileImage) {
         Member updateMember = findByIdOrEmail(memberUpdateRequest);
+
+        String imagePath = fileService.saveFile(profileImage);
 
         updateMember.update(
                 Objects.requireNonNull(memberUpdateRequest.username()),
-                memberUpdateRequest.profileImagePath(),
+                imagePath,
                 memberUpdateRequest.introduction()
         );
 

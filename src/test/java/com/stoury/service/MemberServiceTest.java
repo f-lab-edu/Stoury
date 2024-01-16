@@ -17,9 +17,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.env.Environment;
 import org.springframework.data.domain.Slice;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.stream.Stream;
@@ -142,21 +144,22 @@ class MemberServiceTest {
     void updateMemberSuccess() {
         Member member1 = Member.builder().email("mem1@dddd.com").encryptedPassword("vurhf2").username("member1").build();
         Member member2 = Member.builder().email("mem2@dddd.com").encryptedPassword("qwerty").username("member2").build();
-        memberRepository.save(member1);
+        Member savedMember1 = memberRepository.save(member1);
+        String imagePathBeforeUpdate = savedMember1.getProfileImagePath();
         memberRepository.save(member2);
 
-        MemberUpdateRequest MemberUpdateRequest = com.stoury.dto.MemberUpdateRequest.builder()
+        MemberUpdateRequest member1UpdateRequest = com.stoury.dto.MemberUpdateRequest.builder()
                 .email(member1.getEmail())
                 .username("changed1")
-                .profileImagePath("/profile/images/member1")
                 .introduction("Member1's introduction was changed!")
                 .build();
-        MemberResponse updatedMember = memberService.updateMember(MemberUpdateRequest);
+        MultipartFile profileImage = new MockMultipartFile("profileImage1", new byte[0]);
+        MemberResponse updatedMember = memberService.updateMember(member1UpdateRequest, profileImage);
 
-        assertThat(updatedMember.email()).isEqualTo(MemberUpdateRequest.email());
-        assertThat(updatedMember.username()).isEqualTo(MemberUpdateRequest.username());
-        assertThat(updatedMember.profileImagePath()).isEqualTo(MemberUpdateRequest.profileImagePath());
-        assertThat(updatedMember.introduction()).isEqualTo(MemberUpdateRequest.introduction());
+        assertThat(updatedMember.email()).isEqualTo(member1UpdateRequest.email());
+        assertThat(updatedMember.username()).isEqualTo(member1UpdateRequest.username());
+        assertThat(updatedMember.profileImagePath()).isNotEqualTo(imagePathBeforeUpdate);
+        assertThat(updatedMember.introduction()).isEqualTo(member1UpdateRequest.introduction());
     }
 
     @Test
@@ -168,11 +171,11 @@ class MemberServiceTest {
 
         MemberUpdateRequest memberUpdateRequest = MemberUpdateRequest.builder()
                 .email(member1.getEmail())
-                .profileImagePath("/profile/images/member1")
                 .introduction("I have no name")
                 .build();
+        MultipartFile profileImage = new MockMultipartFile("profileImage1", new byte[0]);
 
-        assertThatThrownBy(()->memberService.updateMember(memberUpdateRequest))
+        assertThatThrownBy(()->memberService.updateMember(memberUpdateRequest, profileImage))
                 .isInstanceOf(NullPointerException.class);
     }
 
