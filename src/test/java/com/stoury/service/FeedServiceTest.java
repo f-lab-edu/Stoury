@@ -1,15 +1,18 @@
 package com.stoury.service;
 
+import com.stoury.domain.Feed;
 import com.stoury.domain.Member;
 import com.stoury.dto.FeedCreateRequest;
 import com.stoury.dto.FeedResponse;
+import com.stoury.repository.FeedRepository;
 import com.stoury.repository.MemberRepository;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.ApplicationContext;
+import org.springframework.dao.DataAccessException;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,12 +20,16 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.fail;
+import static org.mockito.Mockito.*;
 
 @SpringBootTest
 @ActiveProfiles("test")
 @Transactional
 public class FeedServiceTest {
+    @Autowired
+    ApplicationContext applicationContext;
     @Autowired
     FeedService feedService;
     @Autowired
@@ -62,5 +69,34 @@ public class FeedServiceTest {
         assertThat(createdFeed.longitude()).isEqualTo(111.111);
         assertThat(createdFeed.latitude()).isEqualTo(333.333);
         assertThat(createdFeed.createdAt()).isNotNull();
+    }
+
+    @Test
+    @DisplayName("피드 생성 실패, 이미지 저장 롤백")
+    void createFeedFailAndRollbackGraphicContents() {
+        FeedRepository mockedFeedRepository = mock(FeedRepository.class);
+        when(mockedFeedRepository.save(any(Feed.class))).thenThrow(new DataAccessException("Something Failed") {
+        });
+        FileService mockedFileService = mock(FileService.class);
+        FeedService failingFeedService = new FeedService(mockedFileService, mockedFeedRepository, memberRepository);
+
+        FeedCreateRequest createFeed = FeedCreateRequest.builder()
+                .writerId(writer.getId())
+                .textContent("testing")
+                .longitude(111.111)
+                .latitude(333.333)
+                .build();
+        List<MultipartFile> graphicContents = List.of(
+                new MockMultipartFile("First", new byte[0]),
+                new MockMultipartFile("Second", new byte[0]),
+                new MockMultipartFile("Third", new byte[0])
+        );
+
+        try {
+            failingFeedService.createFeed(createFeed, graphicContents);
+            fail();
+        }catch (Exception ignore){}
+
+        verify(mockedFileService, atLeastOnce()).removeFile(any(String.class));
     }
 }
