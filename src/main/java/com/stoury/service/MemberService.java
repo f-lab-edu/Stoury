@@ -23,7 +23,7 @@ import static com.stoury.exception.MemberCrudExceptions.*;
 public class MemberService {
     private final MemberRepository memberRepository;
     private final PasswordEncoder passwordEncoder;
-    private final FileService fileService;
+    private final StorageService fileService;
     public final static int PASSWORD_LENGTH_MIN = 8;
     public final static int PASSWORD_LENGTH_MAX = 30;
     public final static int USERNAME_LENGTH_MAX = 10;

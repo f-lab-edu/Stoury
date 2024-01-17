@@ -4,7 +4,7 @@ import com.stoury.domain.Feed;
 import com.stoury.domain.Member;
 import com.stoury.dto.FeedCreateRequest;
 import com.stoury.dto.FeedResponse;
-import com.stoury.event.FileSaveEvent;
+import com.stoury.event.GraphicSaveEvent;
 import com.stoury.exception.FeedCreateException;
 import com.stoury.repository.FeedRepository;
 import com.stoury.repository.MemberRepository;
@@ -82,7 +82,7 @@ public class FeedServiceTest {
         assertThat(createdFeed.longitude()).isEqualTo(feedCreateRequest.longitude());
         assertThat(createdFeed.latitude()).isEqualTo(feedCreateRequest.latitude());
 
-        verify(eventPublisher, times(graphicContents.size())).publishEvent(any(FileSaveEvent.class));
+        verify(eventPublisher, times(graphicContents.size())).publishEvent(any(GraphicSaveEvent.class));
     }
 
     @Test

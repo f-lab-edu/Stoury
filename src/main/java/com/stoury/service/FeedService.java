@@ -5,7 +5,7 @@ import com.stoury.domain.GraphicContent;
 import com.stoury.domain.Member;
 import com.stoury.dto.FeedCreateRequest;
 import com.stoury.dto.FeedResponse;
-import com.stoury.event.FileSaveEvent;
+import com.stoury.event.GraphicSaveEvent;
 import com.stoury.exception.FeedCreateException;
 import com.stoury.repository.FeedRepository;
 import com.stoury.repository.MemberRepository;
@@ -47,8 +47,8 @@ public class FeedService {
                     MultipartFile fileToSave = graphicContents.get(seq);
                     GraphicContent graphicContent = new GraphicContent(seq);
                     Pair<MultipartFile, String> fileToSaveWithPath = Pair.of(fileToSave, graphicContent.getPath());
-                    FileSaveEvent fileSaveEvent = new FileSaveEvent(this, fileToSaveWithPath);
-                    eventPublisher.publishEvent(fileSaveEvent);
+                    GraphicSaveEvent graphicSaveEvent = new GraphicSaveEvent(this, fileToSaveWithPath);
+                    eventPublisher.publishEvent(graphicSaveEvent);
                     return graphicContent;
                 })
                 .toList();

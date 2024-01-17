@@ -13,7 +13,7 @@ import java.util.UUID;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "GRAPHIC_CONTENT")
 public class GraphicContent {
-    public static final String PATH_PREFIX = "/path/";
+    public static final String PATH_PREFIX = "/fee/";
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

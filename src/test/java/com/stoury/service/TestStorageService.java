@@ -5,11 +5,9 @@ import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.Map;
-
 @Component
 @Profile("test")
-public class TestFileService implements FileService {
+public class TestStorageService implements StorageService {
     public static final String PATH_PREFIX = "/test/path/";
 
     @Override
