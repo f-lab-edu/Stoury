@@ -94,4 +94,21 @@ public class FeedServiceTest {
         assertThatThrownBy(()->feedService.createFeed(writer, createFeed, graphicContents))
                 .isInstanceOf(FeedCreateException.class);
     }
+
+    @Test
+    @DisplayName("피드 저장 실패, 위치정보 없음")
+    @Transactional
+    void createFeedFailNoCoordinate() {
+        FeedCreateRequest createFeed = FeedCreateRequest.builder()
+                .textContent("testing")
+                .build();
+        List<MultipartFile> graphicContents = List.of(
+                new MockMultipartFile("First", new byte[0]),
+                new MockMultipartFile("Second", new byte[0]),
+                new MockMultipartFile("Third", new byte[0])
+        );
+
+        assertThatThrownBy(()->feedService.createFeed(writer, createFeed, graphicContents))
+                .isInstanceOf(FeedCreateException.class);
+    }
 }

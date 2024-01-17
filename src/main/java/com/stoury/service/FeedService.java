@@ -33,8 +33,7 @@ public class FeedService {
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public FeedResponse createFeed(Member writer, FeedCreateRequest feedCreateRequest,
                                    List<MultipartFile> graphicContents) {
-        validate(graphicContents);
-        validate(writer);
+        validate(writer, feedCreateRequest, graphicContents);
 
         Map<MultipartFile, String> reservedImagePaths = graphicContents.stream()
                 .collect(Collectors.toMap(Function.identity(), file -> UUID.randomUUID().toString()));
@@ -52,15 +51,15 @@ public class FeedService {
         return FeedResponse.from(uploadedFeed);
     }
 
-    private void validate(Member writer) {
+    private void validate(Member writer, FeedCreateRequest feedCreateRequest, List<MultipartFile> graphicContents) {
         if (!memberRepository.existsById(writer.getId())) {
             throw new FeedCreateException("Cannot find the member.");
         }
-    }
-
-    private void validate(List<MultipartFile> graphicContents) {
         if (Objects.requireNonNull(graphicContents).isEmpty()) {
             throw new FeedCreateException("You must upload with images or videos.");
+        }
+        if (feedCreateRequest.longitude() == null || feedCreateRequest.latitude() == null) {
+            throw new FeedCreateException("Location information is required.");
         }
     }
 }
