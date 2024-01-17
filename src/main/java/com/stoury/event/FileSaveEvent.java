@@ -2,16 +2,15 @@ package com.stoury.event;
 
 import lombok.Getter;
 import org.springframework.context.ApplicationEvent;
+import org.springframework.data.util.Pair;
 import org.springframework.web.multipart.MultipartFile;
-
-import java.util.Map;
 
 @Getter
 public class FileSaveEvent extends ApplicationEvent {
-    private Map<MultipartFile, String> toSaveFiles;
+    private Pair<MultipartFile, String> toSaveFile;
 
-    public FileSaveEvent(Object source, Map<MultipartFile, String> toSaveFiles) {
+    public FileSaveEvent(Object source, Pair<MultipartFile, String> toSaveFiles) {
         super(source);
-        this.toSaveFiles = toSaveFiles;
+        this.toSaveFile = toSaveFiles;
     }
 }

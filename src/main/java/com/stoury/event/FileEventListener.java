@@ -2,6 +2,7 @@ package com.stoury.event;
 
 import com.stoury.service.FileService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionalEventListener;
 import org.springframework.web.multipart.MultipartFile;
@@ -15,7 +16,7 @@ public class FileEventListener {
 
     @TransactionalEventListener
     public void onFileSaveEventHandler(FileSaveEvent fileSaveEvent) {
-        Map<MultipartFile, String> toSaveFiles = fileSaveEvent.getToSaveFiles();
-        fileService.saveFilesAtPaths(toSaveFiles);
+        Pair<MultipartFile, String> toSaveFiles = fileSaveEvent.getToSaveFile();
+        fileService.saveFilesAtPath(toSaveFiles);
     }
 }

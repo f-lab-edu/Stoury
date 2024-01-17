@@ -77,7 +77,7 @@ public class FeedServiceTest {
         assertThat(createdFeed.createdAt()).isNotNull();
 
         long eventCount = events.stream(FileSaveEvent.class).count();
-        assertThat(eventCount).isOne();
+        assertThat(eventCount).isEqualTo(graphicContents.size());
     }
 
     @Test

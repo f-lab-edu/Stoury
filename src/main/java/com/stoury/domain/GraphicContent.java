@@ -2,16 +2,18 @@ package com.stoury.domain;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+
+import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "GRAPHIC_CONTENT")
 public class GraphicContent {
+    public static final String PATH_PREFIX = "/path/";
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -22,11 +24,17 @@ public class GraphicContent {
     @Column(name = "PATH", unique = true, nullable = false)
     private String path;
 
-    public GraphicContent(String path) {
-        this.path = path;
-    }
+    @Column(name = "SEQUENCE", columnDefinition = "TINYINT", nullable = false)
+    private int sequence;
 
     public void beAttachedTo(Feed feed) {
         this.feed = feed;
+    }
+
+    public static GraphicContent createTemporalGraphicContent(int sequence) {
+        GraphicContent tempGraphic = new GraphicContent();
+        tempGraphic.path = PATH_PREFIX + LocalDateTime.now().getNano();
+        tempGraphic.sequence = sequence;
+        return tempGraphic;
     }
 }

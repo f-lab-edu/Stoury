@@ -1,5 +1,6 @@
 package com.stoury.service;
 
+import org.springframework.data.util.Pair;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
@@ -14,5 +15,5 @@ public interface FileService {
 
     String saveFile(MultipartFile file);
 
-    void saveFilesAtPaths(Map<MultipartFile, String> reservedImagePaths);
+    void saveFilesAtPath(Pair<MultipartFile, String> reservedImagePaths);
 }
