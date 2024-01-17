@@ -2,6 +2,10 @@ package com.stoury.domain;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.BatchSize;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter
@@ -29,6 +33,10 @@ public class Member {
 
     @Column(name = "DELETED", nullable = false)
     private boolean deleted;
+
+    @BatchSize(size = 20)
+    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, mappedBy = "member")
+    List<Feed> feeds = new ArrayList<>();
 
     @Builder
     public Member(String email, String encryptedPassword, String username, String introduction) {

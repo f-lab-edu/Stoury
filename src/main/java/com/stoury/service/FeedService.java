@@ -5,67 +5,62 @@ import com.stoury.domain.GraphicContent;
 import com.stoury.domain.Member;
 import com.stoury.dto.FeedCreateRequest;
 import com.stoury.dto.FeedResponse;
+import com.stoury.event.FileSaveEvent;
 import com.stoury.exception.FeedCreateException;
 import com.stoury.repository.FeedRepository;
 import com.stoury.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
-import java.util.NoSuchElementException;
+import java.util.Map;
 import java.util.Objects;
+import java.util.UUID;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class FeedService {
-    private final FileService fileService;
     private final FeedRepository feedRepository;
     private final MemberRepository memberRepository;
+    private final ApplicationEventPublisher eventPublisher;
 
-    @Transactional
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public FeedResponse createFeed(Member writer, FeedCreateRequest feedCreateRequest,
                                    List<MultipartFile> graphicContents) {
-        List<GraphicContent> savedContents = null;
-        try {
-            validate(graphicContents);
-            validate(writer);
+        validate(graphicContents);
+        validate(writer);
 
-            savedContents = graphicContents.stream()
-                    .map(file -> new GraphicContent(fileService.saveFile(file)))
-                    .toList();
+        Map<MultipartFile, String> reservedImagePaths = graphicContents.stream()
+                .collect(Collectors.toMap(Function.identity(), file -> UUID.randomUUID().toString()));
 
-            Feed feed = feedCreateRequest.toEntity(writer, savedContents);
+        List<GraphicContent> reservedContents = reservedImagePaths.values().stream()
+                .map(GraphicContent::new)
+                .toList();
 
-            Feed uploadedFeed = feedRepository.save(feed);
+        Feed feed = feedCreateRequest.toEntity(writer, reservedContents);
 
-            return FeedResponse.from(uploadedFeed);
-        } catch (Exception e) {
-            manualRollback(savedContents);
-            throw new FeedCreateException(e);
-        }
+        Feed uploadedFeed = feedRepository.save(feed);
+
+        eventPublisher.publishEvent(new FileSaveEvent(this, reservedImagePaths));
+
+        return FeedResponse.from(uploadedFeed);
     }
 
     private void validate(Member writer) {
         if (!memberRepository.existsById(writer.getId())) {
-            throw new NoSuchElementException("Cannot find the member.");
+            throw new FeedCreateException("Cannot find the member.");
         }
     }
 
     private void validate(List<MultipartFile> graphicContents) {
         if (Objects.requireNonNull(graphicContents).isEmpty()) {
-            throw new IllegalArgumentException("You must upload with images or videos.");
+            throw new FeedCreateException("You must upload with images or videos.");
         }
-    }
-
-    private void manualRollback(List<GraphicContent> savedContents) {
-        if (hasAnyContents(savedContents)) {
-            fileService.removeFiles(savedContents.stream().map(GraphicContent::getPath).toList());
-        }
-    }
-
-    private boolean hasAnyContents(List<GraphicContent> savedContents) {
-        return savedContents!= null && !savedContents.isEmpty();
     }
 }
