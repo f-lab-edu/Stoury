@@ -8,13 +8,6 @@ import org.springframework.web.multipart.MultipartFile;
 @Component
 @Profile("test")
 public class TestStorageService implements StorageService {
-    public static final String PATH_PREFIX = "/test/path/";
-
-    @Override
-    public String saveFile(MultipartFile file) {
-        return PATH_PREFIX + file.hashCode();
-    }
-
     @Override
     public void saveFilesAtPath(Pair<MultipartFile, String> reservedImagePaths) {
         // 지정된 경로에 이미지를 저장하는 로직
