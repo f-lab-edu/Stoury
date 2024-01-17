@@ -5,14 +5,17 @@ import com.stoury.dto.MemberCreateRequest;
 import com.stoury.dto.MemberResponse;
 import com.stoury.dto.MemberUpdateRequest;
 import com.stoury.repository.MemberRepository;
+import com.stoury.utils.FileUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.*;
+import org.springframework.data.util.Pair;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 
@@ -23,12 +26,13 @@ import static com.stoury.exception.MemberCrudExceptions.*;
 public class MemberService {
     private final MemberRepository memberRepository;
     private final PasswordEncoder passwordEncoder;
-    private final StorageService fileService;
+    private final StorageService storageService;
     public final static int PASSWORD_LENGTH_MIN = 8;
     public final static int PASSWORD_LENGTH_MAX = 30;
     public final static int USERNAME_LENGTH_MAX = 10;
     public final static int EMAIL_LENGTH_MAX = 25;
     public final static int PAGE_SIZE = 5;
+    public final static String PROFILE_IMAGE_PATH_PREFIX = "/members/profiles/images";
 
     @Transactional
     public MemberResponse createMember(MemberCreateRequest memberCreateRequest) {
@@ -90,18 +94,41 @@ public class MemberService {
     }
 
     @Transactional
-    public MemberResponse updateMember(MemberUpdateRequest memberUpdateRequest, MultipartFile profileImage) {
+    public MemberResponse updateMemberWithProfileImage(MemberUpdateRequest memberUpdateRequest, MultipartFile profileImage) {
+        String profileImagePath = createImagePath(Objects.requireNonNull(profileImage));
+        
+        storageService.saveFilesAtPath(Pair.of(profileImage, profileImagePath));
+        
         Member updateMember = findByIdOrEmail(memberUpdateRequest);
-
-        String imagePath = fileService.saveFile(profileImage);
 
         updateMember.update(
                 Objects.requireNonNull(memberUpdateRequest.username()),
-                imagePath,
+                profileImagePath,
                 memberUpdateRequest.introduction()
         );
 
         return MemberResponse.from(updateMember);
+    }
+
+    @Transactional
+    public MemberResponse updateMember(MemberUpdateRequest memberUpdateRequest) {
+        Member updateMember = findByIdOrEmail(memberUpdateRequest);
+
+        updateMember.update(
+                Objects.requireNonNull(memberUpdateRequest.username()),
+                updateMember.getProfileImagePath(),
+                memberUpdateRequest.introduction()
+        );
+
+        return MemberResponse.from(updateMember);
+    }
+
+    private String createImagePath(MultipartFile file) {
+        FileUtils.FileType fileType = FileUtils.getFileType(file);
+        if (FileUtils.FileType.JPG.equals(fileType)) {
+            return PROFILE_IMAGE_PATH_PREFIX + "/" + FileUtils.getFileNameByCurrentTime() + fileType.getExtension();
+        }
+        throw new MemberUpdateException("Content/type of profile image is jpeg.");
     }
 
     private Member findByIdOrEmail(MemberUpdateRequest memberUpdateRequest) {

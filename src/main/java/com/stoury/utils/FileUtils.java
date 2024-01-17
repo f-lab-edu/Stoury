@@ -4,6 +4,9 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Objects;
 
 import static com.stoury.utils.FileUtils.FileType.*;
@@ -19,7 +22,11 @@ public class FileUtils {
         };
     }
 
-
+    public static String getFileNameByCurrentTime() {
+        LocalDateTime nanoLocalDateTime = LocalDateTime.ofInstant(Instant.now(), ZoneId.systemDefault());
+        return nanoLocalDateTime.toString()
+                .replaceAll("[-:T.]", "_");
+    }
 
     @AllArgsConstructor
     @Getter
