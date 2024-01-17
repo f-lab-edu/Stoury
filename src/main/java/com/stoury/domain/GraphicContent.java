@@ -1,9 +1,11 @@
 package com.stoury.domain;
 
+import com.stoury.utils.FileUtils;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -13,7 +15,7 @@ import java.util.UUID;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "GRAPHIC_CONTENT")
 public class GraphicContent {
-    public static final String PATH_PREFIX = "/fee/";
+    public static final String PATH_PREFIX = "/feeds";
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
