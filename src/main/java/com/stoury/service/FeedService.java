@@ -20,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.IntStream;
 
 @Service
@@ -82,5 +83,15 @@ public class FeedService {
         if (feedCreateRequest.longitude() == null || feedCreateRequest.latitude() == null) {
             throw new FeedCreateException("Location information is required.");
         }
+    }
+
+    @Transactional(readOnly = true)
+    public List<FeedResponse> getFeedsOfMemberId(Long memberId) {
+        Member feedWriter = memberRepository.findById(Objects.requireNonNull(memberId))
+                .orElseThrow(() -> new FeedCreateException("Cannot find the member."));
+
+        return feedWriter.getFeeds()
+                .stream().map(FeedResponse::from)
+                .toList();
     }
 }

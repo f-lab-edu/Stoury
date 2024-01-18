@@ -64,8 +64,8 @@ public class FeedServiceTest {
                 .latitude(333.333)
                 .build();
         List<MultipartFile> graphicContents = List.of(
-                new MockMultipartFile("Files", "first","image/jpeg",new byte[0]),
-                new MockMultipartFile("Files", "second","video/mp4",new byte[0])
+                new MockMultipartFile("Files", "first", "image/jpeg", new byte[0]),
+                new MockMultipartFile("Files", "second", "video/mp4", new byte[0])
         );
         when(feedRepository.save(any(Feed.class))).thenReturn(Feed.builder()
                 .member(writer)
@@ -93,9 +93,9 @@ public class FeedServiceTest {
                 .latitude(333.333)
                 .build();
         List<MultipartFile> graphicContents = List.of(
-                new MockMultipartFile("Files", "first","image/jpeg",new byte[0]),
-                new MockMultipartFile("Files", "second","video/mp4",new byte[0]),
-                new MockMultipartFile("Files", "third","image/png",new byte[0])
+                new MockMultipartFile("Files", "first", "image/jpeg", new byte[0]),
+                new MockMultipartFile("Files", "second", "video/mp4", new byte[0]),
+                new MockMultipartFile("Files", "third", "image/png", new byte[0])
         );
 
         assertThatThrownBy(() -> feedService.createFeed(writer, createFeed, graphicContents))
@@ -113,7 +113,7 @@ public class FeedServiceTest {
                 .build();
         List<MultipartFile> graphicContents = Collections.emptyList();
 
-        assertThatThrownBy(()->feedService.createFeed(writer, createFeed, graphicContents))
+        assertThatThrownBy(() -> feedService.createFeed(writer, createFeed, graphicContents))
                 .isInstanceOf(FeedCreateException.class);
     }
 
@@ -130,7 +130,29 @@ public class FeedServiceTest {
                 new MockMultipartFile("Third", new byte[0])
         );
 
-        assertThatThrownBy(()->feedService.createFeed(writer, createFeed, graphicContents))
+        assertThatThrownBy(() -> feedService.createFeed(writer, createFeed, graphicContents))
                 .isInstanceOf(FeedCreateException.class);
+    }
+
+    @Test
+    @DisplayName("사용자 피드 조회")
+    void searchFeedsOfMember() {
+        Member member = Member.builder()
+                .username("writer").encryptedPassword("qwdqwdqwdwdd1111").email("sdasds@asds.com").build();
+        Member writer = memberRepository.save(member);
+
+        FeedCreateRequest feedRequest1 = FeedCreateRequest.builder().textContent("feed1").latitude(11.11).longitude(22.22).build();
+        FeedCreateRequest feedRequest2 = FeedCreateRequest.builder().textContent("feed2").latitude(11.11).longitude(22.22).build();
+        List<MultipartFile> graphicContent1 = List.of(new MockMultipartFile("image", "first",
+                "image/jpeg", new byte[0]));
+        List<MultipartFile> graphicContent2 = List.of(new MockMultipartFile("image", "first",
+                "image/jpeg", new byte[0]));
+
+        FeedResponse feed1 = feedService.createFeed(writer, feedRequest1, graphicContent1);
+        FeedResponse feed2 = feedService.createFeed(writer, feedRequest2, graphicContent2);
+
+        List<FeedResponse> foundFeeds = feedService.getFeedsOfMemberId(writer.getId());
+
+        assertThat(foundFeeds).contains(feed1, feed2);
     }
 }
