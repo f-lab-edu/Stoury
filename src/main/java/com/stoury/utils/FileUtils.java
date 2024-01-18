@@ -9,11 +9,12 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Objects;
 
-import static com.stoury.utils.FileUtils.FileType.*;
+import static com.stoury.utils.FileUtils.SupportedFileType.*;
 
 public class FileUtils {
-    public static FileType getFileType(MultipartFile file){
+    public static SupportedFileType getFileType(MultipartFile file) {
         String contentType = file.getContentType();
+
 
         return switch (Objects.requireNonNull(contentType)) {
             case "image/jpeg" -> JPG;
@@ -30,7 +31,7 @@ public class FileUtils {
 
     @AllArgsConstructor
     @Getter
-    public enum FileType{
+    public enum SupportedFileType {
         JPG("/images", ".jpeg"), MP4("/videos", ".mp4"), OTHER("/other", "");
         private final String path;
         private final String extension;

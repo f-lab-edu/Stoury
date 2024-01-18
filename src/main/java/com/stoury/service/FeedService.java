@@ -24,6 +24,7 @@ import java.util.stream.IntStream;
 @Service
 @RequiredArgsConstructor
 public class FeedService {
+    public static final String PATH_PREFIX = "/feeds";
     private final FeedRepository feedRepository;
     private final MemberRepository memberRepository;
     private final ApplicationEventPublisher eventPublisher;
@@ -46,7 +47,7 @@ public class FeedService {
         return IntStream.range(0, graphicContents.size())
                 .mapToObj(seq -> {
                     MultipartFile fileToSave = graphicContents.get(seq);
-                    GraphicContent graphicContent = new GraphicContent(seq);
+                    GraphicContent graphicContent = createGraphicContent(seq, fileToSave);
                     Pair<MultipartFile, String> fileToSaveWithPath = Pair.of(fileToSave, graphicContent.getPath());
                     GraphicSaveEvent graphicSaveEvent = new GraphicSaveEvent(this, fileToSaveWithPath);
                     eventPublisher.publishEvent(graphicSaveEvent);
@@ -57,6 +58,18 @@ public class FeedService {
 
     private Feed createFeedEntity(Member writer, FeedCreateRequest feedCreateRequest, List<GraphicContent> graphicContents) {
         return feedCreateRequest.toEntity(writer, graphicContents);
+    }
+
+    private GraphicContent createGraphicContent(int seq, MultipartFile file) {
+        FileUtils.SupportedFileType fileType = FileUtils.getFileType(file);
+
+        if (FileUtils.SupportedFileType.OTHER.equals(fileType)) {
+            throw new FeedCreateException("The File format is not supported.");
+        }
+
+        String path = PATH_PREFIX + fileType.getPath() + "/" + FileUtils.getFileNameByCurrentTime() + fileType.getExtension();
+
+        return new GraphicContent(path, seq);
     }
 
     private void validate(Member writer, FeedCreateRequest feedCreateRequest, List<MultipartFile> graphicContents) {

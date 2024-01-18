@@ -65,8 +65,7 @@ public class FeedServiceTest {
                 .build();
         List<MultipartFile> graphicContents = List.of(
                 new MockMultipartFile("Files", "first","image/jpeg",new byte[0]),
-                new MockMultipartFile("Files", "second","video/mp4",new byte[0]),
-                new MockMultipartFile("Files", "third","image/png",new byte[0])
+                new MockMultipartFile("Files", "second","video/mp4",new byte[0])
         );
         when(feedRepository.save(any(Feed.class))).thenReturn(Feed.builder()
                 .member(writer)
@@ -83,6 +82,24 @@ public class FeedServiceTest {
         assertThat(createdFeed.latitude()).isEqualTo(feedCreateRequest.latitude());
 
         verify(eventPublisher, times(graphicContents.size())).publishEvent(any(GraphicSaveEvent.class));
+    }
+
+    @Test
+    @DisplayName("피드 생성 실패, 지원하지 않는 파일")
+    void createFeedFailByNotSupportedFileFormat() {
+        FeedCreateRequest createFeed = FeedCreateRequest.builder()
+                .textContent("testing")
+                .longitude(111.111)
+                .latitude(333.333)
+                .build();
+        List<MultipartFile> graphicContents = List.of(
+                new MockMultipartFile("Files", "first","image/jpeg",new byte[0]),
+                new MockMultipartFile("Files", "second","video/mp4",new byte[0]),
+                new MockMultipartFile("Files", "third","image/png",new byte[0])
+        );
+
+        assertThatThrownBy(() -> feedService.createFeed(writer, createFeed, graphicContents))
+                .isInstanceOf(FeedCreateException.class);
     }
 
     @Test

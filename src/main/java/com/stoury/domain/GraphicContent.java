@@ -7,15 +7,11 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.time.LocalDateTime;
-import java.util.UUID;
-
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "GRAPHIC_CONTENT")
 public class GraphicContent {
-    public static final String PATH_PREFIX = "/feeds";
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -33,8 +29,8 @@ public class GraphicContent {
         this.feed = feed;
     }
 
-    public GraphicContent (int sequence) {
-        this.path = PATH_PREFIX + LocalDateTime.now().getNano();
+    public GraphicContent(String path, int sequence) {
+        this.path = path;
         this.sequence = sequence;
     }
 }

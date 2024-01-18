@@ -15,7 +15,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 
@@ -124,8 +123,8 @@ public class MemberService {
     }
 
     private String createImagePath(MultipartFile file) {
-        FileUtils.FileType fileType = FileUtils.getFileType(file);
-        if (FileUtils.FileType.JPG.equals(fileType)) {
+        FileUtils.SupportedFileType fileType = FileUtils.getFileType(file);
+        if (FileUtils.SupportedFileType.JPG.equals(fileType)) {
             return PROFILE_IMAGE_PATH_PREFIX + "/" + FileUtils.getFileNameByCurrentTime() + fileType.getExtension();
         }
         throw new MemberUpdateException("Content/type of profile image is jpeg.");
