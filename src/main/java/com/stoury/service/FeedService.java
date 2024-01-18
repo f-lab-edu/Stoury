@@ -13,6 +13,7 @@ import com.stoury.utils.FileUtils;
 import com.stoury.utils.SupportedFileType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.data.domain.*;
 import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -27,6 +28,7 @@ import java.util.stream.IntStream;
 @RequiredArgsConstructor
 public class FeedService {
     public static final String PATH_PREFIX = "/feeds";
+    public static final int PAGE_SIZE = 10;
     private final FeedRepository feedRepository;
     private final MemberRepository memberRepository;
     private final ApplicationEventPublisher eventPublisher;
@@ -86,12 +88,18 @@ public class FeedService {
     }
 
     @Transactional(readOnly = true)
-    public List<FeedResponse> getFeedsOfMemberId(Long memberId) {
+    public Slice<FeedResponse> getFeedsOfMemberId(Long memberId, int pageNumber) {
         Member feedWriter = memberRepository.findById(Objects.requireNonNull(memberId))
                 .orElseThrow(() -> new FeedCreateException("Cannot find the member."));
 
-        return feedWriter.getFeeds()
-                .stream().map(FeedResponse::from)
+
+        Pageable page = PageRequest.of(pageNumber, PAGE_SIZE, Sort.by("createdAt").descending());
+        Slice<Feed> feedSlice = feedRepository.findByMember(feedWriter, page);
+
+        List<FeedResponse> feedResponses = feedSlice.stream()
+                .map(FeedResponse::from)
                 .toList();
+
+        return new SliceImpl<>(feedResponses, feedSlice.getPageable(), feedSlice.hasNext());
     }
 }

@@ -17,10 +17,12 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.data.domain.Slice;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -141,18 +143,20 @@ public class FeedServiceTest {
                 .username("writer").encryptedPassword("qwdqwdqwdwdd1111").email("sdasds@asds.com").build();
         Member writer = memberRepository.save(member);
 
-        FeedCreateRequest feedRequest1 = FeedCreateRequest.builder().textContent("feed1").latitude(11.11).longitude(22.22).build();
-        FeedCreateRequest feedRequest2 = FeedCreateRequest.builder().textContent("feed2").latitude(11.11).longitude(22.22).build();
-        List<MultipartFile> graphicContent1 = List.of(new MockMultipartFile("image", "first",
-                "image/jpeg", new byte[0]));
-        List<MultipartFile> graphicContent2 = List.of(new MockMultipartFile("image", "first",
-                "image/jpeg", new byte[0]));
+        List<FeedResponse> feeds = new ArrayList<>();
+        for (int i = 0; i < 20; i++) {
+            FeedCreateRequest feedRequest = FeedCreateRequest.builder().textContent("feed" + i).latitude(11.11).longitude(22.22).build();
+            List<MultipartFile> graphicContent = List.of(new MockMultipartFile("image", "image" + i,
+                    "image/jpeg", new byte[0]));
 
-        FeedResponse feed1 = feedService.createFeed(writer, feedRequest1, graphicContent1);
-        FeedResponse feed2 = feedService.createFeed(writer, feedRequest2, graphicContent2);
+            FeedResponse feedResponse = feedService.createFeed(writer, feedRequest, graphicContent);
+            feeds.add(feedResponse);
+        }
 
-        List<FeedResponse> foundFeeds = feedService.getFeedsOfMemberId(writer.getId());
+        Slice<FeedResponse> foundFeeds = feedService.getFeedsOfMemberId(writer.getId(), 0);
 
-        assertThat(foundFeeds).contains(feed1, feed2);
+        List<FeedResponse> recentTenFeeds = feeds.subList(10, 20);
+
+        assertThat(foundFeeds).containsAll(recentTenFeeds);
     }
 }
