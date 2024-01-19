@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 
 public interface FeedRepository extends JpaRepository<Feed, Long> {
 
-    Slice<Feed> findByMember(Member feedWriter, Pageable page);
+    Slice<Feed> findAllByMemberAndCreatedAtIsBefore(Member feedWriter, LocalDateTime orderThan, Pageable page);
 
     @Query("""
             select f

@@ -159,6 +159,7 @@ public class FeedServiceTest {
         Slice<FeedResponse> recent10Feeds = feedService.getFeedsOfMemberId(writer.getId(), maxDateTime);
 
         List<String> feedTexts = recent10Feeds.stream().map(FeedResponse::textContent).toList();
+        assertThat(recent10Feeds.hasNext()).isTrue();
         assertThat(feedTexts).containsExactly(
                 "feed19", "feed18", "feed17", "feed16", "feed15",
                 "feed14", "feed13", "feed12", "feed11", "feed10"
