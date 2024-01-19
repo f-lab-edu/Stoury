@@ -152,7 +152,7 @@ public class MemberService {
             throw new MemberSearchException("No keyword for search.");
         }
 
-        Pageable page = PageRequest.of(0, PAGE_SIZE, Sort.by("username"));
+        Pageable page = PageRequest.of(0,  PAGE_SIZE, Sort.by("username"));
 
         Slice<Member> memberEntitySlice = memberRepository.findMembersByUsernameMatches(keyword, page);
 

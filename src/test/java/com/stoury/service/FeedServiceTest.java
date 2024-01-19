@@ -9,6 +9,7 @@ import com.stoury.event.GraphicSaveEvent;
 import com.stoury.exception.FeedCreateException;
 import com.stoury.repository.FeedRepository;
 import com.stoury.repository.MemberRepository;
+import com.stoury.repository.TagRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -23,6 +24,8 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -35,6 +38,8 @@ import static org.mockito.Mockito.*;
 public class FeedServiceTest {
     @Mock
     MemberRepository memberRepository;
+    @Mock
+    TagRepository tagRepository;
     @Mock
     FeedRepository feedRepository;
     @Mock
@@ -89,6 +94,7 @@ public class FeedServiceTest {
 
     @Test
     @DisplayName("피드 생성 실패, 지원하지 않는 파일")
+    @Transactional
     void createFeedFailByNotSupportedFileFormat() {
         FeedCreateRequest createFeed = FeedCreateRequest.builder()
                 .textContent("testing")
@@ -140,10 +146,6 @@ public class FeedServiceTest {
     @Test
     @DisplayName("사용자 피드 조회")
     void searchFeedsOfMember() {
-        Member member = Member.builder()
-                .username("writer").encryptedPassword("qwdqwdqwdwdd1111").email("sdasds@asds.com").build();
-        Member writer = memberRepository.save(member);
-
         List<FeedResponse> feeds = new ArrayList<>();
         for (int i = 0; i < 20; i++) {
             FeedCreateRequest feedRequest = FeedCreateRequest.builder().textContent("feed" + i).latitude(11.11).longitude(22.22).build();
@@ -163,28 +165,31 @@ public class FeedServiceTest {
 
     @Test
     @DisplayName("태그로 피드 조회")
+    @Transactional
     void searchFeedsByTag() {
         String tagName = "testTag";
         Tag tag = new Tag(tagName);
-        List<Feed> feeds = create10FeedsWith(tag);
+        tagRepository.save(tag);
+        List<Feed> feeds = create20FeedsWith(tag);
         feedRepository.saveAll(feeds);
 
-        Slice<FeedResponse> recent5Feeds = feedService.getFeedsByTag(tagName, feeds.get(5).getCreatedAt());
-        assertThat(recent5Feeds).hasSize(5);
-        assertThat(recent5Feeds.hasNext()).isTrue();
+        LocalDateTime maxDateTime = LocalDate.of(2100, 12, 31).atStartOfDay();
+        Slice<FeedResponse> recent10Feeds = feedService.getFeedsByTag(tagName, maxDateTime);
+        assertThat(recent10Feeds).hasSize(10);
+        assertThat(recent10Feeds.hasNext()).isTrue();
 
-        List<FeedResponse> recentFeedResponses = recent5Feeds.getContent();
+        List<FeedResponse> recentFeedResponses = recent10Feeds.getContent();
         for (int i = 0; i < recentFeedResponses.size(); i++) {
             FeedResponse feedResponse = recentFeedResponses.get(i);
             assertThat(feedResponse.textContent()).isEqualTo(feeds.get(feeds.size() - i - 1).getTextContent());
         }
     }
 
-    private List<Feed> create10FeedsWith(Tag tag) {
+    private List<Feed> create20FeedsWith(Tag tag) {
         List<Feed> feeds = new ArrayList<>();
 
         List<Tag> tagList = List.of(tag);
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < 20; i++) {
             Feed feed = Feed.builder()
                     .member(writer)
                     .textContent("#" + i)

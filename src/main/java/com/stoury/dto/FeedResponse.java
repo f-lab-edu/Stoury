@@ -2,6 +2,8 @@ package com.stoury.dto;
 
 import com.stoury.domain.Feed;
 import com.stoury.domain.GraphicContent;
+import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.SliceImpl;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -23,5 +25,13 @@ public record FeedResponse(Long feedId,
                 uploadedFeed.getLongitude(),
                 uploadedFeed.getCreatedAt()
         );
+    }
+
+    public static Slice<FeedResponse> from(Slice<Feed> feedSlice) {
+        List<FeedResponse> feedResponses = feedSlice.stream()
+                .map(FeedResponse::from)
+                .toList();
+
+        return new SliceImpl<>(feedResponses, feedSlice.getPageable(), feedSlice.hasNext());
     }
 }

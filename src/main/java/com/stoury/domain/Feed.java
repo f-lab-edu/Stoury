@@ -42,12 +42,18 @@ public class Feed {
     @Column(name = "LONGITUDE")
     private Double longitude;
 
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(joinColumns = @JoinColumn(name = "FEED_ID"),
+            inverseJoinColumns = @JoinColumn(name = "TAG_ID"))
+    private List<Tag> tags = new ArrayList<>();
+
     @Builder
-    public Feed(Member member, String textContent, Double latitude, Double longitude) {
+    public Feed(Member member, String textContent, Double latitude, Double longitude, List<Tag> tags) {
         this.member = member;
         this.textContent = textContent;
         this.latitude = latitude;
         this.longitude = longitude;
+        this.tags = tags;
     }
 
     public void addGraphicContent(GraphicContent graphicContent) {

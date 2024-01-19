@@ -3,12 +3,15 @@ package com.stoury.service;
 import com.stoury.domain.Feed;
 import com.stoury.domain.GraphicContent;
 import com.stoury.domain.Member;
+import com.stoury.domain.Tag;
 import com.stoury.dto.FeedCreateRequest;
 import com.stoury.dto.FeedResponse;
 import com.stoury.event.GraphicSaveEvent;
 import com.stoury.exception.FeedCreateException;
+import com.stoury.exception.FeedSearchException;
 import com.stoury.repository.FeedRepository;
 import com.stoury.repository.MemberRepository;
+import com.stoury.repository.TagRepository;
 import com.stoury.utils.FileUtils;
 import com.stoury.utils.SupportedFileType;
 import lombok.RequiredArgsConstructor;
@@ -18,10 +21,14 @@ import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.IntStream;
 
 @Service
@@ -31,6 +38,7 @@ public class FeedService {
     public static final int PAGE_SIZE = 10;
     private final FeedRepository feedRepository;
     private final MemberRepository memberRepository;
+    private final TagRepository tagRepository;
     private final ApplicationEventPublisher eventPublisher;
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
@@ -96,10 +104,15 @@ public class FeedService {
         Pageable page = PageRequest.of(pageNumber, PAGE_SIZE, Sort.by("createdAt").descending());
         Slice<Feed> feedSlice = feedRepository.findByMember(feedWriter, page);
 
-        List<FeedResponse> feedResponses = feedSlice.stream()
-                .map(FeedResponse::from)
-                .toList();
+        return FeedResponse.from(feedSlice);
+    }
 
-        return new SliceImpl<>(feedResponses, feedSlice.getPageable(), feedSlice.hasNext());
+    @Transactional(readOnly = true)
+    public Slice<FeedResponse> getFeedsByTag(String tagName, LocalDateTime orderThan) {
+        Pageable page = PageRequest.of(0, PAGE_SIZE, Sort.by("createdAt").descending());
+
+        Slice<Feed> feedSlice = feedRepository.findByTagAndCreateAtLessThan(tagName, orderThan, page);
+
+        return FeedResponse.from(feedSlice);
     }
 }
