@@ -79,9 +79,65 @@ public class FeedServiceTest {
     }
 
     @Test
+    @DisplayName("피드 생성과 동시에 태그 생성 성공")
+    void createFeedWithTagsSuccess() {
+        when(memberRepository.existsById(any())).thenReturn(true);
+        writer = Member.builder()
+                .username("writer")
+                .encryptedPassword("dqwdasda")
+                .email("d1wd@wdwfef.com")
+                .build();
+
+        List<String> tagGroup = List.of("tag1", "tag2", "tag3");
+        FeedCreateRequest feedCreateRequest = FeedCreateRequest.builder()
+                .textContent("with tag group1")
+                .longitude(11.11)
+                .latitude(11.11)
+                .tagNames(tagGroup)
+                .build();
+        List<MultipartFile> graphicContents = List.of(
+                new MockMultipartFile("Files", "first", "image/jpeg", new byte[0]),
+                new MockMultipartFile("Files", "second", "video/mp4", new byte[0])
+        );
+
+        FeedResponse feedResponse = feedService.createFeed(writer, feedCreateRequest, graphicContents);
+
+        assertThat(feedResponse.tagNames()).containsExactly(tagGroup.toArray(String[]::new));
+    }
+
+    @Test
+    @DisplayName("이미 존재하는 태그로 피드 생성 성공")
+    void createFeedWithExistTags() {
+        when(memberRepository.existsById(any())).thenReturn(true);
+        writer = Member.builder()
+                .username("writer")
+                .encryptedPassword("dqwdasda")
+                .email("d1wd@wdwfef.com")
+                .build();
+
+        List<String> tagGroup = List.of("tag1", "tag2", "tag3");
+
+        FeedCreateRequest feedCreateRequest = FeedCreateRequest.builder()
+                .textContent("with tag group1")
+                .longitude(11.11)
+                .latitude(11.11)
+                .tagNames(tagGroup)
+                .build();
+        List<MultipartFile> graphicContents = List.of(
+                new MockMultipartFile("Files", "first", "image/jpeg", new byte[0]),
+                new MockMultipartFile("Files", "second", "video/mp4", new byte[0])
+        );
+
+        FeedResponse feedResponse = feedService.createFeed(writer, feedCreateRequest, graphicContents);
+
+        assertThat(feedResponse.tagNames()).containsExactly(tagGroup.toArray(String[]::new));
+    }
+
+    @Test
     @DisplayName("피드 생성 실패, 지원하지 않는 파일")
     @Transactional
     void createFeedFailByNotSupportedFileFormat() {
+        when(memberRepository.existsById(any())).thenReturn(true);
         writer = Member.builder()
                 .username("writer")
                 .encryptedPassword("dqwdasda")
@@ -107,6 +163,7 @@ public class FeedServiceTest {
     @DisplayName("피드 저장 실패, 이미지 없음")
     @Transactional
     void createFeedFailNoGraphicContents() {
+        when(memberRepository.existsById(any())).thenReturn(true);
         writer = Member.builder()
                 .username("writer")
                 .encryptedPassword("dqwdasda")
