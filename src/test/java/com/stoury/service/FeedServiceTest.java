@@ -29,6 +29,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.IntStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -146,21 +147,22 @@ public class FeedServiceTest {
     @Test
     @DisplayName("사용자 피드 조회")
     void searchFeedsOfMember() {
-        List<FeedResponse> feeds = new ArrayList<>();
-        for (int i = 0; i < 20; i++) {
-            FeedCreateRequest feedRequest = FeedCreateRequest.builder().textContent("feed" + i).latitude(11.11).longitude(22.22).build();
-            List<MultipartFile> graphicContent = List.of(new MockMultipartFile("image", "image" + i,
-                    "image/jpeg", new byte[0]));
+        List<Feed> feeds = IntStream.range(0, 20).mapToObj(i -> Feed.builder()
+                .textContent("feed" + i)
+                .latitude(11.11)
+                .longitude(11.11)
+                .member(writer)
+                .build()).toList();
+        feedRepository.saveAll(feeds);
 
-            FeedResponse feedResponse = feedService.createFeed(writer, feedRequest, graphicContent);
-            feeds.add(feedResponse);
-        }
+        LocalDateTime maxDateTime = LocalDate.of(2100, 12, 31).atStartOfDay();
+        Slice<FeedResponse> recent10Feeds = feedService.getFeedsOfMemberId(writer.getId(), maxDateTime);
 
-        Slice<FeedResponse> foundFeeds = feedService.getFeedsOfMemberId(writer.getId(), 0);
-
-        List<FeedResponse> recentTenFeeds = feeds.subList(10, 20);
-
-        assertThat(foundFeeds).containsAll(recentTenFeeds);
+        List<String> feedTexts = recent10Feeds.stream().map(FeedResponse::textContent).toList();
+        assertThat(feedTexts).containsExactly(
+                "feed19", "feed18", "feed17", "feed16", "feed15",
+                "feed14", "feed13", "feed12", "feed11", "feed10"
+        );
     }
 
     @Test
@@ -175,6 +177,7 @@ public class FeedServiceTest {
 
         LocalDateTime maxDateTime = LocalDate.of(2100, 12, 31).atStartOfDay();
         Slice<FeedResponse> recent10Feeds = feedService.getFeedsByTag(tagName, maxDateTime);
+
         assertThat(recent10Feeds).hasSize(10);
         assertThat(recent10Feeds.hasNext()).isTrue();
 
