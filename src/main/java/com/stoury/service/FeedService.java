@@ -3,6 +3,7 @@ package com.stoury.service;
 import com.stoury.domain.Feed;
 import com.stoury.domain.GraphicContent;
 import com.stoury.domain.Member;
+import com.stoury.domain.Tag;
 import com.stoury.dto.FeedCreateRequest;
 import com.stoury.dto.FeedResponse;
 import com.stoury.event.GraphicSaveEvent;
@@ -63,7 +64,10 @@ public class FeedService {
     }
 
     private Feed createFeedEntity(Member writer, FeedCreateRequest feedCreateRequest, List<GraphicContent> graphicContents) {
-        return feedCreateRequest.toEntity(writer, graphicContents);
+        List<Tag> tags = feedCreateRequest.tagNames().stream()
+                .map(tagName -> tagRepository.findByTagName(tagName).orElseGet(() -> tagRepository.save(new Tag(tagName))))
+                .toList();
+        return feedCreateRequest.toEntity(writer, graphicContents, tags);
     }
 
     private GraphicContent createGraphicContent(int seq, MultipartFile file) {

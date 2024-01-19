@@ -50,17 +50,11 @@ public class FeedServiceTest {
     Member writer;
 
     @BeforeEach
-    void setup() {
-        writer = Member.builder()
-                .username("writer")
-                .encryptedPassword("dqwdasda")
-                .email("d1wd@wdwfef.com")
-                .build();
-    }
-
     @AfterEach
     void tearDown() {
+        feedRepository.deleteAll();
         memberRepository.deleteAll();
+        tagRepository.deleteAll();
     }
 
     @Test
@@ -72,6 +66,13 @@ public class FeedServiceTest {
                 .longitude(111.111)
                 .latitude(333.333)
                 .build();
+        Member member = Member.builder()
+                .username("writer")
+                .encryptedPassword("dqwdasda")
+                .email("d1wd@wdwfef.com")
+                .build();
+        Member writer = memberRepository.save(member);
+
         List<MultipartFile> graphicContents = List.of(
                 new MockMultipartFile("Files", "first", "image/jpeg", new byte[0]),
                 new MockMultipartFile("Files", "second", "video/mp4", new byte[0])
@@ -94,9 +95,77 @@ public class FeedServiceTest {
     }
 
     @Test
+    @DisplayName("피드 생성과 동시에 태그 생성 성공")
+    void createFeedWithTagsSuccess() {
+        // 태그가 없는 상태에서 시작
+        assertThat(tagRepository.findAll()).isEmpty();
+
+        Member member = Member.builder()
+                .username("writer")
+                .encryptedPassword("dqwdasda")
+                .email("d1wd@wdwfef.com")
+                .build();
+        Member writer = memberRepository.save(member);
+
+        List<String> tagGroup = List.of("tag1", "tag2", "tag3");
+        FeedCreateRequest feedCreateRequest = FeedCreateRequest.builder()
+                .textContent("with tag group1")
+                .longitude(11.11)
+                .latitude(11.11)
+                .tagNames(tagGroup)
+                .build();
+        List<MultipartFile> graphicContents = List.of(
+                new MockMultipartFile("Files", "first", "image/jpeg", new byte[0]),
+                new MockMultipartFile("Files", "second", "video/mp4", new byte[0])
+        );
+
+        FeedResponse feedResponse = feedService.createFeed(writer, feedCreateRequest, graphicContents);
+
+        assertThat(feedResponse.tagNames()).containsExactly(tagGroup.toArray(String[]::new));
+    }
+
+    @Test
+    @DisplayName("이미 존재하는 태그로 피드 생성 성공")
+    void createFeedWithExistTags() {
+        Member member = Member.builder()
+                .username("writer")
+                .encryptedPassword("dqwdasda")
+                .email("d1wd@wdwfef.com")
+                .build();
+        Member writer = memberRepository.save(member);
+
+        List<String> tagGroup = tagRepository.saveAll(List.of(
+                new Tag("tag1"),
+                new Tag("tag2"),
+                new Tag("tag3"))).stream().map(Tag::getTagName).toList();
+
+        FeedCreateRequest feedCreateRequest = FeedCreateRequest.builder()
+                .textContent("with tag group1")
+                .longitude(11.11)
+                .latitude(11.11)
+                .tagNames(tagGroup)
+                .build();
+        List<MultipartFile> graphicContents = List.of(
+                new MockMultipartFile("Files", "first", "image/jpeg", new byte[0]),
+                new MockMultipartFile("Files", "second", "video/mp4", new byte[0])
+        );
+
+        FeedResponse feedResponse = feedService.createFeed(writer, feedCreateRequest, graphicContents);
+
+        assertThat(feedResponse.tagNames()).containsExactly(tagGroup.toArray(String[]::new));
+    }
+
+    @Test
     @DisplayName("피드 생성 실패, 지원하지 않는 파일")
     @Transactional
     void createFeedFailByNotSupportedFileFormat() {
+        Member member = Member.builder()
+                .username("writer")
+                .encryptedPassword("dqwdasda")
+                .email("d1wd@wdwfef.com")
+                .build();
+        Member writer = memberRepository.save(member);
+
         FeedCreateRequest createFeed = FeedCreateRequest.builder()
                 .textContent("testing")
                 .longitude(111.111)
@@ -116,6 +185,13 @@ public class FeedServiceTest {
     @DisplayName("피드 저장 실패, 이미지 없음")
     @Transactional
     void createFeedFailNoGraphicContents() {
+        Member member = Member.builder()
+                .username("writer")
+                .encryptedPassword("dqwdasda")
+                .email("d1wd@wdwfef.com")
+                .build();
+        Member writer = memberRepository.save(member);
+
         FeedCreateRequest createFeed = FeedCreateRequest.builder()
                 .textContent("testing")
                 .longitude(111.111)
@@ -131,39 +207,9 @@ public class FeedServiceTest {
     @DisplayName("피드 저장 실패, 위치정보 없음")
     @Transactional
     void createFeedFailNoCoordinate() {
-        FeedCreateRequest createFeed = FeedCreateRequest.builder()
+        assertThatThrownBy(() -> FeedCreateRequest.builder()
                 .textContent("testing")
-                .build();
-        List<MultipartFile> graphicContents = List.of(
-                new MockMultipartFile("First", new byte[0]),
-                new MockMultipartFile("Second", new byte[0]),
-                new MockMultipartFile("Third", new byte[0])
-        );
-
-        assertThatThrownBy(() -> feedService.createFeed(writer, createFeed, graphicContents))
-                .isInstanceOf(FeedCreateException.class);
-    }
-
-    @Test
-    @DisplayName("사용자 피드 조회")
-    void searchFeedsOfMember() {
-        List<Feed> feeds = IntStream.range(0, 20).mapToObj(i -> Feed.builder()
-                .textContent("feed" + i)
-                .latitude(11.11)
-                .longitude(11.11)
-                .member(writer)
-                .build()).toList();
-        feedRepository.saveAll(feeds);
-
-        LocalDateTime maxDateTime = LocalDate.of(2100, 12, 31).atStartOfDay();
-        Slice<FeedResponse> recent10Feeds = feedService.getFeedsOfMemberId(writer.getId(), maxDateTime);
-
-        List<String> feedTexts = recent10Feeds.stream().map(FeedResponse::textContent).toList();
-        assertThat(recent10Feeds.hasNext()).isTrue();
-        assertThat(feedTexts).containsExactly(
-                "feed19", "feed18", "feed17", "feed16", "feed15",
-                "feed14", "feed13", "feed12", "feed11", "feed10"
-        );
+                .build()).isInstanceOf(FeedCreateException.class);
     }
 
     @Test
@@ -189,7 +235,43 @@ public class FeedServiceTest {
         }
     }
 
+    @Test
+    @DisplayName("사용자 피드 조회")
+    void searchFeedsOfMember() {
+        Member member = Member.builder()
+                .username("writer")
+                .encryptedPassword("dqwdasda")
+                .email("d1wd@wdwfef.com")
+                .build();
+        Member writer = memberRepository.save(member);
+
+        List<Feed> feeds = IntStream.range(0, 20).mapToObj(i -> Feed.builder()
+                .textContent("feed" + i)
+                .latitude(11.11)
+                .longitude(11.11)
+                .member(writer)
+                .build()).toList();
+        feedRepository.saveAll(feeds);
+
+        LocalDateTime maxDateTime = LocalDate.of(2100, 12, 31).atStartOfDay();
+        Slice<FeedResponse> recent10Feeds = feedService.getFeedsOfMemberId(writer.getId(), maxDateTime);
+
+        List<String> feedTexts = recent10Feeds.stream().map(FeedResponse::textContent).toList();
+        assertThat(recent10Feeds.hasNext()).isTrue();
+        assertThat(feedTexts).containsExactly(
+                "feed19", "feed18", "feed17", "feed16", "feed15",
+                "feed14", "feed13", "feed12", "feed11", "feed10"
+        );
+    }
+
     private List<Feed> create20FeedsWith(Tag tag) {
+        Member member = Member.builder()
+                .username("writer")
+                .encryptedPassword("dqwdasda")
+                .email("d1wd@wdwfef.com")
+                .build();
+        Member writer = memberRepository.save(member);
+
         List<Feed> feeds = new ArrayList<>();
 
         List<Tag> tagList = List.of(tag);
