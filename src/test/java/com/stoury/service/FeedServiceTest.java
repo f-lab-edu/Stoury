@@ -2,6 +2,7 @@ package com.stoury.service;
 
 import com.stoury.domain.Feed;
 import com.stoury.domain.Member;
+import com.stoury.domain.Tag;
 import com.stoury.dto.FeedCreateRequest;
 import com.stoury.dto.FeedResponse;
 import com.stoury.event.GraphicSaveEvent;
@@ -158,5 +159,41 @@ public class FeedServiceTest {
         List<FeedResponse> recentTenFeeds = feeds.subList(10, 20);
 
         assertThat(foundFeeds).containsAll(recentTenFeeds);
+    }
+
+    @Test
+    @DisplayName("태그로 피드 조회")
+    void searchFeedsByTag() {
+        String tagName = "testTag";
+        Tag tag = new Tag(tagName);
+        List<Feed> feeds = create10FeedsWith(tag);
+        feedRepository.saveAll(feeds);
+
+        Slice<FeedResponse> recent5Feeds = feedService.getFeedsByTag(tagName, feeds.get(5).getCreatedAt());
+        assertThat(recent5Feeds).hasSize(5);
+        assertThat(recent5Feeds.hasNext()).isTrue();
+
+        List<FeedResponse> recentFeedResponses = recent5Feeds.getContent();
+        for (int i = 0; i < recentFeedResponses.size(); i++) {
+            FeedResponse feedResponse = recentFeedResponses.get(i);
+            assertThat(feedResponse.textContent()).isEqualTo(feeds.get(feeds.size() - i - 1).getTextContent());
+        }
+    }
+
+    private List<Feed> create10FeedsWith(Tag tag) {
+        List<Feed> feeds = new ArrayList<>();
+
+        List<Tag> tagList = List.of(tag);
+        for (int i = 0; i < 10; i++) {
+            Feed feed = Feed.builder()
+                    .member(writer)
+                    .textContent("#" + i)
+                    .tags(tagList)
+                    .longitude(11.11)
+                    .latitude(11.11)
+                    .build();
+            feeds.add(feed);
+        }
+        return feeds;
     }
 }
