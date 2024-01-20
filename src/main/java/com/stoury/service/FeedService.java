@@ -10,6 +10,7 @@ import com.stoury.exception.FeedCreateException;
 import com.stoury.repository.FeedRepository;
 import com.stoury.repository.MemberRepository;
 import com.stoury.utils.FileUtils;
+import com.stoury.utils.SupportedFileType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.util.Pair;
@@ -61,9 +62,9 @@ public class FeedService {
     }
 
     private GraphicContent createGraphicContent(int seq, MultipartFile file) {
-        FileUtils.SupportedFileType fileType = FileUtils.getFileType(file);
+        SupportedFileType fileType = FileUtils.getFileType(file);
 
-        if (FileUtils.SupportedFileType.OTHER.equals(fileType)) {
+        if (SupportedFileType.OTHER.equals(fileType)) {
             throw new FeedCreateException("The File format is not supported.");
         }
 

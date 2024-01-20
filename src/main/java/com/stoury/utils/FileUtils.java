@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Objects;
 
-import static com.stoury.utils.FileUtils.SupportedFileType.*;
+import static com.stoury.utils.SupportedFileType.*;
 
 public class FileUtils {
     public static SupportedFileType getFileType(MultipartFile file) {
@@ -27,13 +27,5 @@ public class FileUtils {
         LocalDateTime nanoLocalDateTime = LocalDateTime.ofInstant(Instant.now(), ZoneId.systemDefault());
         return nanoLocalDateTime.toString()
                 .replaceAll("[-:T.]", "_");
-    }
-
-    @AllArgsConstructor
-    @Getter
-    public enum SupportedFileType {
-        JPG("/images", ".jpeg"), MP4("/videos", ".mp4"), OTHER("/other", "");
-        private final String path;
-        private final String extension;
     }
 }

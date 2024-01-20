@@ -6,6 +6,7 @@ import com.stoury.dto.MemberResponse;
 import com.stoury.dto.MemberUpdateRequest;
 import com.stoury.repository.MemberRepository;
 import com.stoury.utils.FileUtils;
+import com.stoury.utils.SupportedFileType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.*;
 import org.springframework.data.util.Pair;
@@ -123,8 +124,8 @@ public class MemberService {
     }
 
     private String createImagePath(MultipartFile file) {
-        FileUtils.SupportedFileType fileType = FileUtils.getFileType(file);
-        if (FileUtils.SupportedFileType.JPG.equals(fileType)) {
+        SupportedFileType fileType = FileUtils.getFileType(file);
+        if (SupportedFileType.JPG.equals(fileType)) {
             return PROFILE_IMAGE_PATH_PREFIX + "/" + FileUtils.getFileNameByCurrentTime() + fileType.getExtension();
         }
         throw new MemberUpdateException("Content/type of profile image is jpeg.");
