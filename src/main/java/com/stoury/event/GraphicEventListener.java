@@ -7,6 +7,8 @@ import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.nio.file.Paths;
+
 @Component
 @RequiredArgsConstructor
 public class GraphicEventListener {
@@ -16,6 +18,6 @@ public class GraphicEventListener {
     public void onFileSaveEventHandler(GraphicSaveEvent graphicSaveEvent) {
         MultipartFile fileToSave = graphicSaveEvent.getFileToSave();
         String path = graphicSaveEvent.getPath();
-        storageService.saveFilesAtPath(fileToSave, path);
+        storageService.saveFilesAtPath(fileToSave, Paths.get(path));
     }
 }

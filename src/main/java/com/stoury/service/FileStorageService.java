@@ -12,16 +12,10 @@ import java.nio.file.*;
 public class FileStorageService implements StorageService {
 
     @Override
-    public void saveFilesAtPath(MultipartFile fileToSave, String fullPath) {
-        int lastIndexOfSlash = fullPath.lastIndexOf("/");
-        String directory = fullPath.substring(0, lastIndexOfSlash);
-        String fileName = fullPath.substring(lastIndexOfSlash + 1);
-
-        Path path = Paths.get(directory, fileName);
-
+    public void saveFilesAtPath(MultipartFile fileToSave, Path path) {
         try {
             if (Files.exists(path)) {
-                throw new FileAlreadyExistsException(fullPath);
+                throw new FileAlreadyExistsException(path.toString());
             }
             Files.copy(fileToSave.getInputStream(), path, StandardCopyOption.REPLACE_EXISTING);
         } catch (IOException e) {

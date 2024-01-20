@@ -15,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Objects;
 
@@ -94,7 +95,7 @@ public class MemberService {
 
     @Transactional
     public MemberResponse updateMemberWithProfileImage(MemberUpdateRequest memberUpdateRequest, MultipartFile profileImage) {
-        String profileImagePath = createImagePath(Objects.requireNonNull(profileImage));
+        Path profileImagePath = createImagePath(Objects.requireNonNull(profileImage));
         
         storageService.saveFilesAtPath(profileImage, profileImagePath);
         
@@ -102,7 +103,7 @@ public class MemberService {
 
         updateMember.update(
                 Objects.requireNonNull(memberUpdateRequest.username()),
-                profileImagePath,
+                profileImagePath.toString(),
                 memberUpdateRequest.introduction()
         );
 
@@ -122,10 +123,10 @@ public class MemberService {
         return MemberResponse.from(updateMember);
     }
 
-    private String createImagePath(MultipartFile file) {
+    private Path createImagePath(MultipartFile file) {
         SupportedFileType fileType = SupportedFileType.getFileType(file);
         if (SupportedFileType.JPG.equals(fileType)) {
-            return PROFILE_IMAGE_PATH_PREFIX + "/" + FileUtils.getFileNameByCurrentTime() + fileType.getExtension();
+            return FileUtils.createFilePath(PROFILE_IMAGE_PATH_PREFIX + "/" + FileUtils.getFileNameByCurrentTime() + fileType.getExtension());
         }
         throw new MemberUpdateException("Content/type of profile image is jpeg.");
     }
