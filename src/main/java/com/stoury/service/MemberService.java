@@ -9,7 +9,6 @@ import com.stoury.utils.FileUtils;
 import com.stoury.utils.SupportedFileType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.*;
-import org.springframework.data.util.Pair;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -97,7 +96,7 @@ public class MemberService {
     public MemberResponse updateMemberWithProfileImage(MemberUpdateRequest memberUpdateRequest, MultipartFile profileImage) {
         String profileImagePath = createImagePath(Objects.requireNonNull(profileImage));
         
-        storageService.saveFilesAtPath(Pair.of(profileImage, profileImagePath));
+        storageService.saveFilesAtPath(profileImage, profileImagePath);
         
         Member updateMember = findByIdOrEmail(memberUpdateRequest);
 

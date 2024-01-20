@@ -49,8 +49,7 @@ public class FeedService {
                 .mapToObj(seq -> {
                     MultipartFile fileToSave = graphicContents.get(seq);
                     GraphicContent graphicContent = createGraphicContent(seq, fileToSave);
-                    Pair<MultipartFile, String> fileToSaveWithPath = Pair.of(fileToSave, graphicContent.getPath());
-                    GraphicSaveEvent graphicSaveEvent = new GraphicSaveEvent(this, fileToSaveWithPath);
+                    GraphicSaveEvent graphicSaveEvent = new GraphicSaveEvent(this, fileToSave, graphicContent.getPath());
                     eventPublisher.publishEvent(graphicSaveEvent);
                     return graphicContent;
                 })

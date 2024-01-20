@@ -5,7 +5,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.data.util.Pair;
 import org.springframework.mock.web.MockMultipartFile;
 
 import java.io.IOException;
@@ -44,7 +43,7 @@ public class FileStorageServiceTest {
     void testFileWriteSuccess() {
         MockMultipartFile file = new MockMultipartFile("Something", "file1", "image/jpeg", new byte[0]);
         String savePath = PATH_PREFIX + "/file1.jpg";
-        fileStorageService.saveFilesAtPath(Pair.of(file, savePath));
+        fileStorageService.saveFilesAtPath(file, savePath);
 
         Assertions.assertThat(Files.exists(Path.of(PATH_PREFIX, "file1.jpg")))
                 .isTrue();

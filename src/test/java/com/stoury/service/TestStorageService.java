@@ -1,7 +1,6 @@
 package com.stoury.service;
 
 import org.springframework.context.annotation.Profile;
-import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -9,7 +8,7 @@ import org.springframework.web.multipart.MultipartFile;
 @Profile("test")
 public class TestStorageService implements StorageService {
     @Override
-    public void saveFilesAtPath(Pair<MultipartFile, String> reservedImagePaths) {
-        // 지정된 경로에 이미지를 저장하는 로직
+    public void saveFilesAtPath(MultipartFile fileToSave, String path) {
+
     }
 }

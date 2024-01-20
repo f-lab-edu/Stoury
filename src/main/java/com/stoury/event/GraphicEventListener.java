@@ -2,7 +2,6 @@ package com.stoury.event;
 
 import com.stoury.service.StorageService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
@@ -15,7 +14,8 @@ public class GraphicEventListener {
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void onFileSaveEventHandler(GraphicSaveEvent graphicSaveEvent) {
-        Pair<MultipartFile, String> toSaveFiles = graphicSaveEvent.getToSaveFile();
-        storageService.saveFilesAtPath(toSaveFiles);
+        MultipartFile fileToSave = graphicSaveEvent.getFileToSave();
+        String path = graphicSaveEvent.getPath();
+        storageService.saveFilesAtPath(fileToSave, path);
     }
 }
