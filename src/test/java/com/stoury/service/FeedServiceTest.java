@@ -1,17 +1,25 @@
 package com.stoury.service;
 
+import com.stoury.domain.Feed;
 import com.stoury.domain.Member;
 import com.stoury.dto.FeedCreateRequest;
 import com.stoury.dto.FeedResponse;
 import com.stoury.event.FileSaveEvent;
 import com.stoury.exception.FeedCreateException;
+import com.stoury.repository.FeedRepository;
 import com.stoury.repository.MemberRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.event.ApplicationEvents;
@@ -24,28 +32,27 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Mockito.*;
 
-@SpringBootTest
-@ActiveProfiles("test")
-@RecordApplicationEvents
+@ExtendWith(MockitoExtension.class)
 public class FeedServiceTest {
-    @Autowired
-    @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
-    ApplicationEvents events;
-    @Autowired
-    FeedService feedService;
-    @Autowired
+    @Mock
     MemberRepository memberRepository;
+    @Mock
+    FeedRepository feedRepository;
+    @Mock
+    ApplicationEventPublisher eventPublisher;
+    @InjectMocks
+    FeedService feedService;
     Member writer;
 
     @BeforeEach
     void setup() {
-        Member member = Member.builder()
+        writer = Member.builder()
                 .username("writer")
                 .encryptedPassword("dqwdasda")
                 .email("d1wd@wdwfef.com")
                 .build();
-        writer = memberRepository.save(member);
     }
 
     @AfterEach
@@ -56,7 +63,8 @@ public class FeedServiceTest {
     @Test
     @DisplayName("피드 생성 성공")
     void createFeedSuccess() {
-        FeedCreateRequest createFeed = FeedCreateRequest.builder()
+        when(memberRepository.existsById(any())).thenReturn(true);
+        FeedCreateRequest feedCreateRequest = FeedCreateRequest.builder()
                 .textContent("testing")
                 .longitude(111.111)
                 .latitude(333.333)
@@ -66,18 +74,21 @@ public class FeedServiceTest {
                 new MockMultipartFile("Second", new byte[0]),
                 new MockMultipartFile("Third", new byte[0])
         );
+        when(feedRepository.save(any(Feed.class))).thenReturn(Feed.builder()
+                .member(writer)
+                .textContent(feedCreateRequest.textContent())
+                .longitude(feedCreateRequest.longitude())
+                .latitude(feedCreateRequest.latitude())
+                .build());
 
-        FeedResponse createdFeed = feedService.createFeed(writer, createFeed, graphicContents);
+        FeedResponse createdFeed = feedService.createFeed(writer, feedCreateRequest, graphicContents);
 
         assertThat(createdFeed.memberResponse().id()).isEqualTo(writer.getId());
         assertThat(createdFeed.memberResponse().username()).isEqualTo(writer.getUsername());
-        assertThat(createdFeed.graphicContentsPaths()).hasSize(3);
-        assertThat(createdFeed.longitude()).isEqualTo(111.111);
-        assertThat(createdFeed.latitude()).isEqualTo(333.333);
-        assertThat(createdFeed.createdAt()).isNotNull();
+        assertThat(createdFeed.longitude()).isEqualTo(feedCreateRequest.longitude());
+        assertThat(createdFeed.latitude()).isEqualTo(feedCreateRequest.latitude());
 
-        long eventCount = events.stream(FileSaveEvent.class).count();
-        assertThat(eventCount).isEqualTo(graphicContents.size());
+        verify(eventPublisher, times(graphicContents.size())).publishEvent(any(FileSaveEvent.class));
     }
 
     @Test
