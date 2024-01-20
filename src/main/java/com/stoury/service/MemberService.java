@@ -124,7 +124,7 @@ public class MemberService {
     }
 
     private String createImagePath(MultipartFile file) {
-        SupportedFileType fileType = FileUtils.getFileType(file);
+        SupportedFileType fileType = SupportedFileType.getFileType(file);
         if (SupportedFileType.JPG.equals(fileType)) {
             return PROFILE_IMAGE_PATH_PREFIX + "/" + FileUtils.getFileNameByCurrentTime() + fileType.getExtension();
         }

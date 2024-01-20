@@ -7,25 +7,15 @@ import org.springframework.web.multipart.MultipartFile;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.Objects;
 
 import static com.stoury.utils.SupportedFileType.*;
 
 public class FileUtils {
-    public static SupportedFileType getFileType(MultipartFile file) {
-        String contentType = file.getContentType();
 
-
-        return switch (Objects.requireNonNull(contentType)) {
-            case "image/jpeg" -> JPG;
-            case "video/mp4" -> MP4;
-            default -> OTHER;
-        };
-    }
 
     public static String getFileNameByCurrentTime() {
-        LocalDateTime nanoLocalDateTime = LocalDateTime.ofInstant(Instant.now(), ZoneId.systemDefault());
-        return nanoLocalDateTime.toString()
-                .replaceAll("[-:T.]", "_");
+        return LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy_MM_dd_HH_mm_ss_SSS"));
     }
 }

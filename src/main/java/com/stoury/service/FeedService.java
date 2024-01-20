@@ -62,7 +62,7 @@ public class FeedService {
     }
 
     private GraphicContent createGraphicContent(int seq, MultipartFile file) {
-        SupportedFileType fileType = FileUtils.getFileType(file);
+        SupportedFileType fileType = SupportedFileType.getFileType(file);
 
         if (SupportedFileType.OTHER.equals(fileType)) {
             throw new FeedCreateException("The File format is not supported.");
