@@ -17,7 +17,7 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
             FROM MEMBER
             WHERE MATCH(USERNAME) AGAINST (:username'*' IN BOOLEAN MODE)
             """, nativeQuery = true)
-    Slice<Member> findAllByUsername(String username, Pageable page);
+    Slice<Member> findMembersByUsernameMatches(String username, Pageable page);
 
     List<Member> findAllByDeletedIsTrue();
 

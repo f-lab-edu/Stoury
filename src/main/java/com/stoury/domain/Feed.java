@@ -30,7 +30,6 @@ public class Feed {
     @CreatedDate
     private LocalDateTime createdAt;
 
-    @BatchSize(size = 10)
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "feed")
     private List<GraphicContent> graphicContents = new ArrayList<>();
 

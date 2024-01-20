@@ -31,10 +31,8 @@ public class GraphicContent {
         this.feed = feed;
     }
 
-    public static GraphicContent createTemporalGraphicContent(int sequence) {
-        GraphicContent tempGraphic = new GraphicContent();
-        tempGraphic.path = PATH_PREFIX + LocalDateTime.now().getNano();
-        tempGraphic.sequence = sequence;
-        return tempGraphic;
+    public GraphicContent (int sequence) {
+        this.path = PATH_PREFIX + LocalDateTime.now().getNano();
+        this.sequence = sequence;
     }
 }

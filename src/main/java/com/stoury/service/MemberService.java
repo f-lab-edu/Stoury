@@ -126,7 +126,7 @@ public class MemberService {
 
         Pageable page = PageRequest.of(0, PAGE_SIZE, Sort.by("username"));
 
-        Slice<Member> memberEntitySlice = memberRepository.findAllByUsername(keyword, page);
+        Slice<Member> memberEntitySlice = memberRepository.findMembersByUsernameMatches(keyword, page);
 
         List<MemberResponse> foundMembers = memberEntitySlice.stream()
                 .map(MemberResponse::from)
