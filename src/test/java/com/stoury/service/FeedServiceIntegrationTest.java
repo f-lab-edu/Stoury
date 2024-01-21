@@ -25,20 +25,12 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.IntStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
 
 @SpringBootTest
 @ActiveProfiles("test")
 public class FeedServiceIntegrationTest {
-    Member writer;
-    List<MultipartFile> graphicContents = List.of(
-            new MockMultipartFile("Files", "first.jpeg", "image/jpeg", new byte[0]),
-            new MockMultipartFile("Files", "second.mp4", "video/mp4", new byte[0])
-    );
     @Autowired
     FeedService feedService;
     @Autowired
@@ -47,13 +39,14 @@ public class FeedServiceIntegrationTest {
     TagRepository tagRepository;
     @Autowired
     FeedRepository feedRepository;
+    Member writer;
+    List<MultipartFile> graphicContents = List.of(
+            new MockMultipartFile("Files", "first.jpeg", "image/jpeg", new byte[0]),
+            new MockMultipartFile("Files", "second.mp4", "video/mp4", new byte[0])
+    );
 
     @BeforeEach
     void setup() {
-        feedRepository.deleteAll();
-        memberRepository.deleteAll();
-        tagRepository.deleteAll();
-
         writer = memberRepository.save(Member.builder()
                 .username("writer")
                 .encryptedPassword("dqwdasda")
