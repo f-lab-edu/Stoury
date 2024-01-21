@@ -44,7 +44,7 @@ public class FeedService {
                                    List<MultipartFile> graphicContentsFiles) {
         validate(writer, feedCreateRequest, graphicContentsFiles);
 
-        List<GraphicContent> graphicContents = requestToSaveFile(graphicContentsFiles);
+        List<GraphicContent> graphicContents = saveGraphicContents(graphicContentsFiles);
 
         Feed feedEntity = createFeedEntity(writer, feedCreateRequest, graphicContents);
 
@@ -53,7 +53,7 @@ public class FeedService {
         return FeedResponse.from(uploadedFeed);
     }
 
-    private List<GraphicContent> requestToSaveFile(List<MultipartFile> graphicContents) {
+    private List<GraphicContent> saveGraphicContents(List<MultipartFile> graphicContents) {
         return IntStream.range(0, graphicContents.size())
                 .mapToObj(seq -> {
                     MultipartFile file = graphicContents.get(seq);
