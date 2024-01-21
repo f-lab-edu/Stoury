@@ -126,8 +126,9 @@ public class MemberService {
     private Path createImagePath(MultipartFile file) {
         SupportedFileType fileType = SupportedFileType.getFileType(file);
         if (SupportedFileType.JPG.equals(fileType)) {
-            return FileUtils.createFilePath(PROFILE_IMAGE_PATH_PREFIX + "/" + FileUtils.getFileNameByCurrentTime() + fileType.getExtension());
+            return FileUtils.createFilePath(PROFILE_IMAGE_PATH_PREFIX + "/" + file.getOriginalFilename());
         }
+
         throw new MemberUpdateException("Content/type of profile image is jpeg.");
     }
 

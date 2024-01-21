@@ -1,7 +1,10 @@
 package com.stoury.utils;
 
+import org.springframework.web.multipart.MultipartFile;
+
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
@@ -9,8 +12,12 @@ import java.util.StringJoiner;
 
 public class FileUtils {
     private static final String FILE_SEPARATOR = System.getProperty("file.separator");
-    public static String getFileNameByCurrentTime() {
-        return LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy_MM_dd_HH_mm_ss_SSS"));
+
+    public static String getFileNameByCurrentTime(MultipartFile file) {
+        String originalFilename = file.getOriginalFilename();
+
+        return LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy_MM_dd"))
+                + FILE_SEPARATOR + originalFilename;
     }
 
     public static Path createFilePath(String fileName, String... directories) {

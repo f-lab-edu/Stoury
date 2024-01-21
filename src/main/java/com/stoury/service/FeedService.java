@@ -67,7 +67,7 @@ public class FeedService {
             throw new FeedCreateException("The File format is not supported.");
         }
 
-        String path = PATH_PREFIX + fileType.getPath() + "/" + FileUtils.getFileNameByCurrentTime() + fileType.getExtension();
+        String path = PATH_PREFIX + "/" + FileUtils.getFileNameByCurrentTime(file);
 
         return new GraphicContent(path, seq);
     }
