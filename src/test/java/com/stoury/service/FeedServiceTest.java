@@ -8,7 +8,6 @@ import com.stoury.event.GraphicSaveEvent;
 import com.stoury.exception.FeedCreateException;
 import com.stoury.repository.FeedRepository;
 import com.stoury.repository.MemberRepository;
-import com.stoury.repository.TagRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -33,7 +32,7 @@ public class FeedServiceTest {
     @Mock
     MemberRepository memberRepository;
     @Mock
-    TagRepository tagRepository;
+    TagService tagService;
     @Mock
     FeedRepository feedRepository;
     @Mock

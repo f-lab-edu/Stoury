@@ -109,7 +109,7 @@ public class FeedServiceIntegrationTest {
         feedRepository.saveAll(feeds);
 
         LocalDateTime maxDateTime = LocalDate.of(2100, 12, 31).atStartOfDay();
-        Slice<FeedResponse> feedSlice = feedService.getFeedsOfMemberId(writer.getId(), maxDateTime);
+        Slice<FeedResponse> feedSlice = feedService.getFeedsByTag(tagName, maxDateTime);
 
         assertThat(feedSlice.hasNext()).isTrue();
         List<FeedResponse> feedList = feedSlice.getContent();

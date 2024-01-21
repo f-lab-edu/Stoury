@@ -10,12 +10,14 @@ import com.stoury.event.GraphicSaveEvent;
 import com.stoury.exception.FeedCreateException;
 import com.stoury.repository.FeedRepository;
 import com.stoury.repository.MemberRepository;
-import com.stoury.repository.TagRepository;
 import com.stoury.utils.FileUtils;
 import com.stoury.utils.SupportedFileType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.data.domain.*;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -34,7 +36,7 @@ public class FeedService {
     public static final int PAGE_SIZE = 10;
     private final FeedRepository feedRepository;
     private final MemberRepository memberRepository;
-    private final TagRepository tagRepository;
+    private final TagService tagService;
     private final ApplicationEventPublisher eventPublisher;
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
@@ -54,32 +56,40 @@ public class FeedService {
     private List<GraphicContent> requestToSaveFile(List<MultipartFile> graphicContents) {
         return IntStream.range(0, graphicContents.size())
                 .mapToObj(seq -> {
-                    MultipartFile fileToSave = graphicContents.get(seq);
-                    GraphicContent graphicContent = createGraphicContent(seq, fileToSave);
-                    GraphicSaveEvent graphicSaveEvent = new GraphicSaveEvent(this, fileToSave, graphicContent.getPath());
-                    eventPublisher.publishEvent(graphicSaveEvent);
-                    return graphicContent;
+                    MultipartFile file = graphicContents.get(seq);
+                    GraphicSaveEvent event = publishEventFrom(file);
+                    return Pair.of(seq, event);
+                })
+                .map(sequentialEvent -> {
+                    Integer seq = sequentialEvent.getFirst();
+                    String path = sequentialEvent.getSecond().getPath();
+                    return new GraphicContent(path, seq);
                 })
                 .toList();
     }
 
     private Feed createFeedEntity(Member writer, FeedCreateRequest feedCreateRequest, List<GraphicContent> graphicContents) {
         List<Tag> tags = feedCreateRequest.tagNames().stream()
-                .map(tagName -> tagRepository.findByTagName(tagName).orElseGet(() -> tagRepository.save(new Tag(tagName))))
+                .map(tagService::getTagOrElseCreate)
                 .toList();
         return feedCreateRequest.toEntity(writer, graphicContents, tags);
     }
 
-    private GraphicContent createGraphicContent(int seq, MultipartFile file) {
+    private GraphicSaveEvent publishEventFrom(MultipartFile file) {
+        String path = createFilePath(file);
+        GraphicSaveEvent event = new GraphicSaveEvent(this, file, path);
+        eventPublisher.publishEvent(event);
+        return event;
+    }
+
+    private String createFilePath(MultipartFile file) {
         SupportedFileType fileType = SupportedFileType.getFileType(file);
 
         if (SupportedFileType.OTHER.equals(fileType)) {
             throw new FeedCreateException("The File format is not supported.");
         }
 
-        String path = PATH_PREFIX + "/" + FileUtils.getFileNameByCurrentTime(file);
-
-        return new GraphicContent(path, seq);
+        return PATH_PREFIX + "/" + FileUtils.getFileNameByCurrentTime(file);
     }
 
     private void validate(Member writer, FeedCreateRequest feedCreateRequest, List<MultipartFile> graphicContents) {
