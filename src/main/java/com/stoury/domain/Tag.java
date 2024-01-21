@@ -20,9 +20,6 @@ public class Tag {
     @Column(name = "TAG_NAME", nullable = false, length = 15, unique = true)
     private String tagName;
 
-    @ManyToMany(fetch = FetchType.LAZY, mappedBy = "tags")
-    private List<Feed> feeds = new ArrayList<>();
-
     public Tag(String tagName) {
         this.tagName = tagName;
     }
