@@ -76,14 +76,10 @@ public class FeedService {
     }
 
     private GraphicSaveEvent publishEventFrom(MultipartFile file) {
-        String path = createFilePath(file);
+        String path = FileUtils.createFilePath(file, PATH_PREFIX);
         GraphicSaveEvent event = new GraphicSaveEvent(this, file, path);
         eventPublisher.publishEvent(event);
         return event;
-    }
-
-    private String createFilePath(MultipartFile file) {
-        return PATH_PREFIX + "/" + FileUtils.getFileNameByCurrentTime(file);
     }
 
     private void validate(Member writer, FeedCreateRequest feedCreateRequest, List<MultipartFile> graphicContents) {

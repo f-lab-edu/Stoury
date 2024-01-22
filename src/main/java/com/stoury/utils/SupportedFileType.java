@@ -9,10 +9,10 @@ import java.util.Arrays;
 @AllArgsConstructor
 @Getter
 public enum SupportedFileType {
-    JPG("/images", ".jpeg", "image/jpeg"),
-    MP4("/videos", ".mp4", "video/mp4"),
-    OTHER("/other", "", "other/other");
-    private final String path;
+    JPG("images", ".jpeg", "image/jpeg"),
+    MP4("videos", ".mp4", "video/mp4"),
+    OTHER("other", "", "other/other");
+    private final String type;
     private final String extension;
     private final String acceptContentType;
 
