@@ -8,6 +8,7 @@ import com.stoury.dto.FeedResponse;
 import com.stoury.repository.FeedRepository;
 import com.stoury.repository.MemberRepository;
 import com.stoury.repository.TagRepository;
+import com.stoury.utils.FileUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -59,6 +60,33 @@ public class FeedServiceIntegrationTest {
         feedRepository.deleteAll();
         memberRepository.deleteAll();
         tagRepository.deleteAll();
+    }
+
+    @Test
+    @DisplayName("피드 이미지 저장경로 확인 - '/feeds/{images|videos}/{yyyy_MM_dd}/{fileName}.{jpeg|png}'")
+    void checkFeedImagesOrVideosPaths() {
+        List<String> tagGroup = List.of("tag1", "tag2", "tag3");
+        List<MultipartFile> graphicContents = List.of(
+                new MockMultipartFile("Files", "first.jpeg", "image/jpeg", new byte[0]),
+                new MockMultipartFile("Files", "second.mp4", "video/mp4", new byte[0])
+        );
+        FeedCreateRequest feedCreateRequest = FeedCreateRequest.builder()
+                .textContent("with tag group1")
+                .longitude(11.11)
+                .latitude(11.11)
+                .tagNames(tagGroup)
+                .build();
+
+        FeedResponse feedResponse = feedService.createFeed(writer, feedCreateRequest, graphicContents);
+
+        String firstPath = feedResponse.graphicContentsPaths().get(0);
+        String[] firstPathDirectories = firstPath.split(FileUtils.FILE_SEPARATOR);
+        String secondPath = feedResponse.graphicContentsPaths().get(1);
+        String[] secondPathDirectories = secondPath.split(FileUtils.FILE_SEPARATOR);
+        assertThat(firstPathDirectories[1]).isEqualTo("feeds");
+        assertThat(secondPathDirectories[1]).isEqualTo("feeds");
+        assertThat(firstPathDirectories[2]).isEqualTo("images");
+        assertThat(secondPathDirectories[2]).isEqualTo("videos");
     }
 
     @Test

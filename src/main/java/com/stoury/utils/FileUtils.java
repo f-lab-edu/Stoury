@@ -11,7 +11,7 @@ import java.util.Arrays;
 import java.util.StringJoiner;
 
 public class FileUtils {
-    private static final String FILE_SEPARATOR = System.getProperty("file.separator");
+    public static final String FILE_SEPARATOR = System.getProperty("file.separator");
 
     public static String getFileNameByCurrentTime(MultipartFile file) {
         String originalFilename = file.getOriginalFilename();
