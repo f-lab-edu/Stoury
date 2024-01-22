@@ -91,7 +91,7 @@ public class FeedService {
             throw new FeedCreateException("Cannot find the member.");
         }
         if (graphicContents.isEmpty() || graphicContents.stream().anyMatch(SupportedFileType::isUnsupportedFile)) {
-            throw new FeedCreateException("You must upload with images or videos.");
+            throw new FeedCreateException("Input files are empty or unsupported.");
         }
         if (feedCreateRequest.longitude() == null || feedCreateRequest.latitude() == null) {
             throw new FeedCreateException("Location information is required.");
