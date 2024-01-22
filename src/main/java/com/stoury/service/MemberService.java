@@ -16,6 +16,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Objects;
 
@@ -32,7 +33,7 @@ public class MemberService {
     public final static int USERNAME_LENGTH_MAX = 10;
     public final static int EMAIL_LENGTH_MAX = 25;
     public final static int PAGE_SIZE = 5;
-    public final static String PROFILE_IMAGE_PATH_PREFIX = "/members/profiles/images";
+    public final static String PROFILE_IMAGE_PATH_PREFIX = "/members/profiles";
 
     @Transactional
     public MemberResponse createMember(MemberCreateRequest memberCreateRequest) {
@@ -95,19 +96,26 @@ public class MemberService {
 
     @Transactional
     public MemberResponse updateMemberWithProfileImage(MemberUpdateRequest memberUpdateRequest, MultipartFile profileImage) {
-        Path profileImagePath = createImagePath(Objects.requireNonNull(profileImage));
-        
-        storageService.saveFilesAtPath(profileImage, profileImagePath);
-        
+        validate(profileImage);
+        String profileImagePath = FileUtils.createFilePath(profileImage, PROFILE_IMAGE_PATH_PREFIX);
+
+        storageService.saveFilesAtPath(profileImage, Paths.get(profileImagePath));
+
         Member updateMember = findByIdOrEmail(memberUpdateRequest);
 
         updateMember.update(
                 Objects.requireNonNull(memberUpdateRequest.username()),
-                profileImagePath.toString(),
+                profileImagePath,
                 memberUpdateRequest.introduction()
         );
 
         return MemberResponse.from(updateMember);
+    }
+
+    private void validate(MultipartFile file) {
+        if (SupportedFileType.isUnsupportedFile(file)) {
+            throw new MemberUpdateException("Content/type of profile image is jpeg.");
+        }
     }
 
     @Transactional
@@ -121,15 +129,6 @@ public class MemberService {
         );
 
         return MemberResponse.from(updateMember);
-    }
-
-    private Path createImagePath(MultipartFile file) {
-        SupportedFileType fileType = SupportedFileType.getFileType(file);
-        if (SupportedFileType.JPG.equals(fileType)) {
-            return FileUtils.createFilePath(PROFILE_IMAGE_PATH_PREFIX + "/" + file.getOriginalFilename());
-        }
-
-        throw new MemberUpdateException("Content/type of profile image is jpeg.");
     }
 
     private Member findByIdOrEmail(MemberUpdateRequest memberUpdateRequest) {

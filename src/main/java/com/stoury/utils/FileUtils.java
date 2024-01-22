@@ -19,15 +19,6 @@ public class FileUtils {
                 + FILE_SEPARATOR + originalFilename;
     }
 
-    public static Path createFilePath(String fileName, String... directories) {
-        StringJoiner joiner = new StringJoiner(FILE_SEPARATOR, FILE_SEPARATOR, "");
-
-        Arrays.stream(directories).forEach(joiner::add);
-        joiner.add(fileName);
-
-        return Paths.get(joiner.toString());
-    }
-
     public static String createFilePath(MultipartFile file, String pathPrefix) {
         SupportedFileType fileType = SupportedFileType.getFileType(file);
         return pathPrefix + FILE_SEPARATOR + fileType.getType() + FILE_SEPARATOR + getFileNameByCurrentTime(file);
