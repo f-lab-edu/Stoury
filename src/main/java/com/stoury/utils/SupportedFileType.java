@@ -24,4 +24,8 @@ public enum SupportedFileType {
                 .findFirst()
                 .orElse(OTHER);
     }
+
+    public static boolean isUnsupportedFile(MultipartFile file) {
+        return OTHER.equals(getFileType(file));
+    }
 }

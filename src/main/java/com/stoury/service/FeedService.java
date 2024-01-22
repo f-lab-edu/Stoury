@@ -83,12 +83,6 @@ public class FeedService {
     }
 
     private String createFilePath(MultipartFile file) {
-        SupportedFileType fileType = SupportedFileType.getFileType(file);
-
-        if (SupportedFileType.OTHER.equals(fileType)) {
-            throw new FeedCreateException("The File format is not supported.");
-        }
-
         return PATH_PREFIX + "/" + FileUtils.getFileNameByCurrentTime(file);
     }
 
@@ -96,7 +90,7 @@ public class FeedService {
         if (!memberRepository.existsById(writer.getId())) {
             throw new FeedCreateException("Cannot find the member.");
         }
-        if (graphicContents.isEmpty()) {
+        if (graphicContents.isEmpty() || graphicContents.stream().anyMatch(SupportedFileType::isUnsupportedFile)) {
             throw new FeedCreateException("You must upload with images or videos.");
         }
         if (feedCreateRequest.longitude() == null || feedCreateRequest.latitude() == null) {
@@ -108,7 +102,6 @@ public class FeedService {
     public Slice<FeedResponse> getFeedsOfMemberId(Long memberId, LocalDateTime orderThan) {
         Member feedWriter = memberRepository.findById(Objects.requireNonNull(memberId))
                 .orElseThrow(() -> new FeedCreateException("Cannot find the member."));
-
 
         Pageable page = PageRequest.of(0, PAGE_SIZE, Sort.by("createdAt").descending());
         Slice<Feed> feedSlice = feedRepository.findAllByMemberAndCreatedAtIsBefore(feedWriter, orderThan, page);
