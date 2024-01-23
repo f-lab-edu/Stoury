@@ -3,6 +3,7 @@ package com.stoury.service;
 import com.stoury.domain.Feed;
 import com.stoury.domain.Like;
 import com.stoury.domain.Member;
+import com.stoury.exception.AlreadyLikedFeedException;
 import com.stoury.exception.FeedSearchException;
 import com.stoury.exception.MemberCrudExceptions;
 import com.stoury.repository.FeedRepository;
@@ -68,5 +69,19 @@ public class LikeServiceTest {
 
         Assertions.assertThatThrownBy(()->likeService.like(dummyLiker, dummyFeed))
                 .isInstanceOf(FeedSearchException.class);
+    }
+
+    @Test
+    @DisplayName("좋아요 실패 - 이미 좋아요 한 피드")
+    void likeFailByAlreadyLiked() {
+        when(memberRepository.existsById(any())).thenReturn(true);
+        when(feedRepository.existsById(any())).thenReturn(true);
+        when(likeRepository.existsByMemberAndFeed(any(Member.class), any(Feed.class))).thenReturn(true);
+
+        Member dummyLiker = Member.builder().build();
+        Feed dummyFeed = Feed.builder().build();
+
+        Assertions.assertThatThrownBy(()->likeService.like(dummyLiker, dummyFeed))
+                .isInstanceOf(AlreadyLikedFeedException.class);
     }
 }
