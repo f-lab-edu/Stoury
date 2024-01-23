@@ -23,6 +23,23 @@ public class LikeService {
 
     @Transactional
     public void like(Member liker, Feed feed) {
+        validate(liker, feed);
+
+        if (likeRepository.existsByMemberAndFeed(liker, feed)) {
+            throw new AlreadyLikedFeedException("You already liked the feed");
+        }
+
+        Like like = new Like(liker, feed);
+        likeRepository.save(like);
+    }
+
+    @Transactional
+    public void likeCancel(Member canceler, Feed feed) {
+        validate(canceler, feed);
+        likeRepository.deleteByMemberAndFeed(canceler, feed);
+    }
+
+    private void validate(Member liker, Feed feed) {
         Validator.of(liker)
                 .willCheck(m -> memberRepository.existsById(m.getId()))
                 .ifFailThrowsWithMessage(MemberCrudExceptions.MemberSearchException.class, "Member not found")
@@ -31,12 +48,5 @@ public class LikeService {
                 .willCheck(f -> feedRepository.existsById(f.getId()))
                 .ifFailThrowsWithMessage(FeedSearchException.class, "Feed not found")
                 .validate();
-
-        if (likeRepository.existsByMemberAndFeed(liker, feed)) {
-            throw new AlreadyLikedFeedException("You already liked the feed");
-        }
-
-        Like like = new Like(liker, feed);
-        likeRepository.save(like);
     }
 }

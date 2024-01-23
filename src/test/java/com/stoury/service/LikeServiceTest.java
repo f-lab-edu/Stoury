@@ -84,4 +84,18 @@ public class LikeServiceTest {
         Assertions.assertThatThrownBy(()->likeService.like(dummyLiker, dummyFeed))
                 .isInstanceOf(AlreadyLikedFeedException.class);
     }
+
+    @Test
+    @DisplayName("좋아요 취소 성공")
+    void likeCancelSuccess() {
+        when(memberRepository.existsById(any())).thenReturn(true);
+        when(feedRepository.existsById(any())).thenReturn(true);
+
+        Member dummyLiker = Member.builder().build();
+        Feed dummyFeed = Feed.builder().build();
+
+        likeService.likeCancel(dummyLiker, dummyFeed);
+
+        verify(likeRepository, times(1)).deleteByMemberAndFeed(dummyLiker, dummyFeed);
+    }
 }
