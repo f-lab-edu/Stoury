@@ -16,6 +16,7 @@ public record FeedResponse(Long feedId,
                            List<String> tagNames,
                            Double latitude,
                            Double longitude,
+                           int likes,
                            LocalDateTime createdAt) {
     public static FeedResponse from(Feed uploadedFeed) {
         return new FeedResponse(
@@ -26,6 +27,7 @@ public record FeedResponse(Long feedId,
                 uploadedFeed.getTags().stream().map(Tag::getTagName).toList(),
                 uploadedFeed.getLatitude(),
                 uploadedFeed.getLongitude(),
+                uploadedFeed.getLikes(),
                 uploadedFeed.getCreatedAt()
         );
     }

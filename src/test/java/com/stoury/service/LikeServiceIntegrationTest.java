@@ -6,6 +6,7 @@ import com.stoury.repository.FeedRepository;
 import com.stoury.repository.LikeRepository;
 import com.stoury.repository.MemberRepository;
 import org.assertj.core.api.Assertions;
+import org.hibernate.AssertionFailure;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -67,8 +68,8 @@ public class LikeServiceIntegrationTest {
                 .build());
         likeService.like(liker, feed);
 
-        Optional<Integer> likeCount = likeRepository.countByFeed(feed);
-        assertThat(likeCount).isPresent();
-        assertThat(likeCount.get()).isOne();
+        feed = feedRepository.findById(feed.getId()).orElseThrow(() -> new AssertionFailure("Feed not found"));
+
+        assertThat(feed.getLikes()).isOne();
     }
 }
