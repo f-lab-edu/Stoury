@@ -3,92 +3,46 @@ package com.stoury.service;
 import com.stoury.domain.Comment;
 import com.stoury.domain.Feed;
 import com.stoury.domain.Member;
-import com.stoury.dto.ChildCommentResponse;
 import com.stoury.dto.CommentResponse;
-import com.stoury.exception.CommentCreateException;
-import com.stoury.exception.CommentSearchException;
-import com.stoury.exception.feed.FeedSearchException;
-import com.stoury.exception.member.MemberSearchException;
+import com.stoury.exception.FeedSearchException;
+import com.stoury.exception.MemberCrudExceptions;
 import com.stoury.repository.CommentRepository;
 import com.stoury.repository.FeedRepository;
 import com.stoury.repository.MemberRepository;
+import com.stoury.utils.Validator;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
 public class CommentService {
-    public final int PAGE_SIZE = 20;
     private final CommentRepository commentRepository;
-    private final MemberRepository memberRepository;
     private final FeedRepository feedRepository;
+    private final MemberRepository memberRepository;
 
     @Transactional
-    public CommentResponse createComment(Long memberId, Long feedId, String commentText) {
-        Member member = memberRepository.findById(Objects.requireNonNull(memberId))
-                .orElseThrow(MemberSearchException::new);
-        Feed feed = feedRepository.findById(Objects.requireNonNull(feedId))
-                .orElseThrow(FeedSearchException::new);
+    public CommentResponse createComment(Member member, Feed feed, String commentText) {
+        validate(member, feed);
 
         Comment comment = new Comment(member, feed,
                 Objects.requireNonNull(commentText, "Comment text can not be empty."));
 
-        return CommentResponse.from(commentRepository.save(comment));
+        Comment savedComment = commentRepository.save(comment);
+
+        return CommentResponse.from(savedComment);
     }
 
-    @Transactional
-    public ChildCommentResponse createNestedComment(Long memberId, Long parentCommentId, String commentText) {
-        Member member = memberRepository.findById(Objects.requireNonNull(memberId))
-                .orElseThrow(MemberSearchException::new);
-        Comment parentComment = commentRepository.findById(Objects.requireNonNull(parentCommentId))
-                .orElseThrow(CommentSearchException::new);
-        if (parentComment.hasParent()) {
-            throw new CommentCreateException("Nested comments are allowed in a level.");
-        }
-
-        Comment comment = new Comment(member, parentComment,
-                Objects.requireNonNull(commentText, "Comment text can not be empty."));
-
-        return ChildCommentResponse.from(commentRepository.save(comment));
-    }
-
-    @Transactional(readOnly = true)
-    public List<CommentResponse> getCommentsOfFeed(Long feedId, LocalDateTime orderThan) {
-        Feed feed = feedRepository.findById(Objects.requireNonNull(feedId))
-                .orElseThrow(FeedSearchException::new);
-
-        Pageable pageable = PageRequest.of(0, PAGE_SIZE, Sort.by("createdAt").descending());
-
-        return CommentResponse.from(commentRepository.findAllByFeedAndCreatedAtBefore(feed, orderThan, pageable));
-    }
-
-    @Transactional(readOnly = true)
-    public List<ChildCommentResponse> getChildComments(Long parentCommentId, LocalDateTime orderThan) {
-        Comment parentComment = commentRepository.findById(Objects.requireNonNull(parentCommentId))
-                .orElseThrow(CommentSearchException::new);
-        if (parentComment.hasParent()) {
-            throw new CommentSearchException("Nested comments are allowed in a level.");
-        }
-
-        Pageable pageable = PageRequest.of(0, PAGE_SIZE, Sort.by("createdAt").descending());
-
-        return ChildCommentResponse.from(commentRepository.findAllByParentCommentAndCreatedAtBefore(parentComment,
-                orderThan, pageable));
-    }
-
-    @Transactional
-    public void deleteComment(Long commentId) {
-        Comment comment = commentRepository.findById(Objects.requireNonNull(commentId))
-                .orElseThrow(CommentSearchException::new);
-
-        comment.delete();
+    private void validate(Member commentWriter, Feed feed) {
+        Validator.of(commentWriter)
+                .willCheck(m -> memberRepository.existsById(m.getId()))
+                .ifFailThrowsWithMessage(MemberCrudExceptions.MemberSearchException.class, "Member not found")
+                .validate();
+        Validator.of(feed)
+                .willCheck(f -> feedRepository.existsById(f.getId()))
+                .ifFailThrowsWithMessage(FeedSearchException.class, "Feed not found")
+                .validate();
     }
 }
