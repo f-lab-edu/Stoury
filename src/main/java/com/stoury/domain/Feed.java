@@ -26,7 +26,7 @@ public class Feed {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
+    @ManyToOne(optional = false)
     private Member member;
 
     @Column(name = "CREATED_AT")
@@ -39,10 +39,10 @@ public class Feed {
     @Column(name = "TEXT_CONTENT", nullable = false, columnDefinition = "text")
     private String textContent;
 
-    @Column(name = "LATITUDE")
+    @Column(name = "LATITUDE", nullable = false)
     private Double latitude;
 
-    @Column(name = "LONGITUDE")
+    @Column(name = "LONGITUDE", nullable = false)
     private Double longitude;
 
     @ManyToMany(fetch = FetchType.LAZY)
