@@ -18,8 +18,8 @@ import java.util.Objects;
 @Service
 @RequiredArgsConstructor
 public class LikeService {
-    private final FeedRepository feedRepository;
     private final MemberRepository memberRepository;
+    private final FeedRepository feedRepository;
     private final LikeRepository likeRepository;
 
     @Transactional
@@ -37,9 +37,9 @@ public class LikeService {
     @Transactional
     public void likeCancel(Member canceler, Feed feed) {
         validate(canceler, feed);
+
         likeRepository.deleteByMemberAndFeed(canceler, feed);
     }
-
     private void validate(Member liker, Feed feed) {
         Long likerId = Objects.requireNonNull(liker.getId(), "Liker Id cannot be null");
         if (!memberRepository.existsById(likerId)) {
