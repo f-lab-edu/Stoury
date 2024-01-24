@@ -20,29 +20,18 @@ import java.util.Objects;
 @RequiredArgsConstructor
 public class CommentService {
     private final CommentRepository commentRepository;
-    private final FeedRepository feedRepository;
-    private final MemberRepository memberRepository;
+    private final ValidateService validateService;
 
     @Transactional
     public CommentResponse createComment(Member member, Feed feed, String commentText) {
-        validate(member, feed);
-
+        validateService.validate(member);
+        validateService.validate(feed);
+        
         Comment comment = new Comment(member, feed,
                 Objects.requireNonNull(commentText, "Comment text can not be empty."));
 
         Comment savedComment = commentRepository.save(comment);
 
         return CommentResponse.from(savedComment);
-    }
-
-    private void validate(Member commentWriter, Feed feed) {
-        Validator.of(commentWriter)
-                .willCheck(m -> memberRepository.existsById(m.getId()))
-                .ifFailThrowsWithMessage(MemberCrudExceptions.MemberSearchException.class, "Member not found")
-                .validate();
-        Validator.of(feed)
-                .willCheck(f -> feedRepository.existsById(f.getId()))
-                .ifFailThrowsWithMessage(FeedSearchException.class, "Feed not found")
-                .validate();
     }
 }
