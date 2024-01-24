@@ -19,9 +19,7 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 public class CommentServiceTest {
     @Mock
-    MemberRepository memberRepository;
-    @Mock
-    FeedRepository feedRepository;
+    ValidateService validateService;
     @Mock
     CommentRepository commentRepository;
 
@@ -31,9 +29,6 @@ public class CommentServiceTest {
     @Test
     @DisplayName("댓글 생성 성공")
     void createCommentSuccess() {
-        when(memberRepository.existsById(any())).thenReturn(true);
-        when(feedRepository.existsById(any())).thenReturn(true);
-
         Member dummyWriter = Member.builder().build();
         Feed dummyFeed = Feed.builder().build();
         String commentText = "dummy Comment!";
