@@ -4,7 +4,7 @@ import com.stoury.domain.Feed;
 import com.stoury.domain.GraphicContent;
 import com.stoury.domain.Member;
 import com.stoury.domain.Tag;
-import com.stoury.exception.FeedCreateException;
+import com.stoury.exception.feed.FeedCreateException;
 import lombok.Builder;
 
 import java.util.ArrayList;

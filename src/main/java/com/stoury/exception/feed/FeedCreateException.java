@@ -1,4 +1,4 @@
-package com.stoury.exception;
+package com.stoury.exception.feed;
 
 public class FeedCreateException extends RuntimeException {
     public FeedCreateException() {

@@ -5,7 +5,7 @@ import com.stoury.domain.Member;
 import com.stoury.dto.FeedCreateRequest;
 import com.stoury.dto.FeedResponse;
 import com.stoury.event.GraphicSaveEvent;
-import com.stoury.exception.FeedCreateException;
+import com.stoury.exception.feed.FeedCreateException;
 import com.stoury.repository.FeedRepository;
 import com.stoury.repository.MemberRepository;
 import org.junit.jupiter.api.DisplayName;
