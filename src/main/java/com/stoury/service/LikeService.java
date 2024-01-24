@@ -18,16 +18,13 @@ import java.util.Objects;
 @Service
 @RequiredArgsConstructor
 public class LikeService {
-    private final LikeRepository likeRepository;
     private final MemberRepository memberRepository;
     private final FeedRepository feedRepository;
+    private final LikeRepository likeRepository;
 
     @Transactional
-    public void like(Long likerId, Long feedId) {
-        Member liker = memberRepository.findById(Objects.requireNonNull(likerId))
-                .orElseThrow(MemberSearchException::new);
-        Feed feed = feedRepository.findById(Objects.requireNonNull(feedId))
-                .orElseThrow(FeedSearchException::new);
+    public void like(Member liker, Feed feed) {
+        validate(liker, feed);
 
         if (likeRepository.existsByMemberAndFeed(liker, feed)) {
             throw new AlreadyLikedFeedException("You already liked the feed");
@@ -38,19 +35,20 @@ public class LikeService {
     }
 
     @Transactional
-    public void likeCancel(Long likerId, Long feedId) {
-        Member liker = memberRepository.findById(Objects.requireNonNull(likerId))
-                .orElseThrow(MemberSearchException::new);
-        Feed feed = feedRepository.findById(Objects.requireNonNull(feedId))
-                .orElseThrow(FeedSearchException::new);
+    public void likeCancel(Member canceler, Feed feed) {
+        validate(canceler, feed);
 
-        likeRepository.deleteByMemberAndFeed(liker, feed);
+        likeRepository.deleteByMemberAndFeed(canceler, feed);
     }
+    private void validate(Member liker, Feed feed) {
+        Long likerId = Objects.requireNonNull(liker.getId(), "Liker Id cannot be null");
+        if (!memberRepository.existsById(likerId)) {
+            throw new MemberSearchException("Member not found");
+        }
 
-    @Transactional
-    public int getLikesOfFeed(Long feedId) {
-        Feed feed = feedRepository.findById(Objects.requireNonNull(feedId))
-                .orElseThrow(FeedSearchException::new);
-        return likeRepository.countByFeed(feed);
+        Long feedId = Objects.requireNonNull(feed.getId(), "Feed Id cannot be null");
+        if (!feedRepository.existsById(feedId)) {
+            throw new FeedSearchException("Feed not found");
+        }
     }
 }
