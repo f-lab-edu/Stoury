@@ -20,9 +20,13 @@ public enum SupportedFileType {
         String contentType = file.getContentType();
 
         return Arrays.stream(SupportedFileType.values())
-                .filter(fileType -> fileType.getAcceptContentType().equals(contentType))
+                .filter(fileType -> fileType.hasAcceptContentType(contentType))
                 .findFirst()
                 .orElse(OTHER);
+    }
+
+    private boolean hasAcceptContentType(String contentType) {
+        return acceptContentType.equals(contentType);
     }
 
     public static boolean isUnsupportedFile(MultipartFile file) {
