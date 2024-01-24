@@ -4,30 +4,31 @@ import com.stoury.domain.Member;
 import com.stoury.dto.MemberCreateRequest;
 import com.stoury.dto.MemberResponse;
 import com.stoury.dto.MemberUpdateRequest;
-import com.stoury.exception.MemberCreateException;
-import com.stoury.exception.MemberDeleteException;
-import com.stoury.exception.MemberSearchException;
-import com.stoury.exception.MemberUpdateException;
 import com.stoury.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.core.env.Environment;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Objects;
+
+import static com.stoury.exception.MemberCrudExceptions.*;
 
 @Service
 @RequiredArgsConstructor
 public class MemberService {
     private final MemberRepository memberRepository;
     private final PasswordEncoder passwordEncoder;
-    private final Environment env;
+    private final FileService fileService;
+    public final static int PASSWORD_LENGTH_MIN = 8;
+    public final static int PASSWORD_LENGTH_MAX = 30;
+    public final static int USERNAME_LENGTH_MAX = 10;
+    public final static int EMAIL_LENGTH_MAX = 25;
+    public final static int PAGE_SIZE = 5;
 
     @Transactional
     public MemberResponse createMember(MemberCreateRequest memberCreateRequest) {
@@ -46,48 +47,57 @@ public class MemberService {
         String username = memberCreateRequest.username();
         String password = memberCreateRequest.password();
 
-        if (validateEmail(email) && validateUserName(username) && validatePassword(password)) {
+        validateEmail(email);
+        validateUserName(username);
+        validatePassword(password);
+    }
+
+    private void validatePassword(String password) {
+        if (StringUtils.hasText(password) && password.length() >= PASSWORD_LENGTH_MIN
+                && password.length() <= PASSWORD_LENGTH_MAX) {
             return;
         }
-        throw new MemberCreateException();
+        throw new MemberCreateException("Invalid Password!");
     }
 
-    private boolean validatePassword(String password) {
-        return StringUtils.hasText(password)
-                && password.length() >= Integer.parseInt(env.getProperty("member.password.length.min"))
-                && password.length() <= Integer.parseInt(env.getProperty("member.password.length.max"));
+    private void validateUserName(String username) {
+        if (StringUtils.hasText(username) && username.length() <= USERNAME_LENGTH_MAX) {
+            return;
+        }
+        throw new MemberCreateException("Invalid username!");
     }
 
-    private boolean validateUserName(String username) {
-        return StringUtils.hasText(username)
-                && username.length() <= Integer.parseInt(env.getProperty("member.username.length.max"));
-    }
-
-    private boolean validateEmail(String email) {
-        return StringUtils.hasText(email)
-                && email.length() <= Integer.parseInt(env.getProperty("member.email.length.max"));
+    private void validateEmail(String email) {
+        if (isEmpty(email) || email.length() > EMAIL_LENGTH_MAX) {
+            throw new MemberCreateException("Invalid email!");
+        }
+        if (memberRepository.existsByEmail(email)) {
+            throw new MemberCreateException("The Email is already used.");
+        }
     }
 
     @Transactional
     public void deleteMember(Long memberId) {
         if (memberId == null) {
-            throw new MemberDeleteException();
+            throw new MemberDeleteException("Member id cannot be null!");
         }
 
         Member deleteMember = memberRepository
                 .findById(memberId)
-                 .orElseThrow(MemberDeleteException::new);
+                .orElseThrow(MemberDeleteException::causeByMemberNotFound);
 
         deleteMember.delete();
     }
 
     @Transactional
-    public MemberResponse updateMember(MemberUpdateRequest memberUpdateRequest) {
+    public MemberResponse updateMember(MemberUpdateRequest memberUpdateRequest, MultipartFile profileImage) {
         Member updateMember = findByIdOrEmail(memberUpdateRequest);
+
+        String imagePath = fileService.saveFile(profileImage);
 
         updateMember.update(
                 Objects.requireNonNull(memberUpdateRequest.username()),
-                memberUpdateRequest.profileImagePath(),
+                imagePath,
                 memberUpdateRequest.introduction()
         );
 
@@ -99,29 +109,33 @@ public class MemberService {
         if (memberUpdateRequest.id() == null) {
             updateMember = memberRepository
                     .findByEmail(memberUpdateRequest.email())
-                    .orElseThrow(MemberUpdateException::new);
+                    .orElseThrow(MemberUpdateException::causeByMemberNotFound);
         } else {
             updateMember = memberRepository
                     .findById(memberUpdateRequest.id())
-                    .orElseThrow(MemberUpdateException::new);
+                    .orElseThrow(MemberUpdateException::causeByMemberNotFound);
         }
         return updateMember;
     }
 
     @Transactional(readOnly = true)
-    public List<MemberResponse> searchMembers(String username) {
-        if (username == null) {
-            throw new MemberSearchException();
+    public Slice<MemberResponse> searchMembers(String keyword) {
+        if (isEmpty(keyword)) {
+            throw new MemberSearchException("No keyword for search.");
         }
 
-        username = username.replaceAll("\\s+", "");
+        Pageable page = PageRequest.of(0, PAGE_SIZE, Sort.by("username"));
 
-        int pageSize = Integer.parseInt(env.getProperty("member.pagesize"));
-        Pageable page = PageRequest.of(0, pageSize, Sort.by("username"));
+        Slice<Member> memberEntitySlice = memberRepository.findMembersByUsernameMatches(keyword, page);
 
-        // TODO: like %%말고 다른 방법 강구
-        List<Member> foundMembers = memberRepository.findAllByUsernameLikeIgnoreCase("%"+username+"%", page);
+        List<MemberResponse> foundMembers = memberEntitySlice.stream()
+                .map(MemberResponse::from)
+                .toList();
 
-        return foundMembers.stream().map(MemberResponse::from).toList();
+        return new SliceImpl<>(foundMembers, memberEntitySlice.getPageable(), memberEntitySlice.hasNext());
+    }
+
+    private boolean isEmpty(String keyword) {
+        return !StringUtils.hasText(keyword);
     }
 }
