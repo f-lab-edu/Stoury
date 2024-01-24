@@ -31,4 +31,10 @@ public class Comment {
     @CreatedDate
     @Column(name = "CREATED_AT", nullable = false)
     private LocalDateTime createdAt;
+
+    public Comment(Member member, Feed feed, String textContent) {
+        this.member = member;
+        this.feed = feed;
+        this.textContent = textContent;
+    }
 }
