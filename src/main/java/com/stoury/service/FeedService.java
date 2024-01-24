@@ -25,6 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.IntStream;
@@ -54,18 +55,18 @@ public class FeedService {
     }
 
     private List<GraphicContent> saveGraphicContents(List<MultipartFile> graphicContents) {
-        return IntStream.range(0, graphicContents.size())
-                .mapToObj(seq -> {
-                    MultipartFile file = graphicContents.get(seq);
-                    GraphicSaveEvent event = publishEventFrom(file);
-                    return Pair.of(seq, event);
-                })
-                .map(sequentialEvent -> {
-                    Integer seq = sequentialEvent.getFirst();
-                    String path = sequentialEvent.getSecond().getPath();
-                    return new GraphicContent(path, seq);
-                })
-                .toList();
+        List<GraphicContent> graphicContentList = new ArrayList<>();
+
+        for (int i = 0; i < graphicContents.size(); i++) {
+            MultipartFile file = graphicContents.get(i);
+
+            GraphicSaveEvent event = publishEventFrom(file);
+            String contentPath = event.getPath();
+
+            graphicContentList.add(new GraphicContent(contentPath, i));
+        }
+
+        return graphicContentList;
     }
 
     private Feed createFeedEntity(Member writer, FeedCreateRequest feedCreateRequest, List<GraphicContent> graphicContents) {
