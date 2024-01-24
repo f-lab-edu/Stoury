@@ -36,7 +36,7 @@ public class Member {
 
     @BatchSize(size = 20)
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "member")
-    List<Feed> feeds = new ArrayList<>();
+    private List<Feed> feeds = new ArrayList<>();
 
     @Builder
     public Member(String email, String encryptedPassword, String username, String introduction) {

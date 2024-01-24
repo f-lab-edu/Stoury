@@ -4,7 +4,7 @@ import com.stoury.domain.Feed;
 import com.stoury.domain.Member;
 import com.stoury.dto.FeedCreateRequest;
 import com.stoury.dto.FeedResponse;
-import com.stoury.event.FileSaveEvent;
+import com.stoury.event.GraphicSaveEvent;
 import com.stoury.exception.FeedCreateException;
 import com.stoury.repository.FeedRepository;
 import com.stoury.repository.MemberRepository;
@@ -64,9 +64,8 @@ public class FeedServiceTest {
                 .latitude(333.333)
                 .build();
         List<MultipartFile> graphicContents = List.of(
-                new MockMultipartFile("First", new byte[0]),
-                new MockMultipartFile("Second", new byte[0]),
-                new MockMultipartFile("Third", new byte[0])
+                new MockMultipartFile("Files", "first","image/jpeg",new byte[0]),
+                new MockMultipartFile("Files", "second","video/mp4",new byte[0])
         );
         when(feedRepository.save(any(Feed.class))).thenReturn(Feed.builder()
                 .member(writer)
@@ -82,7 +81,25 @@ public class FeedServiceTest {
         assertThat(createdFeed.longitude()).isEqualTo(feedCreateRequest.longitude());
         assertThat(createdFeed.latitude()).isEqualTo(feedCreateRequest.latitude());
 
-        verify(eventPublisher, times(graphicContents.size())).publishEvent(any(FileSaveEvent.class));
+        verify(eventPublisher, times(graphicContents.size())).publishEvent(any(GraphicSaveEvent.class));
+    }
+
+    @Test
+    @DisplayName("피드 생성 실패, 지원하지 않는 파일")
+    void createFeedFailByNotSupportedFileFormat() {
+        FeedCreateRequest createFeed = FeedCreateRequest.builder()
+                .textContent("testing")
+                .longitude(111.111)
+                .latitude(333.333)
+                .build();
+        List<MultipartFile> graphicContents = List.of(
+                new MockMultipartFile("Files", "first","image/jpeg",new byte[0]),
+                new MockMultipartFile("Files", "second","video/mp4",new byte[0]),
+                new MockMultipartFile("Files", "third","image/png",new byte[0])
+        );
+
+        assertThatThrownBy(() -> feedService.createFeed(writer, createFeed, graphicContents))
+                .isInstanceOf(FeedCreateException.class);
     }
 
     @Test

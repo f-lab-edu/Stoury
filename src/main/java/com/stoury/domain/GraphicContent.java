@@ -1,19 +1,17 @@
 package com.stoury.domain;
 
+import com.stoury.utils.FileUtils;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-
-import java.time.LocalDateTime;
-import java.util.UUID;
+import org.springframework.web.multipart.MultipartFile;
 
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "GRAPHIC_CONTENT")
 public class GraphicContent {
-    public static final String PATH_PREFIX = "/path/";
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -31,8 +29,8 @@ public class GraphicContent {
         this.feed = feed;
     }
 
-    public GraphicContent (int sequence) {
-        this.path = PATH_PREFIX + LocalDateTime.now().getNano();
+    public GraphicContent(String path, int sequence) {
+        this.path = path;
         this.sequence = sequence;
     }
 }

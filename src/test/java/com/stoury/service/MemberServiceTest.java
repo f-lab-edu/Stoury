@@ -45,6 +45,7 @@ class MemberServiceTest {
     void tearDown() {
         memberRepository.deleteAll();
     }
+
     @Test
     @DisplayName("사용자 생성 - 성공")
     void createMemberSuccess() {
@@ -77,7 +78,7 @@ class MemberServiceTest {
                 .username("member2")
                 .build();
 
-        assertThatThrownBy(()-> memberService.createMember(memberCreateRequest))
+        assertThatThrownBy(() -> memberService.createMember(memberCreateRequest))
                 .isInstanceOf(MemberCrudExceptions.MemberCreateException.class);
     }
 
@@ -132,7 +133,7 @@ class MemberServiceTest {
 
         Long notExistingId = member1.getId() + member2.getId();
 
-        assertThatThrownBy(()->memberService.deleteMember(notExistingId))
+        assertThatThrownBy(() -> memberService.deleteMember(notExistingId))
                 .isInstanceOf(MemberCrudExceptions.MemberDeleteException.class);
 
         assertThatThrownBy(() -> memberService.deleteMember(null))
@@ -140,12 +141,11 @@ class MemberServiceTest {
     }
 
     @Test
-    @DisplayName("사용자 정보 업데이트 - 성공")
+    @DisplayName("프사없이 사용자 정보 업데이트 - 성공")
     void updateMemberSuccess() {
         Member member1 = Member.builder().email("mem1@dddd.com").encryptedPassword("vurhf2").username("member1").build();
         Member member2 = Member.builder().email("mem2@dddd.com").encryptedPassword("qwerty").username("member2").build();
-        Member savedMember1 = memberRepository.save(member1);
-        String imagePathBeforeUpdate = savedMember1.getProfileImagePath();
+        memberRepository.save(member1);
         memberRepository.save(member2);
 
         MemberUpdateRequest member1UpdateRequest = com.stoury.dto.MemberUpdateRequest.builder()
@@ -153,13 +153,59 @@ class MemberServiceTest {
                 .username("changed1")
                 .introduction("Member1's introduction was changed!")
                 .build();
-        MultipartFile profileImage = new MockMultipartFile("profileImage1", new byte[0]);
-        MemberResponse updatedMember = memberService.updateMember(member1UpdateRequest, profileImage);
+
+        MemberResponse updatedMember = memberService.updateMember(member1UpdateRequest);
 
         assertThat(updatedMember.email()).isEqualTo(member1UpdateRequest.email());
         assertThat(updatedMember.username()).isEqualTo(member1UpdateRequest.username());
-        assertThat(updatedMember.profileImagePath()).isNotEqualTo(imagePathBeforeUpdate);
         assertThat(updatedMember.introduction()).isEqualTo(member1UpdateRequest.introduction());
+    }
+
+    @Test
+    @DisplayName("프사랑 사용자 정보 업데이트 - 성공")
+    void updateMemberWithProfileSuccess() {
+        Member member1 = Member.builder().email("mem1@dddd.com").encryptedPassword("vurhf2").username("member1").build();
+        Member member2 = Member.builder().email("mem2@dddd.com").encryptedPassword("qwerty").username("member2").build();
+        String profileImagePathBeforeUpdate = memberRepository.save(member1).getProfileImagePath();
+        memberRepository.save(member2);
+
+        MemberUpdateRequest MemberUpdateRequest = com.stoury.dto.MemberUpdateRequest.builder()
+                .email(member1.getEmail())
+                .username("changed1")
+                .introduction("Member1's introduction was changed!")
+                .build();
+        MultipartFile profileImage = new MockMultipartFile("Files", "profileImage",
+                "image/jpeg", new byte[0]);
+        MemberResponse updatedMember = memberService.updateMemberWithProfileImage(MemberUpdateRequest, profileImage);
+
+        assertThat(updatedMember.email()).isEqualTo(MemberUpdateRequest.email());
+        assertThat(updatedMember.username()).isEqualTo(MemberUpdateRequest.username());
+        assertThat(updatedMember.profileImagePath()).isNotEqualTo(profileImagePathBeforeUpdate);
+        assertThat(updatedMember.introduction()).isEqualTo(MemberUpdateRequest.introduction());
+
+        String[] directories = updatedMember.profileImagePath().split("/");
+        assertThat(directories[1]).isEqualTo("members");
+        assertThat(directories[2]).isEqualTo("profiles");
+        assertThat(directories[3]).isEqualTo("images");
+    }
+
+    @Test
+    @DisplayName("프사랑 사용자 정보 업데이트 - 실패, jpeg가 아님")
+    void updateMemberWithProfileNotJpegFail() {
+        Member member1 = Member.builder().email("mem1@dddd.com").encryptedPassword("vurhf2").username("member1").build();
+        Member member2 = Member.builder().email("mem2@dddd.com").encryptedPassword("qwerty").username("member2").build();
+        memberRepository.save(member1);
+        memberRepository.save(member2);
+
+        MemberUpdateRequest MemberUpdateRequest = com.stoury.dto.MemberUpdateRequest.builder()
+                .email(member1.getEmail())
+                .username("changed1")
+                .introduction("Member1's introduction was changed!")
+                .build();
+        MultipartFile profileImage = new MockMultipartFile("Files", "profileImage",
+                "image/png", new byte[0]);
+        assertThatThrownBy(() -> memberService.updateMemberWithProfileImage(MemberUpdateRequest, profileImage))
+                .isInstanceOf(MemberCrudExceptions.MemberUpdateException.class);
     }
 
     @Test
@@ -173,9 +219,8 @@ class MemberServiceTest {
                 .email(member1.getEmail())
                 .introduction("I have no name")
                 .build();
-        MultipartFile profileImage = new MockMultipartFile("profileImage1", new byte[0]);
 
-        assertThatThrownBy(()->memberService.updateMember(memberUpdateRequest, profileImage))
+        assertThatThrownBy(() -> memberService.updateMember(memberUpdateRequest))
                 .isInstanceOf(NullPointerException.class);
     }
 
