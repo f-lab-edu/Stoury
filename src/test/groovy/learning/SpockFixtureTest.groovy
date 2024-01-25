@@ -40,7 +40,7 @@ class SpockFixtureTest extends Specification {
         def result = calculator.sub(0,0)
 
         then:
-        calculator == null
+        calculator != null
         result == 5L
     }
 }

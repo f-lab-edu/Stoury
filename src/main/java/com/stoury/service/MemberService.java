@@ -8,7 +8,6 @@ import com.stoury.exception.member.*;
 import com.stoury.repository.MemberRepository;
 import com.stoury.utils.FileUtils;
 import com.stoury.utils.SupportedFileType;
-import com.stoury.utils.Validator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.*;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -95,11 +94,7 @@ public class MemberService {
 
     @Transactional
     public MemberResponse updateMemberWithProfileImage(MemberUpdateRequest memberUpdateRequest, MultipartFile profileImage) {
-        Validator.of(profileImage)
-                .willCheck(SupportedFileType::isSupportedFile)
-                .ifFailThrows(MemberUpdateException.class)
-                .withMessage("Content/type of profile image is jpeg.")
-                .validate();
+        validate(profileImage);
 
         String profileImagePath = FileUtils.createFilePath(profileImage, PROFILE_IMAGE_PATH_PREFIX);
 
@@ -114,6 +109,12 @@ public class MemberService {
         );
 
         return MemberResponse.from(updateMember);
+    }
+
+    private void validate(MultipartFile file) {
+        if (SupportedFileType.isUnsupportedFile(file)) {
+            throw new MemberUpdateException("Content/type of profile image is jpeg.");
+        }
     }
 
     @Transactional
