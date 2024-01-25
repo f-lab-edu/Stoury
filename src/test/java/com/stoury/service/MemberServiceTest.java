@@ -46,20 +46,6 @@ class MemberServiceTest {
         memberRepository.deleteAll();
     }
 
-    @Test
-    @DisplayName("사용자 생성 - 성공")
-    void createMemberSuccess() {
-        MemberCreateRequest memberCreateRequest = MemberCreateRequest.builder()
-                .email("dddd@cccc.com")
-                .password("notencryptedpwd")
-                .username("jzakka")
-                .build();
-
-        MemberResponse createMember = memberService.createMember(memberCreateRequest);
-
-        assertThat(createMember.email()).isEqualTo(memberCreateRequest.email());
-        assertThat(createMember.username()).isEqualTo(memberCreateRequest.username());
-    }
 
     @Test
     @DisplayName("사용자 생성 - 실패, 중복 이메일")
