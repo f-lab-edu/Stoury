@@ -32,4 +32,8 @@ public enum SupportedFileType {
     public static boolean isUnsupportedFile(MultipartFile file) {
         return OTHER.equals(getFileType(file));
     }
+
+    public static boolean isSupportedFile(MultipartFile file) {
+        return !isUnsupportedFile(file);
+    }
 }

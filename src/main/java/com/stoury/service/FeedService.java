@@ -12,6 +12,7 @@ import com.stoury.repository.FeedRepository;
 import com.stoury.repository.MemberRepository;
 import com.stoury.utils.FileUtils;
 import com.stoury.utils.SupportedFileType;
+import com.stoury.utils.Validator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.PageRequest;
@@ -82,15 +83,24 @@ public class FeedService {
     }
 
     private void validate(Member writer, FeedCreateRequest feedCreateRequest, List<MultipartFile> graphicContents) {
-        if (!memberRepository.existsById(writer.getId())) {
-            throw new FeedCreateException("Cannot find the member.");
-        }
-        if (graphicContents.isEmpty() || graphicContents.stream().anyMatch(SupportedFileType::isUnsupportedFile)) {
-            throw new FeedCreateException("Input files are empty or unsupported.");
-        }
-        if (feedCreateRequest.longitude() == null || feedCreateRequest.latitude() == null) {
-            throw new FeedCreateException("Location information is required.");
-        }
+        Validator.of(writer.getId())
+                .willCheck(memberRepository::existsById)
+                .ifFailThrows(FeedCreateException.class)
+                .withMessage("Cannot find the member.")
+                .validate();
+
+        Validator.of(graphicContents)
+                .willCheck(contents -> !contents.isEmpty())
+                .willCheck(contents -> contents.stream().noneMatch(SupportedFileType::isUnsupportedFile))
+                .ifFailThrows(FeedCreateException.class)
+                .withMessage("Input files are empty or unsupported.")
+                .validate();
+
+        Validator.of(feedCreateRequest)
+                .willCheck(request -> Objects.nonNull(request.latitude()))
+                .willCheck(request -> Objects.nonNull(request.longitude()))
+                .ifFailThrowsWithMessage(FeedCreateException.class, "Location information is required.")
+                .validate();
     }
 
     @Transactional(readOnly = true)
