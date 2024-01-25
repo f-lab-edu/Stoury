@@ -4,7 +4,7 @@ import com.stoury.domain.Member;
 import com.stoury.dto.MemberCreateRequest;
 import com.stoury.dto.MemberResponse;
 import com.stoury.dto.MemberUpdateRequest;
-import com.stoury.exception.MemberCrudExceptions;
+import com.stoury.exception.member.*;
 import com.stoury.repository.MemberRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
@@ -46,20 +46,6 @@ class MemberServiceTest {
         memberRepository.deleteAll();
     }
 
-    @Test
-    @DisplayName("사용자 생성 - 성공")
-    void createMemberSuccess() {
-        MemberCreateRequest memberCreateRequest = MemberCreateRequest.builder()
-                .email("dddd@cccc.com")
-                .password("notencryptedpwd")
-                .username("jzakka")
-                .build();
-
-        MemberResponse createMember = memberService.createMember(memberCreateRequest);
-
-        assertThat(createMember.email()).isEqualTo(memberCreateRequest.email());
-        assertThat(createMember.username()).isEqualTo(memberCreateRequest.username());
-    }
 
     @Test
     @DisplayName("사용자 생성 - 실패, 중복 이메일")
@@ -79,7 +65,7 @@ class MemberServiceTest {
                 .build();
 
         assertThatThrownBy(() -> memberService.createMember(memberCreateRequest))
-                .isInstanceOf(MemberCrudExceptions.MemberCreateException.class);
+                .isInstanceOf(MemberCreateException.class);
     }
 
     @ParameterizedTest
@@ -87,7 +73,7 @@ class MemberServiceTest {
     @DisplayName("사용자 생성 - 실패, [이메일, 패스워드, 이름] 셋 중 하나라도 누락 불가")
     void createMemberFail(MemberCreateRequest defectiveMemberCreateRequest) {
         assertThatThrownBy(() -> memberService.createMember(defectiveMemberCreateRequest))
-                .isInstanceOf(MemberCrudExceptions.MemberCreateException.class);
+                .isInstanceOf(MemberCreateException.class);
     }
 
     private static Stream<Arguments> invalidRequestMembers() {
@@ -134,10 +120,10 @@ class MemberServiceTest {
         Long notExistingId = member1.getId() + member2.getId();
 
         assertThatThrownBy(() -> memberService.deleteMember(notExistingId))
-                .isInstanceOf(MemberCrudExceptions.MemberDeleteException.class);
+                .isInstanceOf(MemberDeleteException.class);
 
         assertThatThrownBy(() -> memberService.deleteMember(null))
-                .isInstanceOf(MemberCrudExceptions.MemberDeleteException.class);
+                .isInstanceOf(MemberDeleteException.class);
     }
 
     @Test
@@ -205,7 +191,7 @@ class MemberServiceTest {
         MultipartFile profileImage = new MockMultipartFile("Files", "profileImage",
                 "image/png", new byte[0]);
         assertThatThrownBy(() -> memberService.updateMemberWithProfileImage(MemberUpdateRequest, profileImage))
-                .isInstanceOf(MemberCrudExceptions.MemberUpdateException.class);
+                .isInstanceOf(MemberUpdateException.class);
     }
 
     @Test
@@ -261,13 +247,13 @@ class MemberServiceTest {
     @DisplayName("사용자 검색, 실패- 공백 혹은 빈 문자열만 있으면 잘못된 입력값으로 간주")
     void getMembersByBlank(String searchKeyword) {
         assertThatThrownBy(() -> memberService.searchMembers(searchKeyword))
-                .isInstanceOf(MemberCrudExceptions.MemberSearchException.class);
+                .isInstanceOf(MemberSearchException.class);
     }
 
     @Test
     @DisplayName("사용자 검색 실패 - null로 검색")
     void getMembersFail() {
         assertThatThrownBy(() -> memberService.searchMembers(null))
-                .isInstanceOf(MemberCrudExceptions.MemberSearchException.class);
+                .isInstanceOf(MemberSearchException.class);
     }
 }

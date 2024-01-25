@@ -9,10 +9,10 @@ import java.util.Arrays;
 @AllArgsConstructor
 @Getter
 public enum SupportedFileType {
-    JPG("/images", ".jpeg", "image/jpeg"),
-    MP4("/videos", ".mp4", "video/mp4"),
-    OTHER("/other", "", "other/other");
-    private final String path;
+    JPG("images", ".jpeg", "image/jpeg"),
+    MP4("videos", ".mp4", "video/mp4"),
+    OTHER("other", "", "other/other");
+    private final String type;
     private final String extension;
     private final String acceptContentType;
 
@@ -20,8 +20,20 @@ public enum SupportedFileType {
         String contentType = file.getContentType();
 
         return Arrays.stream(SupportedFileType.values())
-                .filter(fileType -> fileType.getAcceptContentType().equals(contentType))
+                .filter(fileType -> fileType.hasAcceptContentType(contentType))
                 .findFirst()
                 .orElse(OTHER);
+    }
+
+    private boolean hasAcceptContentType(String contentType) {
+        return acceptContentType.equals(contentType);
+    }
+
+    public static boolean isUnsupportedFile(MultipartFile file) {
+        return OTHER.equals(getFileType(file));
+    }
+
+    public static boolean isSupportedFile(MultipartFile file) {
+        return !isUnsupportedFile(file);
     }
 }

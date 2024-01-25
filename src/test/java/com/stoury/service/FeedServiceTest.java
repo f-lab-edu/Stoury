@@ -5,11 +5,9 @@ import com.stoury.domain.Member;
 import com.stoury.dto.FeedCreateRequest;
 import com.stoury.dto.FeedResponse;
 import com.stoury.event.GraphicSaveEvent;
-import com.stoury.exception.FeedCreateException;
+import com.stoury.exception.feed.FeedCreateException;
 import com.stoury.repository.FeedRepository;
 import com.stoury.repository.MemberRepository;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -21,6 +19,7 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -33,26 +32,14 @@ public class FeedServiceTest {
     @Mock
     MemberRepository memberRepository;
     @Mock
+    TagService tagService;
+    @Mock
     FeedRepository feedRepository;
     @Mock
     ApplicationEventPublisher eventPublisher;
     @InjectMocks
     FeedService feedService;
     Member writer;
-
-    @BeforeEach
-    void setup() {
-        writer = Member.builder()
-                .username("writer")
-                .encryptedPassword("dqwdasda")
-                .email("d1wd@wdwfef.com")
-                .build();
-    }
-
-    @AfterEach
-    void tearDown() {
-        memberRepository.deleteAll();
-    }
 
     @Test
     @DisplayName("피드 생성 성공")
@@ -63,15 +50,22 @@ public class FeedServiceTest {
                 .longitude(111.111)
                 .latitude(333.333)
                 .build();
+        writer = Member.builder()
+                .username("writer")
+                .encryptedPassword("dqwdasda")
+                .email("d1wd@wdwfef.com")
+                .build();
+
         List<MultipartFile> graphicContents = List.of(
-                new MockMultipartFile("Files", "first","image/jpeg",new byte[0]),
-                new MockMultipartFile("Files", "second","video/mp4",new byte[0])
+                new MockMultipartFile("Files", "first", "image/jpeg", new byte[0]),
+                new MockMultipartFile("Files", "second", "video/mp4", new byte[0])
         );
         when(feedRepository.save(any(Feed.class))).thenReturn(Feed.builder()
                 .member(writer)
                 .textContent(feedCreateRequest.textContent())
                 .longitude(feedCreateRequest.longitude())
                 .latitude(feedCreateRequest.latitude())
+                .tags(new ArrayList<>())
                 .build());
 
         FeedResponse createdFeed = feedService.createFeed(writer, feedCreateRequest, graphicContents);
@@ -86,16 +80,24 @@ public class FeedServiceTest {
 
     @Test
     @DisplayName("피드 생성 실패, 지원하지 않는 파일")
+    @Transactional
     void createFeedFailByNotSupportedFileFormat() {
+        when(memberRepository.existsById(any())).thenReturn(true);
+        writer = Member.builder()
+                .username("writer")
+                .encryptedPassword("dqwdasda")
+                .email("d1wd@wdwfef.com")
+                .build();
+
         FeedCreateRequest createFeed = FeedCreateRequest.builder()
                 .textContent("testing")
                 .longitude(111.111)
                 .latitude(333.333)
                 .build();
         List<MultipartFile> graphicContents = List.of(
-                new MockMultipartFile("Files", "first","image/jpeg",new byte[0]),
-                new MockMultipartFile("Files", "second","video/mp4",new byte[0]),
-                new MockMultipartFile("Files", "third","image/png",new byte[0])
+                new MockMultipartFile("Files", "first", "image/jpeg", new byte[0]),
+                new MockMultipartFile("Files", "second", "video/mp4", new byte[0]),
+                new MockMultipartFile("Files", "third", "image/png", new byte[0])
         );
 
         assertThatThrownBy(() -> feedService.createFeed(writer, createFeed, graphicContents))
@@ -106,6 +108,13 @@ public class FeedServiceTest {
     @DisplayName("피드 저장 실패, 이미지 없음")
     @Transactional
     void createFeedFailNoGraphicContents() {
+        when(memberRepository.existsById(any())).thenReturn(true);
+        writer = Member.builder()
+                .username("writer")
+                .encryptedPassword("dqwdasda")
+                .email("d1wd@wdwfef.com")
+                .build();
+
         FeedCreateRequest createFeed = FeedCreateRequest.builder()
                 .textContent("testing")
                 .longitude(111.111)
@@ -113,7 +122,7 @@ public class FeedServiceTest {
                 .build();
         List<MultipartFile> graphicContents = Collections.emptyList();
 
-        assertThatThrownBy(()->feedService.createFeed(writer, createFeed, graphicContents))
+        assertThatThrownBy(() -> feedService.createFeed(writer, createFeed, graphicContents))
                 .isInstanceOf(FeedCreateException.class);
     }
 
@@ -121,16 +130,8 @@ public class FeedServiceTest {
     @DisplayName("피드 저장 실패, 위치정보 없음")
     @Transactional
     void createFeedFailNoCoordinate() {
-        FeedCreateRequest createFeed = FeedCreateRequest.builder()
+        assertThatThrownBy(() -> FeedCreateRequest.builder()
                 .textContent("testing")
-                .build();
-        List<MultipartFile> graphicContents = List.of(
-                new MockMultipartFile("First", new byte[0]),
-                new MockMultipartFile("Second", new byte[0]),
-                new MockMultipartFile("Third", new byte[0])
-        );
-
-        assertThatThrownBy(()->feedService.createFeed(writer, createFeed, graphicContents))
-                .isInstanceOf(FeedCreateException.class);
+                .build()).isInstanceOf(FeedCreateException.class);
     }
 }

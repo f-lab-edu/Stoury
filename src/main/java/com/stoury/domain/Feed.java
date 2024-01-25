@@ -17,7 +17,9 @@ import java.util.List;
 @Getter
 @EntityListeners(AuditingEntityListener.class)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Table(name = "FEED")
+@Table(name = "FEED",
+        indexes = @Index(name = "INDEX_CREATED_AT", columnList = "CREATED_AT")
+)
 public class Feed {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -30,7 +32,7 @@ public class Feed {
     @CreatedDate
     private LocalDateTime createdAt;
 
-    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "feed")
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<GraphicContent> graphicContents = new ArrayList<>();
 
     @Column(name = "TEXT_CONTENT", nullable = false, columnDefinition = "text")
@@ -42,16 +44,21 @@ public class Feed {
     @Column(name = "LONGITUDE")
     private Double longitude;
 
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(joinColumns = @JoinColumn(name = "FEED_ID"),
+            inverseJoinColumns = @JoinColumn(name = "TAG_ID"))
+    private List<Tag> tags = new ArrayList<>();
+
     @Builder
-    public Feed(Member member, String textContent, Double latitude, Double longitude) {
+    public Feed(Member member, String textContent, Double latitude, Double longitude, List<Tag> tags) {
         this.member = member;
         this.textContent = textContent;
         this.latitude = latitude;
         this.longitude = longitude;
+        this.tags = tags;
     }
 
     public void addGraphicContent(GraphicContent graphicContent) {
-        graphicContent.beAttachedTo(this);
         graphicContents.add(graphicContent);
     }
 

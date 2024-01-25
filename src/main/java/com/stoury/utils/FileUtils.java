@@ -5,13 +5,12 @@ import org.springframework.web.multipart.MultipartFile;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.StringJoiner;
 
 public class FileUtils {
-    private static final String FILE_SEPARATOR = System.getProperty("file.separator");
+    public static final String FILE_SEPARATOR = System.getProperty("file.separator");
 
     public static String getFileNameByCurrentTime(MultipartFile file) {
         String originalFilename = file.getOriginalFilename();
@@ -20,12 +19,8 @@ public class FileUtils {
                 + FILE_SEPARATOR + originalFilename;
     }
 
-    public static Path createFilePath(String fileName, String... directories) {
-        StringJoiner joiner = new StringJoiner(FILE_SEPARATOR, FILE_SEPARATOR, "");
-
-        Arrays.stream(directories).forEach(joiner::add);
-        joiner.add(fileName);
-
-        return Paths.get(joiner.toString());
+    public static String createFilePath(MultipartFile file, String pathPrefix) {
+        SupportedFileType fileType = SupportedFileType.getFileType(file);
+        return pathPrefix + FILE_SEPARATOR + fileType.getType() + FILE_SEPARATOR + getFileNameByCurrentTime(file);
     }
 }

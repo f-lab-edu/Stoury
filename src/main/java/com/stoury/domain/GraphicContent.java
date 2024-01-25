@@ -16,18 +16,12 @@ public class GraphicContent {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
-    private Feed feed;
-
     @Column(name = "PATH", unique = true, nullable = false)
     private String path;
 
     @Column(name = "SEQUENCE", columnDefinition = "TINYINT", nullable = false)
     private int sequence;
 
-    public void beAttachedTo(Feed feed) {
-        this.feed = feed;
-    }
 
     public GraphicContent(String path, int sequence) {
         this.path = path;
