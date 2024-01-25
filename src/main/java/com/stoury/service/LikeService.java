@@ -4,15 +4,16 @@ import com.stoury.domain.Feed;
 import com.stoury.domain.Like;
 import com.stoury.domain.Member;
 import com.stoury.exception.AlreadyLikedFeedException;
-import com.stoury.exception.FeedSearchException;
-import com.stoury.exception.MemberCrudExceptions;
+import com.stoury.exception.feed.FeedSearchException;
+import com.stoury.exception.member.MemberSearchException;
 import com.stoury.repository.FeedRepository;
 import com.stoury.repository.LikeRepository;
 import com.stoury.repository.MemberRepository;
-import com.stoury.utils.Validator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -40,13 +41,14 @@ public class LikeService {
     }
 
     private void validate(Member liker, Feed feed) {
-        Validator.of(liker)
-                .willCheck(m -> memberRepository.existsById(m.getId()))
-                .ifFailThrowsWithMessage(MemberCrudExceptions.MemberSearchException.class, "Member not found")
-                .validate();
-        Validator.of(feed)
-                .willCheck(f -> feedRepository.existsById(f.getId()))
-                .ifFailThrowsWithMessage(FeedSearchException.class, "Feed not found")
-                .validate();
+        Long likerId = Objects.requireNonNull(liker.getId(), "Liker Id cannot be null");
+        if (!memberRepository.existsById(likerId)) {
+            throw new MemberSearchException("Member not found");
+        }
+
+        Long feedId = Objects.requireNonNull(feed.getId(), "Feed Id cannot be null");
+        if (!feedRepository.existsById(feedId)) {
+            throw new FeedSearchException("Feed not found");
+        }
     }
 }
