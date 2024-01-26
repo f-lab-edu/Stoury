@@ -8,6 +8,8 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter
@@ -25,6 +27,12 @@ public class Comment {
     @ManyToOne(optional = false)
     private Feed feed;
 
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "parentComment")
+    List<Comment> nestedComments = new ArrayList<>();
+
+    @ManyToOne(optional = true)
+    Comment parentComment;
+
     @Column(name = "TEXT_CONTENT", length = 200, nullable = false)
     private String textContent;
 
@@ -36,5 +44,15 @@ public class Comment {
         this.member = member;
         this.feed = feed;
         this.textContent = textContent;
+    }
+
+    public Comment(Member member, Comment parentComment, String textContent) {
+        this(member, parentComment.getFeed(), textContent);
+
+        this.parentComment = parentComment;
+    }
+
+    public boolean hasParent() {
+        return parentComment != null;
     }
 }
