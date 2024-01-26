@@ -31,6 +31,7 @@ public class Comment {
     List<Comment> nestedComments = new ArrayList<>();
 
     @ManyToOne(optional = true)
+    @JoinColumn(name = "PARENT_COMMENT_ID")
     Comment parentComment;
 
     @Column(name = "TEXT_CONTENT", length = 200, nullable = false)
@@ -39,6 +40,9 @@ public class Comment {
     @CreatedDate
     @Column(name = "CREATED_AT", nullable = false)
     private LocalDateTime createdAt;
+
+    @Column(name = "DELETE", nullable = false)
+    private boolean deleted;
 
     public Comment(Member member, Feed feed, String textContent) {
         this.member = member;
@@ -58,5 +62,9 @@ public class Comment {
 
     public boolean hasNestedComments() {
         return !nestedComments.isEmpty();
+    }
+
+    public void delete() {
+        this.deleted = true;
     }
 }
