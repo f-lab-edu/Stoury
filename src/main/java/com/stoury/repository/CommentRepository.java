@@ -10,4 +10,6 @@ import java.util.List;
 
 public interface CommentRepository extends JpaRepository<Comment, Long> {
     List<Comment> findAllByFeedAndCreatedAtBefore(Feed feed, LocalDateTime orderThan, Pageable pageable);
+
+    List<Comment> findAllByParentCommentAndCreatedAtBefore(Comment parentComment, LocalDateTime orderThan, Pageable pageable);
 }
