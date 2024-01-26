@@ -3,6 +3,7 @@ package com.stoury
 import com.stoury.domain.Comment
 import com.stoury.domain.Feed
 import com.stoury.domain.Member
+import com.stoury.dto.CommentResponse
 import com.stoury.exception.CommentCreateException
 import com.stoury.exception.CommentSearchException
 import com.stoury.repository.CommentRepository
@@ -83,5 +84,21 @@ class CommentServiceTest extends Specification {
         commentService.deleteComment(comment)
         then:
         comment.isDeleted()
+    }
+
+    def "삭제된 댓글 긁어오면 '삭제된 댓글입니다'라고 표시"() {
+        given:
+        def comment1 = new Comment(member, feed, "comment1")
+        def comment2 = new Comment(member, feed, "comment2")
+        def comment3 = new Comment(member, savedComment, "comment3")
+
+        when:
+        commentService.deleteComment(comment2)
+        commentService.deleteComment(comment3)
+
+        then:
+        CommentResponse.from(comment1).textContent() == "comment1"
+        CommentResponse.from(comment2).textContent() == "This comment was deleted"
+        CommentResponse.from(comment3).textContent() == "This comment was deleted"
     }
 }
