@@ -4,6 +4,7 @@ import com.stoury.domain.Comment
 import com.stoury.domain.Feed
 import com.stoury.domain.Member
 import com.stoury.exception.CommentCreateException
+import com.stoury.exception.CommentSearchException
 import com.stoury.repository.CommentRepository
 import com.stoury.repository.FeedRepository
 import com.stoury.repository.MemberRepository
@@ -32,6 +33,7 @@ class CommentServiceTest extends Specification {
         savedNestedComment.getId() >> 2L
         savedNestedComment.getMember() >> member
         savedNestedComment.getParentComment() >> savedComment
+        savedNestedComment.hasParent() >> true
         memberRepository.existsById(_) >> true
         feedRepository.existsById(_) >> true
         commentRepository.existsById(_) >> true
@@ -52,8 +54,6 @@ class CommentServiceTest extends Specification {
     }
 
     def "대대댓글 생성 실패"() {
-        given:
-        savedNestedComment.hasParent() >> true
         when:
         commentService.createNestedComment(member, savedNestedComment, "This is double nested comment")
         then:
@@ -65,5 +65,19 @@ class CommentServiceTest extends Specification {
         commentService.getCommentsOfFeed(feed, LocalDateTime.now())
         then:
         1 * commentRepository.findAllByFeedAndCreatedAtBefore(_, _, _) >> List.of(savedComment)
+    }
+
+    def "대댓글 조회"() {
+        when:
+        commentService.getNestedComments(savedComment, LocalDateTime.now())
+        then:
+        1 * commentRepository.findAllByParentCommentAndCreatedAtBefore(_, _, _) >> List.of(savedNestedComment)
+    }
+
+    def "대댓글 조회 실패 - 대댓글의 대댓글을 조회하려 함"() {
+        when:
+        commentService.getNestedComments(savedNestedComment, LocalDateTime.now())
+        then:
+        thrown(CommentSearchException.class)
     }
 }
