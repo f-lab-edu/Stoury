@@ -9,6 +9,7 @@ import com.stoury.dto.FeedResponse;
 import com.stoury.event.GraphicSaveEvent;
 import com.stoury.exception.feed.FeedCreateException;
 import com.stoury.repository.FeedRepository;
+import com.stoury.repository.LikeRepository;
 import com.stoury.repository.MemberRepository;
 import com.stoury.utils.FileUtils;
 import com.stoury.utils.SupportedFileType;
@@ -35,6 +36,7 @@ public class FeedService {
     public static final int PAGE_SIZE = 10;
     private final FeedRepository feedRepository;
     private final MemberRepository memberRepository;
+    private final LikeRepository likeRepository;
     private final TagService tagService;
     private final ApplicationEventPublisher eventPublisher;
 
@@ -49,7 +51,7 @@ public class FeedService {
 
         Feed uploadedFeed = feedRepository.save(feedEntity);
 
-        return FeedResponse.from(uploadedFeed);
+        return FeedResponse.from(uploadedFeed, 0);
     }
 
     private List<GraphicContent> saveGraphicContents(List<MultipartFile> graphicContents) {
@@ -94,22 +96,22 @@ public class FeedService {
     }
 
     @Transactional(readOnly = true)
-    public Slice<FeedResponse> getFeedsOfMemberId(Long memberId, LocalDateTime orderThan) {
+    public List<FeedResponse> getFeedsOfMemberId(Long memberId, LocalDateTime orderThan) {
         Member feedWriter = memberRepository.findById(Objects.requireNonNull(memberId))
                 .orElseThrow(() -> new FeedCreateException("Cannot find the member."));
 
         Pageable page = PageRequest.of(0, PAGE_SIZE, Sort.by("createdAt").descending());
-        Slice<Feed> feedSlice = feedRepository.findAllByMemberAndCreatedAtIsBefore(feedWriter, orderThan, page);
+        List<Feed> feeds = feedRepository.findAllByMemberAndCreatedAtIsBefore(feedWriter, orderThan, page);
 
-        return FeedResponse.from(feedSlice);
+        return feeds.stream().map(feed -> FeedResponse.from(feed, likeRepository.countByFeed(feed))).toList();
     }
 
     @Transactional(readOnly = true)
-    public Slice<FeedResponse> getFeedsByTag(String tagName, LocalDateTime orderThan) {
+    public List<FeedResponse> getFeedsByTag(String tagName, LocalDateTime orderThan) {
         Pageable page = PageRequest.of(0, PAGE_SIZE, Sort.by("createdAt").descending());
 
-        Slice<Feed> feedSlice = feedRepository.findByTagAndCreateAtLessThan(tagName, orderThan, page);
+        List<Feed> feeds = feedRepository.findByTagAndCreateAtLessThan(tagName, orderThan, page);
 
-        return FeedResponse.from(feedSlice);
+        return feeds.stream().map(feed -> FeedResponse.from(feed, likeRepository.countByFeed(feed))).toList();
     }
 }

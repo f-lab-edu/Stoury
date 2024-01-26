@@ -50,8 +50,6 @@ public class Feed {
             inverseJoinColumns = @JoinColumn(name = "TAG_ID"))
     private List<Tag> tags = new ArrayList<>();
 
-    @Formula("(SELECT COUNT(L.ID) FROM LIKES L WHERE L.FEED_ID = id)")
-    private int likes;
     @Builder
     public Feed(Member member, String textContent, Double latitude, Double longitude, List<Tag> tags) {
         this.member = member;
