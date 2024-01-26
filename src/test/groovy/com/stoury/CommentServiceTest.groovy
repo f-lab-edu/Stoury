@@ -20,20 +20,8 @@ class CommentServiceTest extends Specification {
 
     def member = Mock(Member)
     def feed = Mock(Feed)
-    def savedComment = Mock(Comment)
-    def savedNestedComment = Mock(Comment)
-
-    def setup() {
-        member.getId() >> 1L
-        feed.getId() >> 1L
-        savedComment.getId() >> 1L
-        savedComment.getMember() >> member
-        savedComment.getFeed() >> feed
-        savedNestedComment.getId() >> 2L
-        savedNestedComment.getMember() >> member
-        savedNestedComment.getParentComment() >> savedComment
-        savedNestedComment.hasParent() >> true
-    }
+    def savedComment = new Comment(member, feed, "This is comment")
+    def savedNestedComment = new Comment(member, savedComment, "This is nested comment")
 
     def "댓글 생성 성공"() {
         when:
