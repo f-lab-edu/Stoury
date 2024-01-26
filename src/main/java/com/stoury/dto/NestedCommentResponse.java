@@ -7,13 +7,13 @@ import java.util.List;
 
 public record NestedCommentResponse(Long id, WriterResponse writerResponse, Long parentCommentId,
                                     String textContent, LocalDateTime createdAt) {
-    public static NestedCommentResponse from(Comment savedComment) {
+    public static NestedCommentResponse from(Comment comment) {
         return new NestedCommentResponse(
-                savedComment.getId(),
-                WriterResponse.from(savedComment.getMember()),
-                savedComment.getParentComment().getId(),
-                savedComment.getTextContent(),
-                savedComment.getCreatedAt()
+                comment.getId(),
+                WriterResponse.from(comment.getMember()),
+                comment.getParentComment().getId(),
+                comment.isDeleted() ? Comment.DELETED_CONTENT_TEXT : comment.getTextContent(),
+                comment.getCreatedAt()
         );
     }
 
