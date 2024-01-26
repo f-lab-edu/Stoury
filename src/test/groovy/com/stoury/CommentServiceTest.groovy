@@ -6,18 +6,16 @@ import com.stoury.domain.Member
 import com.stoury.exception.CommentCreateException
 import com.stoury.exception.CommentSearchException
 import com.stoury.repository.CommentRepository
-import com.stoury.repository.FeedRepository
-import com.stoury.repository.MemberRepository
 import com.stoury.service.CommentService
+import com.stoury.validator.Validator
 import spock.lang.Specification
 
 import java.time.LocalDateTime
 
 class CommentServiceTest extends Specification {
-    def memberRepository = Mock(MemberRepository)
-    def feedRepository = Mock(FeedRepository)
+    def validator = Mock(Validator)
     def commentRepository = Mock(CommentRepository)
-    def commentService = new CommentService(commentRepository, memberRepository, feedRepository)
+    def commentService = new CommentService(commentRepository, validator)
 
     def member = Mock(Member)
     def feed = Mock(Feed)
@@ -34,9 +32,6 @@ class CommentServiceTest extends Specification {
         savedNestedComment.getMember() >> member
         savedNestedComment.getParentComment() >> savedComment
         savedNestedComment.hasParent() >> true
-        memberRepository.existsById(_) >> true
-        feedRepository.existsById(_) >> true
-        commentRepository.existsById(_) >> true
     }
 
     def "댓글 생성 성공"() {
@@ -79,5 +74,14 @@ class CommentServiceTest extends Specification {
         commentService.getNestedComments(savedNestedComment, LocalDateTime.now())
         then:
         thrown(CommentSearchException.class)
+    }
+
+    def "댓글 삭제 성공"() {
+        given:
+        def comment = new Comment(member, feed, "blabla")
+        when:
+        commentService.deleteComment(comment)
+        then:
+        comment.isDeleted()
     }
 }
