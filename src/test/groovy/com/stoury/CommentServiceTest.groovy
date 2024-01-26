@@ -3,6 +3,7 @@ package com.stoury
 import com.stoury.domain.Comment
 import com.stoury.domain.Feed
 import com.stoury.domain.Member
+import com.stoury.exception.CommentCreateException
 import com.stoury.repository.CommentRepository
 import com.stoury.repository.FeedRepository
 import com.stoury.repository.MemberRepository
@@ -20,12 +21,13 @@ class CommentServiceTest extends Specification {
     def savedComment = Mock(Comment)
     def savedNestedComment = Mock(Comment)
 
-    def setup(){
+    def setup() {
         member.getId() >> 1L
         feed.getId() >> 1L
         savedComment.getId() >> 1L
-        savedComment.getMember()  >> member
+        savedComment.getMember() >> member
         savedComment.getFeed() >> feed
+        savedNestedComment.getId() >> 2L
         savedNestedComment.getMember() >> member
         savedNestedComment.getParentComment() >> savedComment
         memberRepository.existsById(_) >> true
@@ -45,5 +47,14 @@ class CommentServiceTest extends Specification {
         commentService.createNestedComment(member, savedComment, "This is nested comment")
         then:
         1 * commentRepository.save(_ as Comment) >> savedNestedComment
+    }
+
+    def "대대댓글 생성 실패"() {
+        given:
+        savedNestedComment.hasParent() >> true
+        when:
+        commentService.createNestedComment(member, savedNestedComment, "This is double nested comment")
+        then:
+        thrown(CommentCreateException.class)
     }
 }
