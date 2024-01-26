@@ -55,4 +55,8 @@ public class Comment {
     public boolean hasParent() {
         return parentComment != null;
     }
+
+    public boolean hasNestedComments() {
+        return !nestedComments.isEmpty();
+    }
 }

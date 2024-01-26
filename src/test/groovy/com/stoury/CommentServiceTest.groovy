@@ -10,6 +10,8 @@ import com.stoury.repository.MemberRepository
 import com.stoury.service.CommentService
 import spock.lang.Specification
 
+import java.time.LocalDateTime
+
 class CommentServiceTest extends Specification {
     def memberRepository = Mock(MemberRepository)
     def feedRepository = Mock(FeedRepository)
@@ -56,5 +58,12 @@ class CommentServiceTest extends Specification {
         commentService.createNestedComment(member, savedNestedComment, "This is double nested comment")
         then:
         thrown(CommentCreateException.class)
+    }
+
+    def "댓글 조회"() {
+        when:
+        commentService.getCommentsOfFeed(feed, LocalDateTime.now())
+        then:
+        1 * commentRepository.findAllByFeedAndCreatedAtBefore(_, _, _) >> List.of(savedComment)
     }
 }
