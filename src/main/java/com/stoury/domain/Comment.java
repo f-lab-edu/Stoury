@@ -17,6 +17,8 @@ import java.util.List;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "COMMENT")
 public class Comment {
+    public static final String DELETED_CONTENT_TEXT = "This comment was deleted";
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

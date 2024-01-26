@@ -7,14 +7,14 @@ import java.util.List;
 
 public record CommentResponse(Long id, WriterResponse writerResponse, Long feedId,
                               boolean hasNestedComments, String textContent, LocalDateTime createdAt) {
-    public static CommentResponse from(Comment savedComment) {
+    public static CommentResponse from(Comment comment) {
         return new CommentResponse(
-                savedComment.getId(),
-                WriterResponse.from(savedComment.getMember()),
-                savedComment.getFeed().getId(),
-                savedComment.hasNestedComments(),
-                savedComment.getTextContent(),
-                savedComment.getCreatedAt()
+                comment.getId(),
+                WriterResponse.from(comment.getMember()),
+                comment.getFeed().getId(),
+                comment.hasNestedComments(),
+                comment.isDeleted() ? Comment.DELETED_CONTENT_TEXT : comment.getTextContent(),
+                comment.getCreatedAt()
         );
     }
 
