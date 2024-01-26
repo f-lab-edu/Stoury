@@ -13,14 +13,20 @@ import com.stoury.repository.CommentRepository;
 import com.stoury.repository.FeedRepository;
 import com.stoury.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
 public class CommentService {
+    public final int PAGE_SIZE = 50;
     private final CommentRepository commentRepository;
     private final MemberRepository memberRepository;
     private final FeedRepository feedRepository;
@@ -49,6 +55,17 @@ public class CommentService {
         Comment savedComment = commentRepository.save(comment);
 
         return NestedCommentResponse.from(savedComment);
+    }
+
+    @Transactional(readOnly = true)
+    public List<CommentResponse> getCommentsOfFeed(Feed feed, LocalDateTime orderThan) {
+        validate(feed);
+
+        Pageable pageable = PageRequest.of(0, PAGE_SIZE, Sort.by("createdAt").descending());
+
+        List<Comment> comments = commentRepository.findAllByFeedAndCreatedAtBefore(feed, orderThan, pageable);
+
+        return CommentResponse.from(comments);
     }
 
     private void validate(Comment parentComment) {

@@ -16,7 +16,7 @@ class LikeServiceTest extends Specification {
     def memberRepository = Mock(MemberRepository)
     def feedRepository = Mock(FeedRepository)
     def likeRepository = Mock(LikeRepository)
-    def likeService = new LikeService(feedRepository, memberRepository, likeRepository)
+    def likeService = new LikeService(memberRepository, feedRepository, likeRepository)
     def liker = Mock(Member)
     def feed = Mock(Feed)
 
