@@ -7,11 +7,8 @@ import com.stoury.dto.CommentResponse;
 import com.stoury.dto.NestedCommentResponse;
 import com.stoury.exception.CommentCreateException;
 import com.stoury.exception.CommentSearchException;
-import com.stoury.exception.feed.FeedSearchException;
-import com.stoury.exception.member.MemberSearchException;
 import com.stoury.repository.CommentRepository;
-import com.stoury.repository.FeedRepository;
-import com.stoury.repository.MemberRepository;
+import com.stoury.validator.Validator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -28,13 +25,12 @@ import java.util.Objects;
 public class CommentService {
     public final int PAGE_SIZE = 20;
     private final CommentRepository commentRepository;
-    private final MemberRepository memberRepository;
-    private final FeedRepository feedRepository;
+    private final Validator validator;
 
     @Transactional
     public CommentResponse createComment(Member member, Feed feed, String commentText) {
-        validate(member);
-        validate(feed);
+        validator.isMemberExists(member);
+        validator.isFeedExists(feed);
 
         Comment comment = new Comment(member, feed,
                 Objects.requireNonNull(commentText, "Comment text can not be empty."));
@@ -46,11 +42,11 @@ public class CommentService {
 
     @Transactional
     public NestedCommentResponse createNestedComment(Member member, Comment parentComment, String commentText) {
-        validate(member);
+        validator.isMemberExists(member);
         if (parentComment.hasParent()) {
             throw new CommentCreateException("Nested comments are allowed in a level.");
         }
-        validate(parentComment);
+        validator.isCommentExists(parentComment);
 
         Comment comment = new Comment(member, parentComment,
                 Objects.requireNonNull(commentText, "Comment text can not be empty."));
@@ -62,7 +58,7 @@ public class CommentService {
 
     @Transactional(readOnly = true)
     public List<CommentResponse> getCommentsOfFeed(Feed feed, LocalDateTime orderThan) {
-        validate(feed);
+        validator.isFeedExists(feed);
 
         Pageable pageable = PageRequest.of(0, PAGE_SIZE, Sort.by("createdAt").descending());
 
@@ -76,7 +72,7 @@ public class CommentService {
         if (parentComment.hasParent()) {
             throw new CommentSearchException("Nested comments are allowed in a level.");
         }
-        validate(parentComment);
+        validator.isCommentExists(parentComment);
 
         Pageable pageable = PageRequest.of(0, PAGE_SIZE, Sort.by("createdAt").descending());
 
@@ -86,24 +82,10 @@ public class CommentService {
         return NestedCommentResponse.from(nestedComments);
     }
 
-    private void validate(Comment comment) {
-        Long parentCommentId = Objects.requireNonNull(comment.getId(), "Parent Id cannot be null");
-        if (!commentRepository.existsById(parentCommentId)) {
-            throw new CommentSearchException("Comment not found");
-        }
-    }
+    @Transactional
+    public void deleteComment(Comment comment) {
+        validator.isCommentExists(comment);
 
-    private void validate(Member commentWriter) {
-        Long writerId = Objects.requireNonNull(commentWriter.getId(), "Liker Id cannot be null");
-        if (!memberRepository.existsById(writerId)) {
-            throw new MemberSearchException("Member not found");
-        }
-    }
-
-    private void validate(Feed feed) {
-        Long feedId = Objects.requireNonNull(feed.getId(), "Feed Id cannot be null");
-        if (!feedRepository.existsById(feedId)) {
-            throw new FeedSearchException("Feed not found");
-        }
+        comment.delete();
     }
 }
