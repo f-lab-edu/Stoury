@@ -26,7 +26,7 @@ import java.util.Objects;
 @Service
 @RequiredArgsConstructor
 public class CommentService {
-    public final int PAGE_SIZE = 50;
+    public final int PAGE_SIZE = 20;
     private final CommentRepository commentRepository;
     private final MemberRepository memberRepository;
     private final FeedRepository feedRepository;
@@ -47,6 +47,9 @@ public class CommentService {
     @Transactional
     public NestedCommentResponse createNestedComment(Member member, Comment parentComment, String commentText) {
         validate(member);
+        if (parentComment.hasParent()) {
+            throw new CommentCreateException("Nested comments are allowed in a level.");
+        }
         validate(parentComment);
 
         Comment comment = new Comment(member, parentComment,
@@ -68,13 +71,25 @@ public class CommentService {
         return CommentResponse.from(comments);
     }
 
-    private void validate(Comment parentComment) {
-        Long parentCommentId = Objects.requireNonNull(parentComment.getId(), "Parent Id cannot be null");
+    @Transactional(readOnly = true)
+    public List<NestedCommentResponse> getNestedComments(Comment parentComment, LocalDateTime orderThan) {
+        if (parentComment.hasParent()) {
+            throw new CommentSearchException("Nested comments are allowed in a level.");
+        }
+        validate(parentComment);
+
+        Pageable pageable = PageRequest.of(0, PAGE_SIZE, Sort.by("createdAt").descending());
+
+        List<Comment> nestedComments = commentRepository.findAllByParentCommentAndCreatedAtBefore(parentComment,
+                orderThan, pageable);
+
+        return NestedCommentResponse.from(nestedComments);
+    }
+
+    private void validate(Comment comment) {
+        Long parentCommentId = Objects.requireNonNull(comment.getId(), "Parent Id cannot be null");
         if (!commentRepository.existsById(parentCommentId)) {
             throw new CommentSearchException("Comment not found");
-        }
-        if (parentComment.hasParent()) {
-            throw new CommentCreateException("Nested comments are allowed in a level.");
         }
     }
 
