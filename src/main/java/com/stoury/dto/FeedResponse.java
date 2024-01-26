@@ -16,8 +16,9 @@ public record FeedResponse(Long feedId,
                            List<String> tagNames,
                            Double latitude,
                            Double longitude,
+                           int likes,
                            LocalDateTime createdAt) {
-    public static FeedResponse from(Feed uploadedFeed) {
+    public static FeedResponse from(Feed uploadedFeed, int feedLikes) {
         return new FeedResponse(
                 uploadedFeed.getId(),
                 MemberResponse.from(uploadedFeed.getMember()),
@@ -26,15 +27,8 @@ public record FeedResponse(Long feedId,
                 uploadedFeed.getTags().stream().map(Tag::getTagName).toList(),
                 uploadedFeed.getLatitude(),
                 uploadedFeed.getLongitude(),
+                feedLikes,
                 uploadedFeed.getCreatedAt()
         );
-    }
-
-    public static Slice<FeedResponse> from(Slice<Feed> feedSlice) {
-        List<FeedResponse> feedResponses = feedSlice.stream()
-                .map(FeedResponse::from)
-                .toList();
-
-        return new SliceImpl<>(feedResponses, feedSlice.getPageable(), feedSlice.hasNext());
     }
 }
