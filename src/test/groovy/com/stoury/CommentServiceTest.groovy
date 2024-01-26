@@ -17,13 +17,20 @@ class CommentServiceTest extends Specification {
 
     def member = Mock(Member)
     def feed = Mock(Feed)
-    def savedComment = new Comment(member, feed, "")
+    def savedComment = Mock(Comment)
+    def savedNestedComment = Mock(Comment)
 
     def setup(){
         member.getId() >> 1L
         feed.getId() >> 1L
+        savedComment.getId() >> 1L
+        savedComment.getMember()  >> member
+        savedComment.getFeed() >> feed
+        savedNestedComment.getMember() >> member
+        savedNestedComment.getParentComment() >> savedComment
         memberRepository.existsById(_) >> true
         feedRepository.existsById(_) >> true
+        commentRepository.existsById(_) >> true
     }
 
     def "댓글 생성 성공"() {
@@ -31,5 +38,12 @@ class CommentServiceTest extends Specification {
         commentService.createComment(member, feed, "This is comment")
         then:
         1 * commentRepository.save(_ as Comment) >> savedComment
+    }
+
+    def "대댓글 생성 성공"() {
+        when:
+        commentService.createNestedComment(member, savedComment, "This is nested comment")
+        then:
+        1 * commentRepository.save(_ as Comment) >> savedNestedComment
     }
 }
