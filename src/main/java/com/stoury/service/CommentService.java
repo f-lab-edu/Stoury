@@ -4,7 +4,7 @@ import com.stoury.domain.Comment;
 import com.stoury.domain.Feed;
 import com.stoury.domain.Member;
 import com.stoury.dto.CommentResponse;
-import com.stoury.dto.NestedCommentResponse;
+import com.stoury.dto.ChildCommentResponse;
 import com.stoury.exception.CommentCreateException;
 import com.stoury.exception.CommentSearchException;
 import com.stoury.repository.CommentRepository;
@@ -35,13 +35,11 @@ public class CommentService {
         Comment comment = new Comment(member, feed,
                 Objects.requireNonNull(commentText, "Comment text can not be empty."));
 
-        Comment savedComment = commentRepository.save(comment);
-
-        return CommentResponse.from(savedComment);
+        return CommentResponse.from(commentRepository.save(comment));
     }
 
     @Transactional
-    public NestedCommentResponse createNestedComment(Member member, Comment parentComment, String commentText) {
+    public ChildCommentResponse createNestedComment(Member member, Comment parentComment, String commentText) {
         validator.isMemberExists(member);
         if (parentComment.hasParent()) {
             throw new CommentCreateException("Nested comments are allowed in a level.");
@@ -51,9 +49,7 @@ public class CommentService {
         Comment comment = new Comment(member, parentComment,
                 Objects.requireNonNull(commentText, "Comment text can not be empty."));
 
-        Comment savedComment = commentRepository.save(comment);
-
-        return NestedCommentResponse.from(savedComment);
+        return ChildCommentResponse.from(commentRepository.save(comment));
     }
 
     @Transactional(readOnly = true)
@@ -62,13 +58,11 @@ public class CommentService {
 
         Pageable pageable = PageRequest.of(0, PAGE_SIZE, Sort.by("createdAt").descending());
 
-        List<Comment> comments = commentRepository.findAllByFeedAndCreatedAtBefore(feed, orderThan, pageable);
-
-        return CommentResponse.from(comments);
+        return CommentResponse.from(commentRepository.findAllByFeedAndCreatedAtBefore(feed, orderThan, pageable));
     }
 
     @Transactional(readOnly = true)
-    public List<NestedCommentResponse> getNestedComments(Comment parentComment, LocalDateTime orderThan) {
+    public List<ChildCommentResponse> getNestedComments(Comment parentComment, LocalDateTime orderThan) {
         if (parentComment.hasParent()) {
             throw new CommentSearchException("Nested comments are allowed in a level.");
         }
@@ -76,10 +70,8 @@ public class CommentService {
 
         Pageable pageable = PageRequest.of(0, PAGE_SIZE, Sort.by("createdAt").descending());
 
-        List<Comment> nestedComments = commentRepository.findAllByParentCommentAndCreatedAtBefore(parentComment,
-                orderThan, pageable);
-
-        return NestedCommentResponse.from(nestedComments);
+        return ChildCommentResponse.from(commentRepository.findAllByParentCommentAndCreatedAtBefore(parentComment,
+                orderThan, pageable));
     }
 
     @Transactional
