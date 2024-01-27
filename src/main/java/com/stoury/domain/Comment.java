@@ -30,11 +30,11 @@ public class Comment {
     private Feed feed;
 
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "parentComment")
-    List<Comment> nestedComments = new ArrayList<>();
+    private List<Comment> childComments = new ArrayList<>();
 
     @ManyToOne(optional = true)
     @JoinColumn(name = "PARENT_COMMENT_ID")
-    Comment parentComment;
+    private Comment parentComment;
 
     @Column(name = "TEXT_CONTENT", length = 200, nullable = false)
     private String textContent;
@@ -63,7 +63,7 @@ public class Comment {
     }
 
     public boolean hasNestedComments() {
-        return !nestedComments.isEmpty();
+        return !childComments.isEmpty();
     }
 
     public void delete() {
