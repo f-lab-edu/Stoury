@@ -5,10 +5,10 @@ import com.stoury.domain.Comment;
 import java.time.LocalDateTime;
 import java.util.List;
 
-public record NestedCommentResponse(Long id, WriterResponse writerResponse, Long parentCommentId,
-                                    String textContent, LocalDateTime createdAt) {
-    public static NestedCommentResponse from(Comment comment) {
-        return new NestedCommentResponse(
+public record ChildCommentResponse(Long id, WriterResponse writerResponse, Long parentCommentId,
+                                   String textContent, LocalDateTime createdAt) {
+    public static ChildCommentResponse from(Comment comment) {
+        return new ChildCommentResponse(
                 comment.getId(),
                 WriterResponse.from(comment.getMember()),
                 comment.getParentComment().getId(),
@@ -17,9 +17,9 @@ public record NestedCommentResponse(Long id, WriterResponse writerResponse, Long
         );
     }
 
-    public static List<NestedCommentResponse> from(List<Comment> nestedComments) {
+    public static List<ChildCommentResponse> from(List<Comment> nestedComments) {
         return nestedComments.stream()
-                .map(NestedCommentResponse::from)
+                .map(ChildCommentResponse::from)
                 .toList();
     }
 }
