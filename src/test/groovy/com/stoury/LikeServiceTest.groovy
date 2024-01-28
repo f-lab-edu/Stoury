@@ -69,4 +69,11 @@ class LikeServiceTest extends Specification {
         then:
         1 * likeRepository.deleteByMemberAndFeed(liker, feed)
     }
+
+    def "특정 피드의 좋아요만 가져오기"() {
+        when:
+        likeService.getLikesOfFeed(1L)
+        then:
+        1 * likeRepository.countByFeed(_ as Feed)
+    }
 }
