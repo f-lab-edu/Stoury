@@ -1,4 +1,4 @@
-package com.stoury
+package com.stoury.service
 
 import com.stoury.domain.Feed
 import com.stoury.domain.Like
