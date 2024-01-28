@@ -3,12 +3,15 @@ package com.stoury.service;
 import com.stoury.domain.Comment;
 import com.stoury.domain.Feed;
 import com.stoury.domain.Member;
-import com.stoury.dto.CommentResponse;
 import com.stoury.dto.ChildCommentResponse;
+import com.stoury.dto.CommentResponse;
 import com.stoury.exception.CommentCreateException;
 import com.stoury.exception.CommentSearchException;
+import com.stoury.exception.feed.FeedSearchException;
+import com.stoury.exception.member.MemberSearchException;
 import com.stoury.repository.CommentRepository;
-import com.stoury.validator.Validator;
+import com.stoury.repository.FeedRepository;
+import com.stoury.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -25,12 +28,15 @@ import java.util.Objects;
 public class CommentService {
     public final int PAGE_SIZE = 20;
     private final CommentRepository commentRepository;
-    private final Validator validator;
+    private final MemberRepository memberRepository;
+    private final FeedRepository feedRepository;
 
     @Transactional
-    public CommentResponse createComment(Member member, Feed feed, String commentText) {
-        validator.isMemberExists(member);
-        validator.isFeedExists(feed);
+    public CommentResponse createComment(Long memberId, Long feedId, String commentText) {
+        Member member = memberRepository.findById(Objects.requireNonNull(memberId))
+                .orElseThrow(MemberSearchException::new);
+        Feed feed = feedRepository.findById(Objects.requireNonNull(feedId))
+                .orElseThrow(FeedSearchException::new);
 
         Comment comment = new Comment(member, feed,
                 Objects.requireNonNull(commentText, "Comment text can not be empty."));
@@ -39,12 +45,14 @@ public class CommentService {
     }
 
     @Transactional
-    public ChildCommentResponse createNestedComment(Member member, Comment parentComment, String commentText) {
-        validator.isMemberExists(member);
+    public ChildCommentResponse createNestedComment(Long memberId, Long parentCommentId, String commentText) {
+        Member member = memberRepository.findById(Objects.requireNonNull(memberId))
+                .orElseThrow(MemberSearchException::new);
+        Comment parentComment = commentRepository.findById(Objects.requireNonNull(parentCommentId))
+                .orElseThrow(CommentSearchException::new);
         if (parentComment.hasParent()) {
             throw new CommentCreateException("Nested comments are allowed in a level.");
         }
-        validator.isCommentExists(parentComment);
 
         Comment comment = new Comment(member, parentComment,
                 Objects.requireNonNull(commentText, "Comment text can not be empty."));
@@ -53,8 +61,9 @@ public class CommentService {
     }
 
     @Transactional(readOnly = true)
-    public List<CommentResponse> getCommentsOfFeed(Feed feed, LocalDateTime orderThan) {
-        validator.isFeedExists(feed);
+    public List<CommentResponse> getCommentsOfFeed(Long feedId, LocalDateTime orderThan) {
+        Feed feed = feedRepository.findById(Objects.requireNonNull(feedId))
+                .orElseThrow(FeedSearchException::new);
 
         Pageable pageable = PageRequest.of(0, PAGE_SIZE, Sort.by("createdAt").descending());
 
@@ -62,11 +71,12 @@ public class CommentService {
     }
 
     @Transactional(readOnly = true)
-    public List<ChildCommentResponse> getNestedComments(Comment parentComment, LocalDateTime orderThan) {
+    public List<ChildCommentResponse> getChildComments(Long parentCommentId, LocalDateTime orderThan) {
+        Comment parentComment = commentRepository.findById(Objects.requireNonNull(parentCommentId))
+                .orElseThrow(CommentSearchException::new);
         if (parentComment.hasParent()) {
             throw new CommentSearchException("Nested comments are allowed in a level.");
         }
-        validator.isCommentExists(parentComment);
 
         Pageable pageable = PageRequest.of(0, PAGE_SIZE, Sort.by("createdAt").descending());
 
@@ -75,8 +85,9 @@ public class CommentService {
     }
 
     @Transactional
-    public void deleteComment(Comment comment) {
-        validator.isCommentExists(comment);
+    public void deleteComment(Long commentId) {
+        Comment comment = commentRepository.findById(Objects.requireNonNull(commentId))
+                .orElseThrow(CommentSearchException::new);
 
         comment.delete();
     }
