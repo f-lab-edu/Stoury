@@ -8,7 +8,6 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @Entity
 @Getter
-@EntityListeners(AuditingEntityListener.class)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "LIKES", uniqueConstraints = @UniqueConstraint(name = "LIKES_UNIQUE_CONSTRAINTS",
         columnNames = {"MEMBER_ID", "FEED_ID"}))

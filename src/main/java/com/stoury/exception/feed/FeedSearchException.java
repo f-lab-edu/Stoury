@@ -2,7 +2,7 @@ package com.stoury.exception.feed;
 
 public class FeedSearchException extends RuntimeException {
     public FeedSearchException() {
-        super();
+        this("Cannot find feed");
     }
 
     public FeedSearchException(String message) {

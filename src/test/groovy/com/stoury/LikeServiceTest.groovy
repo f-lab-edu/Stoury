@@ -6,38 +6,29 @@ import com.stoury.domain.Member
 import com.stoury.exception.AlreadyLikedFeedException
 import com.stoury.exception.feed.FeedSearchException
 import com.stoury.exception.member.MemberSearchException
-import com.stoury.repository.FeedRepository
 import com.stoury.repository.LikeRepository
-import com.stoury.repository.MemberRepository
 import com.stoury.service.LikeService
+import com.stoury.validator.Validator
 import spock.lang.Specification
 
 class LikeServiceTest extends Specification {
-    def memberRepository = Mock(MemberRepository)
-    def feedRepository = Mock(FeedRepository)
+    def validator = Mock(Validator)
     def likeRepository = Mock(LikeRepository)
-    def likeService = new LikeService(feedRepository, memberRepository, likeRepository)
+    def likeService = new LikeService(likeRepository, validator)
     def liker = Mock(Member)
     def feed = Mock(Feed)
 
     def "좋아요 성공"() {
-        setup:
-        liker.getId() >> 1L
-        feed.getId() >> 1L
-        memberRepository.existsById(_) >> true
-        feedRepository.existsById(_) >> true
-
         when:
         likeService.like(liker, feed);
 
         then:
-
         1 * likeRepository.save(_ as Like)
     }
 
     def "좋아요 실패 - 존재하지 않는 사용자"() {
         setup:
-        liker.getId() >> 2L
+        validator.isMemberExists(_ as Member) >> {throw new MemberSearchException()}
 
         when:
         likeService.like(liker, feed);
@@ -48,9 +39,7 @@ class LikeServiceTest extends Specification {
 
     def "좋아요 실패 - 존재하지 않는 피드"() {
         setup:
-        liker.getId() >> 1L
-        feed.getId() >> 1L
-        memberRepository.existsById(_) >> true
+        validator.isFeedExists(_ as Feed) >> {throw new FeedSearchException()}
 
         when:
         likeService.like(liker, feed);
@@ -61,10 +50,6 @@ class LikeServiceTest extends Specification {
 
     def "좋아요 실패 - 이미 좋아요 한 피드"() {
         setup:
-        liker.getId() >> 1L
-        feed.getId() >> 1L
-        memberRepository.existsById(_) >> true
-        feedRepository.existsById(_) >> true
         likeRepository.existsByMemberAndFeed(_ as Member, _ as Feed) >> true
 
         when:
@@ -75,12 +60,6 @@ class LikeServiceTest extends Specification {
     }
 
     def "좋아요 취소 성공"() {
-        setup:
-        liker.getId() >> 1L
-        feed.getId() >> 1L
-        memberRepository.existsById(_) >> true
-        feedRepository.existsById(_) >> true
-
         when:
         likeService.likeCancel(liker, feed)
 
