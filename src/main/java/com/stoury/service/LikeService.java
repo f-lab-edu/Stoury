@@ -5,7 +5,6 @@ import com.stoury.domain.Like;
 import com.stoury.domain.Member;
 import com.stoury.exception.AlreadyLikedFeedException;
 import com.stoury.repository.LikeRepository;
-import com.stoury.validator.Validator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,12 +13,15 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class LikeService {
     private final LikeRepository likeRepository;
-    private final Validator validator;
+    private final MemberRepository memberRepository;
+    private final FeedRepository feedRepository;
 
     @Transactional
-    public void like(Member liker, Feed feed) {
-        validator.isMemberExists(liker);
-        validator.isFeedExists(feed);
+    public void like(Long likerId, Long feedId) {
+        Member liker = memberRepository.findById(Objects.requireNonNull(likerId))
+                .orElseThrow(MemberSearchException::new);
+        Feed feed = feedRepository.findById(Objects.requireNonNull(feedId))
+                .orElseThrow(FeedSearchException::new);
 
         if (likeRepository.existsByMemberAndFeed(liker, feed)) {
             throw new AlreadyLikedFeedException("You already liked the feed");
@@ -30,10 +32,19 @@ public class LikeService {
     }
 
     @Transactional
-    public void likeCancel(Member canceler, Feed feed) {
-        validator.isMemberExists(canceler);
-        validator.isFeedExists(feed);
+    public void likeCancel(Long likerId, Long feedId) {
+        Member liker = memberRepository.findById(Objects.requireNonNull(likerId))
+                .orElseThrow(MemberSearchException::new);
+        Feed feed = feedRepository.findById(Objects.requireNonNull(feedId))
+                .orElseThrow(FeedSearchException::new);
 
-        likeRepository.deleteByMemberAndFeed(canceler, feed);
+        likeRepository.deleteByMemberAndFeed(liker, feed);
+    }
+
+    @Transactional
+    public int getLikesOfFeed(Long feedId) {
+        Feed feed = feedRepository.findById(Objects.requireNonNull(feedId))
+                .orElseThrow(FeedSearchException::new);
+        return likeRepository.countByFeed(feed);
     }
 }
