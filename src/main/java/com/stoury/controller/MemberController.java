@@ -19,6 +19,6 @@ public class MemberController {
     public ResponseEntity<MemberResponse> createMember(@RequestBody MemberCreateRequest memberCreateRequest) {
         MemberResponse createdMember = memberService.createMember(memberCreateRequest);
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(createdMember);
+        return ResponseEntity.ok(createdMember);
     }
 }
