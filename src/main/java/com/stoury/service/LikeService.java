@@ -53,7 +53,7 @@ public class LikeService {
     }
 
     @Transactional
-    public int getLikesOfFeed(Long feedId) {
+    public long getLikesOfFeed(Long feedId) {
         Feed feed = feedRepository.findById(Objects.requireNonNull(feedId))
                 .orElseThrow(FeedSearchException::new);
 

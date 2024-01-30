@@ -45,9 +45,9 @@ public class LikeRedisRepository {
         return false;
     }
 
-    public int countByFeed(Feed feed) {
+    public long countByFeed(Feed feed) {
         String feedId = getFeedIdToString(feed);
-        return Math.toIntExact(opsForSet.size(feedId));
+        return opsForSet.size(feedId);
     }
 
     private String getFeedIdToString(Feed feed) {
