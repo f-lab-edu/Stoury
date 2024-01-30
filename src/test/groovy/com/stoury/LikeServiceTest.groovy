@@ -12,39 +12,41 @@ import com.stoury.validator.Validator
 import spock.lang.Specification
 
 class LikeServiceTest extends Specification {
-    def validator = Mock(Validator)
     def likeRepository = Mock(LikeRepository)
-    def likeService = new LikeService(likeRepository, validator)
+    def memberRepository = Mock(MemberRepository)
+    def feedRepository = Mock(FeedRepository)
+    def likeService = new LikeService(likeRepository, memberRepository, feedRepository)
     def liker = Mock(Member)
     def feed = Mock(Feed)
 
+    def setup() {
+        memberRepository.findById(_ as Long) >> Optional.of(liker)
+        feedRepository.findById(_ as Long) >> Optional.of(feed)
+    }
+
     def "좋아요 성공"() {
         when:
-        likeService.like(liker, feed);
+        likeService.like(1L, 2L);
 
         then:
         1 * likeRepository.save(_ as Like)
     }
 
     def "좋아요 실패 - 존재하지 않는 사용자"() {
-        setup:
-        validator.isMemberExists(_ as Member) >> {throw new MemberSearchException()}
-
         when:
-        likeService.like(liker, feed);
+        likeService.like(1L, 2L);
 
         then:
+        memberRepository.findById(_ as Long) >> Optional.empty()
         thrown(MemberSearchException.class)
     }
 
     def "좋아요 실패 - 존재하지 않는 피드"() {
-        setup:
-        validator.isFeedExists(_ as Feed) >> {throw new FeedSearchException()}
-
         when:
-        likeService.like(liker, feed);
+        likeService.like(1L, 2L);
 
         then:
+        feedRepository.findById(_ as Long) >> Optional.empty()
         thrown(FeedSearchException.class)
     }
 
@@ -53,7 +55,7 @@ class LikeServiceTest extends Specification {
         likeRepository.existsByMemberAndFeed(_ as Member, _ as Feed) >> true
 
         when:
-        likeService.like(liker, feed);
+        likeService.like(1L, 2L);
 
         then:
         thrown(AlreadyLikedFeedException.class)
@@ -61,9 +63,16 @@ class LikeServiceTest extends Specification {
 
     def "좋아요 취소 성공"() {
         when:
-        likeService.likeCancel(liker, feed)
+        likeService.likeCancel(1L, 2L)
 
         then:
         1 * likeRepository.deleteByMemberAndFeed(liker, feed)
+    }
+
+    def "특정 피드의 좋아요만 가져오기"() {
+        when:
+        likeService.getLikesOfFeed(1L)
+        then:
+        1 * likeRepository.countByFeed(_ as Feed)
     }
 }
