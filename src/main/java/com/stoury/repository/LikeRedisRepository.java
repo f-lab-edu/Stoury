@@ -3,8 +3,6 @@ package com.stoury.repository;
 import com.stoury.domain.Feed;
 import com.stoury.domain.Like;
 import com.stoury.domain.Member;
-import jakarta.annotation.PostConstruct;
-import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.SetOperations;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Repository;
@@ -13,13 +11,12 @@ import java.util.Objects;
 import java.util.Set;
 
 @Repository
-@RequiredArgsConstructor
 public class LikeRedisRepository {
     private final StringRedisTemplate redisTemplate;
     private SetOperations<String, String> opsForSet;
 
-    @PostConstruct
-    private void init() {
+    public LikeRedisRepository(StringRedisTemplate redisTemplate) {
+        this.redisTemplate = redisTemplate;
         opsForSet = redisTemplate.opsForSet();
     }
 

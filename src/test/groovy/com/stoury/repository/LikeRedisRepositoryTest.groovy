@@ -13,7 +13,6 @@ class LikeRedisRepositoryTest extends Specification {
 
     def setup() {
         connectionFactory.start()
-        likeRedisRepository.init()
     }
 
     def cleanup() {
