@@ -18,3 +18,5 @@ spring:
 logging:
   level:
     org.hibernate.orm.jdbc.bind: trace
+
+token-secret: TOKEN_SECRET_TEST
