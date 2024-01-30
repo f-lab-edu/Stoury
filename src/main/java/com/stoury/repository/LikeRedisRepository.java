@@ -61,9 +61,4 @@ public class LikeRedisRepository {
 
         return memberId.toString();
     }
-
-    private void clearAllOnlyForTest() {
-        Set<String> allKeys = redisTemplate.keys("*");
-        redisTemplate.delete(allKeys);
-    }
 }

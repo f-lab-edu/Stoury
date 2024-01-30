@@ -16,7 +16,9 @@ class LikeRedisRepositoryTest extends Specification {
     }
 
     def cleanup() {
-        likeRedisRepository.clearAllOnlyForTest()
+        def redisTemplate = likeRedisRepository.redisTemplate
+        Set<String> allKeys = redisTemplate.keys("*");
+        redisTemplate.delete(allKeys);
     }
 
     def "좋아요 저장 성공"() {
