@@ -6,10 +6,9 @@ import com.stoury.domain.Member
 import com.stoury.exception.AlreadyLikedFeedException
 import com.stoury.exception.feed.FeedSearchException
 import com.stoury.exception.member.MemberSearchException
-import com.stoury.repository.FeedRepository
 import com.stoury.repository.LikeRepository
-import com.stoury.repository.MemberRepository
 import com.stoury.service.LikeService
+import com.stoury.validator.Validator
 import spock.lang.Specification
 
 class LikeServiceTest extends Specification {

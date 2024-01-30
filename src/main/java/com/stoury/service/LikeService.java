@@ -4,16 +4,11 @@ import com.stoury.domain.Feed;
 import com.stoury.domain.Like;
 import com.stoury.domain.Member;
 import com.stoury.exception.AlreadyLikedFeedException;
-import com.stoury.exception.feed.FeedSearchException;
-import com.stoury.exception.member.MemberSearchException;
-import com.stoury.repository.FeedRepository;
 import com.stoury.repository.LikeRepository;
-import com.stoury.repository.MemberRepository;
+import com.stoury.validator.Validator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
