@@ -18,6 +18,7 @@ import com.stoury.repository.MemberRepository;
 import com.stoury.utils.FileUtils;
 import com.stoury.utils.SupportedFileType;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -33,7 +34,8 @@ import java.util.*;
 @Service
 @RequiredArgsConstructor
 public class FeedService {
-    public static final String PATH_PREFIX = "/feeds";
+    @Value("${path-prefix}")
+    public  String pathPrefix;
     public static final int PAGE_SIZE = 10;
     private final FeedRepository feedRepository;
     private final MemberRepository memberRepository;
@@ -61,7 +63,7 @@ public class FeedService {
         for (int i = 0; i < graphicContents.size(); i++) {
             MultipartFile file = graphicContents.get(i);
 
-            GraphicSaveEvent event = publishSaveEvent(file);
+            GraphicSaveEvent event = publishNewFileEvent(file);
             String contentPath = event.getPath();
 
             graphicContentList.add(new GraphicContent(contentPath, i));
@@ -81,8 +83,8 @@ public class FeedService {
                 .toList();
     }
 
-    private GraphicSaveEvent publishSaveEvent(MultipartFile file) {
-        String path = FileUtils.createFilePath(file, PATH_PREFIX);
+    private GraphicSaveEvent publishNewFileEvent(MultipartFile file) {
+        String path = FileUtils.createFilePath(file, pathPrefix);
         GraphicSaveEvent event = new GraphicSaveEvent(this, file, path);
         eventPublisher.publishEvent(event);
         return event;
@@ -132,13 +134,13 @@ public class FeedService {
 
         feed.update(feedUpdateRequest, getOrCreateTags(feedUpdateRequest.tagNames()));
 
-        publishDeleteEvents(beforeDeleteGraphicContents, feed.getGraphicContents());
+        publishDeleteFileEvents(beforeDeleteGraphicContents, feed.getGraphicContents());
 
         return FeedResponse.from(feed, likeRepository.countByFeed(feed));
     }
 
-    private void publishDeleteEvents(List<GraphicContent> beforeDeleteGraphicContents,
-                                     List<GraphicContent> afterDeleteGraphicContents) {
+    private void publishDeleteFileEvents(List<GraphicContent> beforeDeleteGraphicContents,
+                                         List<GraphicContent> afterDeleteGraphicContents) {
         for (GraphicContent beforeDeleteGraphicContent : beforeDeleteGraphicContents) {
             if (!afterDeleteGraphicContents.contains(beforeDeleteGraphicContent)) {
                 eventPublisher.publishEvent(new GraphicDeleteEvent(this, beforeDeleteGraphicContent.getPath()));

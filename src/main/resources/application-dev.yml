@@ -19,3 +19,6 @@ logging:
   level:
     org.springframework.security: trace
 token-secret: "TOKEN_SECRET_DEV"
+path-prefix: ${FEEDS}
+profileImage:
+  path-prefix: ${PROFILE_IMAGES}
