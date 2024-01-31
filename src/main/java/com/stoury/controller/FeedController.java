@@ -1,13 +1,19 @@
 package com.stoury.controller;
 
+import com.stoury.domain.Feed;
 import com.stoury.domain.Member;
 import com.stoury.dto.ErrorResponse;
 import com.stoury.dto.feed.FeedCreateRequest;
 import com.stoury.dto.feed.FeedResponse;
 import com.stoury.dto.feed.FeedUpdateRequest;
+import com.stoury.exception.feed.FeedCreateException;
+import com.stoury.exception.feed.FeedSearchException;
+import com.stoury.exception.feed.FeedUpdateException;
+import com.stoury.exception.member.MemberSearchException;
 import com.stoury.service.FeedService;
 import com.stoury.service.MemberService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.User;
@@ -66,5 +72,31 @@ public class FeedController {
         FeedResponse updatedFeed = feedService.updateFeed(feedId, writer, feedUpdateRequest);
 
         return ResponseEntity.ok(updatedFeed);
+    }
+
+    @DeleteMapping("/feeds/{feedId}")
+    public ResponseEntity deleteFeed(@AuthenticationPrincipal User user,
+                                     @PathVariable Long feedId) {
+        Member writer = memberService.getMemberByEmail(user.getUsername());
+
+        Feed feed = feedService.getFeed(feedId);
+
+        if (!feed.getMember().equals(writer)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        feedService.deleteFeed(feed);
+
+        return ResponseEntity.ok().build();
+    }
+
+    @ExceptionHandler(value = {FeedCreateException.class, FeedUpdateException.class})
+    public ResponseEntity handle400(RuntimeException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ErrorResponse.of(ex.getMessage()));
+    }
+
+    @ExceptionHandler(value = {FeedSearchException.class, MemberSearchException.class})
+    public ResponseEntity handle404(RuntimeException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ErrorResponse.of(ex.getMessage()));
     }
 }

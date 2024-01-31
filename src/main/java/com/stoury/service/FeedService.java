@@ -122,8 +122,7 @@ public class FeedService {
 
     @Transactional
     public FeedResponse updateFeed(Long feedId, Member writer, FeedUpdateRequest feedUpdateRequest) {
-        Feed feed = feedRepository.findById(Objects.requireNonNull(feedId))
-                .orElseThrow(FeedSearchException::new);
+        Feed feed = getFeed(feedId);
 
         if (!feed.getMember().equals(writer)) {
             throw new FeedUpdateException("Not Authorized");
@@ -145,5 +144,16 @@ public class FeedService {
                 eventPublisher.publishEvent(new GraphicDeleteEvent(this, beforeDeleteGraphicContent.getPath()));
             }
         }
+    }
+
+    @Transactional
+    public void deleteFeed(Feed feed) {
+        feedRepository.delete(feed);
+    }
+
+    @Transactional(readOnly = true)
+    public Feed getFeed(Long feedId) {
+        return feedRepository.findById(Objects.requireNonNull(feedId))
+                .orElseThrow(FeedSearchException::new);
     }
 }
