@@ -40,6 +40,7 @@ public class SecurityConfig {
         return http.csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(httpRequest -> httpRequest.requestMatchers("/login", "/members").permitAll()
                         .requestMatchers(new AntPathRequestMatcher("/members", "post")).permitAll()
+                        .requestMatchers(new AntPathRequestMatcher("/feeds", "get")).permitAll()
                         .anyRequest().authenticated())
                 .addFilter(authenticationFilter())
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
