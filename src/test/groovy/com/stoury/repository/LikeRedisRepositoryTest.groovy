@@ -9,7 +9,7 @@ import spock.lang.Specification
 
 class LikeRedisRepositoryTest extends Specification {
     def connectionFactory = new LettuceConnectionFactory("127.0.0.1", 8379) // 테스트용 레디스 컨테이너의 포트
-    def likeRedisRepository = new LikeRedisRepository(new StringRedisTemplate(connectionFactory))
+    def likeRedisRepository = new LikeRepository(new StringRedisTemplate(connectionFactory))
 
     def setup() {
         connectionFactory.start()

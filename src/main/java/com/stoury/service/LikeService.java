@@ -7,7 +7,6 @@ import com.stoury.exception.AlreadyLikedFeedException;
 import com.stoury.exception.feed.FeedSearchException;
 import com.stoury.exception.member.MemberSearchException;
 import com.stoury.repository.FeedRepository;
-import com.stoury.repository.LikeRedisRepository;
 import com.stoury.repository.LikeRepository;
 import com.stoury.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
@@ -19,8 +18,7 @@ import java.util.Objects;
 @Service
 @RequiredArgsConstructor
 public class LikeService {
-    private final LikeRepository likeJpaRepository;
-    private final LikeRedisRepository likeRedisRepository;
+    private final LikeRepository likeRedisRepository;
     private final MemberRepository memberRepository;
     private final FeedRepository feedRepository;
 
@@ -31,7 +29,7 @@ public class LikeService {
         Feed feed = feedRepository.findById(Objects.requireNonNull(feedId))
                 .orElseThrow(FeedSearchException::new);
 
-        if (likeRedisRepository.existsByMemberAndFeed(liker, feed) || likeJpaRepository.existsByMemberAndFeed(liker, feed)) {
+        if (likeRedisRepository.existsByMemberAndFeed(liker, feed)) {
             throw new AlreadyLikedFeedException("You already liked the feed");
         }
 
@@ -46,10 +44,7 @@ public class LikeService {
         Feed feed = feedRepository.findById(Objects.requireNonNull(feedId))
                 .orElseThrow(FeedSearchException::new);
 
-        if (likeRedisRepository.deleteByMemberAndFeed(liker, feed)) {
-            return;
-        }
-        likeJpaRepository.deleteByMemberAndFeed(liker, feed);
+        likeRedisRepository.deleteByMemberAndFeed(liker, feed);
     }
 
     @Transactional
@@ -57,7 +52,6 @@ public class LikeService {
         Feed feed = feedRepository.findById(Objects.requireNonNull(feedId))
                 .orElseThrow(FeedSearchException::new);
 
-        return likeRedisRepository.countByFeed(feed)
-                + likeJpaRepository.countByFeed(feed);
+        return likeRedisRepository.countByFeed(feed);
     }
 }
