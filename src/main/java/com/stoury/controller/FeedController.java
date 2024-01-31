@@ -1,16 +1,19 @@
 package com.stoury.controller;
 
 import com.stoury.domain.Member;
+import com.stoury.dto.ErrorResponse;
 import com.stoury.dto.FeedCreateRequest;
 import com.stoury.dto.FeedResponse;
 import com.stoury.service.FeedService;
 import com.stoury.service.MemberService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -36,9 +39,21 @@ public class FeedController {
     }
 
     @GetMapping("/feeds")
-    public ResponseEntity<List<FeedResponse>> getFeedsOfMember(@RequestParam(required = true) Long memberId,
+    public ResponseEntity getFeedsOfMember(@RequestParam(required = false) Long memberId,
+                                                               @RequestParam(required = false) String tagName,
                                                                @RequestParam(required = false) Optional<LocalDateTime> orderThan) {
-        List<FeedResponse> feeds = feedService.getFeedsOfMemberId(memberId, orderThan.orElse(DEFAULT_ORDER_THAN));
+        boolean searchByMember = memberId != null;
+        boolean searchByTag = tagName != null;
+
+        List<FeedResponse> feeds;
+        if (searchByMember == searchByTag) {
+            return ResponseEntity.status(400).body(ErrorResponse.of("Search by a member or a tag"));
+        }
+        if (searchByMember) {
+            feeds = feedService.getFeedsOfMemberId(memberId, orderThan.orElse(DEFAULT_ORDER_THAN));
+        } else {
+            feeds = feedService.getFeedsByTag(tagName, orderThan.orElse(DEFAULT_ORDER_THAN));
+        }
 
         return ResponseEntity.ok(feeds);
     }
