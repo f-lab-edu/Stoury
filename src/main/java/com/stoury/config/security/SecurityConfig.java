@@ -1,7 +1,6 @@
 package com.stoury.config.security;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.stoury.dto.LoginMemberDetails;
 import com.stoury.dto.LoginRequest;
 import com.stoury.utils.JwtUtils;
 import jakarta.servlet.FilterChain;
@@ -20,6 +19,7 @@ import org.springframework.security.config.annotation.authentication.configurati
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
@@ -32,6 +32,7 @@ import java.util.Objects;
 @RequiredArgsConstructor
 public class SecurityConfig {
     private final ObjectMapper objectMapper;
+    private final JwtAuthenticationFilter jwtAuthenticationFilter;
     @Value("${token-secret}")
     private String TOKEN_SECRET;
     @Bean
@@ -41,6 +42,7 @@ public class SecurityConfig {
                         .requestMatchers(new AntPathRequestMatcher("/members", "post")).permitAll()
                         .anyRequest().authenticated())
                 .addFilter(authenticationFilter())
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .httpBasic(Customizer.withDefaults())
                 .build();
     }
@@ -78,8 +80,8 @@ public class SecurityConfig {
 
             @Override
             protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authResult) throws IOException, ServletException {
-                LoginMemberDetails loginMember = (LoginMemberDetails) authResult.getPrincipal();
-                String email = Objects.requireNonNull(loginMember.getEmail(), "Login email cannot be null.");
+                UserDetails loginMember =  (UserDetails) authResult.getPrincipal();
+                String email = Objects.requireNonNull(loginMember.getUsername(), "Login email cannot be null.");
 
                 String token = JwtUtils.issueToken(email, TOKEN_SECRET);
                 response.addHeader("Authorization", "Bearer " + token);

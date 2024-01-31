@@ -1,7 +1,6 @@
 package com.stoury.service;
 
 import com.stoury.domain.Member;
-import com.stoury.dto.LoginMemberDetails;
 import com.stoury.dto.MemberCreateRequest;
 import com.stoury.dto.MemberResponse;
 import com.stoury.dto.MemberUpdateRequest;
@@ -11,6 +10,7 @@ import com.stoury.utils.FileUtils;
 import com.stoury.utils.SupportedFileType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.*;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -21,6 +21,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -115,6 +116,11 @@ public class MemberService implements UserDetailsService {
         return MemberResponse.from(updateMember);
     }
 
+    public Member getMemberByEmail(String email) {
+        return memberRepository.findByEmail(Objects.requireNonNull(email))
+                .orElseThrow(() -> new UsernameNotFoundException("Cannot find member"));
+    }
+
     private void validate(MultipartFile file) {
         if (SupportedFileType.isUnsupportedFile(file)) {
             throw new MemberUpdateException("Content/type of profile image is jpeg.");
@@ -171,9 +177,8 @@ public class MemberService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        Member member = memberRepository.findByEmail(Objects.requireNonNull(email))
-                .orElseThrow(() -> new UsernameNotFoundException("Cannot find member"));
+        Member member = getMemberByEmail(email);
 
-        return new LoginMemberDetails(member.getEmail(), member.getEncryptedPassword());
+        return new User(member.getEmail(), member.getEncryptedPassword(), new ArrayList<>());
     }
 }
