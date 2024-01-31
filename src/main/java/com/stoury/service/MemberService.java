@@ -1,9 +1,9 @@
 package com.stoury.service;
 
 import com.stoury.domain.Member;
-import com.stoury.dto.MemberCreateRequest;
-import com.stoury.dto.MemberResponse;
-import com.stoury.dto.MemberUpdateRequest;
+import com.stoury.dto.member.MemberCreateRequest;
+import com.stoury.dto.member.MemberResponse;
+import com.stoury.dto.member.MemberUpdateRequest;
 import com.stoury.exception.member.*;
 import com.stoury.repository.MemberRepository;
 import com.stoury.utils.FileUtils;
@@ -103,7 +103,7 @@ public class MemberService implements UserDetailsService {
 
         String profileImagePath = FileUtils.createFilePath(profileImage, PROFILE_IMAGE_PATH_PREFIX);
 
-        storageService.saveFilesAtPath(profileImage, Paths.get(profileImagePath));
+        storageService.saveFileAtPath(profileImage, Paths.get(profileImagePath));
 
         Member updateMember = findByIdOrEmail(memberUpdateRequest);
 

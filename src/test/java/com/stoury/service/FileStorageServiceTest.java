@@ -43,7 +43,7 @@ public class FileStorageServiceTest {
     void testFileWriteSuccess() {
         MockMultipartFile file = new MockMultipartFile("Something", "file1", "image/jpeg", new byte[0]);
         Path savePath = Paths.get(PATH_PREFIX + "/file1.jpg");
-        fileStorageService.saveFilesAtPath(file, savePath);
+        fileStorageService.saveFileAtPath(file, savePath);
 
         Assertions.assertThat(Files.exists(Path.of(PATH_PREFIX, "file1.jpg")))
                 .isTrue();

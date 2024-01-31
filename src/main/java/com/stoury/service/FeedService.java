@@ -4,10 +4,14 @@ import com.stoury.domain.Feed;
 import com.stoury.domain.GraphicContent;
 import com.stoury.domain.Member;
 import com.stoury.domain.Tag;
-import com.stoury.dto.FeedCreateRequest;
-import com.stoury.dto.FeedResponse;
+import com.stoury.dto.feed.FeedCreateRequest;
+import com.stoury.dto.feed.FeedResponse;
+import com.stoury.dto.feed.FeedUpdateRequest;
+import com.stoury.event.GraphicDeleteEvent;
 import com.stoury.event.GraphicSaveEvent;
 import com.stoury.exception.feed.FeedCreateException;
+import com.stoury.exception.feed.FeedSearchException;
+import com.stoury.exception.feed.FeedUpdateException;
 import com.stoury.repository.FeedRepository;
 import com.stoury.repository.LikeRepository;
 import com.stoury.repository.MemberRepository;
@@ -24,9 +28,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -59,7 +61,7 @@ public class FeedService {
         for (int i = 0; i < graphicContents.size(); i++) {
             MultipartFile file = graphicContents.get(i);
 
-            GraphicSaveEvent event = publishEventFrom(file);
+            GraphicSaveEvent event = publishSaveEvent(file);
             String contentPath = event.getPath();
 
             graphicContentList.add(new GraphicContent(contentPath, i));
@@ -69,13 +71,17 @@ public class FeedService {
     }
 
     private Feed createFeedEntity(Member writer, FeedCreateRequest feedCreateRequest, List<GraphicContent> graphicContents) {
-        List<Tag> tags = feedCreateRequest.tagNames().stream()
-                .map(tagService::getTagOrElseCreate)
-                .toList();
+        List<Tag> tags = getOrCreateTags(feedCreateRequest.tagNames());
         return feedCreateRequest.toEntity(writer, graphicContents, tags);
     }
 
-    private GraphicSaveEvent publishEventFrom(MultipartFile file) {
+    private List<Tag> getOrCreateTags(List<String> tagNames) {
+        return tagNames.stream()
+                .map(tagService::getTagOrElseCreate)
+                .toList();
+    }
+
+    private GraphicSaveEvent publishSaveEvent(MultipartFile file) {
         String path = FileUtils.createFilePath(file, PATH_PREFIX);
         GraphicSaveEvent event = new GraphicSaveEvent(this, file, path);
         eventPublisher.publishEvent(event);
@@ -112,5 +118,31 @@ public class FeedService {
         List<Feed> feeds = feedRepository.findByTagAndCreateAtLessThan(tagName, orderThan, page);
 
         return feeds.stream().map(feed -> FeedResponse.from(feed, likeRepository.countByFeed(feed))).toList();
+    }
+
+    public FeedResponse updateFeed(Long feedId, Member writer, FeedUpdateRequest feedUpdateRequest) {
+        Feed feed = feedRepository.findById(Objects.requireNonNull(feedId))
+                .orElseThrow(FeedSearchException::new);
+
+        if (!feed.getMember().equals(writer)) {
+            throw new FeedUpdateException("Not Authorized");
+        }
+
+        List<GraphicContent> beforeDeleteGraphicContents = new ArrayList<>(feed.getGraphicContents());
+
+        feed.update(feedUpdateRequest, getOrCreateTags(feedUpdateRequest.tagNames()));
+
+        publishDeleteEvents(beforeDeleteGraphicContents, feed.getGraphicContents());
+
+        return FeedResponse.from(feed, likeRepository.countByFeed(feed));
+    }
+
+    private void publishDeleteEvents(List<GraphicContent> beforeDeleteGraphicContents,
+                                     List<GraphicContent> afterDeleteGraphicContents) {
+        for (GraphicContent beforeDeleteGraphicContent : beforeDeleteGraphicContents) {
+            if (!afterDeleteGraphicContents.contains(beforeDeleteGraphicContent)) {
+                eventPublisher.publishEvent(new GraphicDeleteEvent(this, beforeDeleteGraphicContent.getPath()));
+            }
+        }
     }
 }

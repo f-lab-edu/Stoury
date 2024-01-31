@@ -1,4 +1,4 @@
-package com.stoury.dto;
+package com.stoury.dto.feed;
 
 import com.stoury.domain.Feed;
 import com.stoury.domain.GraphicContent;

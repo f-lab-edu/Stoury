@@ -1,10 +1,9 @@
-package com.stoury.dto;
+package com.stoury.dto.feed;
 
 import com.stoury.domain.Feed;
 import com.stoury.domain.GraphicContent;
 import com.stoury.domain.Tag;
-import org.springframework.data.domain.Slice;
-import org.springframework.data.domain.SliceImpl;
+import com.stoury.dto.member.MemberResponse;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -18,17 +17,17 @@ public record FeedResponse(Long feedId,
                            Double longitude,
                            long likes,
                            LocalDateTime createdAt) {
-    public static FeedResponse from(Feed uploadedFeed, long feedLikes) {
+    public static FeedResponse from(Feed feed, int feedLikes) {
         return new FeedResponse(
-                uploadedFeed.getId(),
-                MemberResponse.from(uploadedFeed.getMember()),
-                uploadedFeed.getGraphicContents().stream().map(GraphicContent::getPath).toList(),
-                uploadedFeed.getTextContent(),
-                uploadedFeed.getTags().stream().map(Tag::getTagName).toList(),
-                uploadedFeed.getLatitude(),
-                uploadedFeed.getLongitude(),
+                feed.getId(),
+                MemberResponse.from(feed.getMember()),
+                feed.getGraphicContents().stream().map(GraphicContent::getPath).toList(),
+                feed.getTextContent(),
+                feed.getTags().stream().map(Tag::getTagName).toList(),
+                feed.getLatitude(),
+                feed.getLongitude(),
                 feedLikes,
-                uploadedFeed.getCreatedAt()
+                feed.getCreatedAt()
         );
     }
 }
