@@ -2,18 +2,17 @@ package com.stoury.controller;
 
 import com.stoury.domain.Member;
 import com.stoury.dto.ErrorResponse;
-import com.stoury.dto.FeedCreateRequest;
-import com.stoury.dto.FeedResponse;
+import com.stoury.dto.feed.FeedCreateRequest;
+import com.stoury.dto.feed.FeedResponse;
+import com.stoury.dto.feed.FeedUpdateRequest;
 import com.stoury.service.FeedService;
 import com.stoury.service.MemberService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -40,8 +39,8 @@ public class FeedController {
 
     @GetMapping("/feeds")
     public ResponseEntity getFeedsOfMember(@RequestParam(required = false) Long memberId,
-                                                               @RequestParam(required = false) String tagName,
-                                                               @RequestParam(required = false) Optional<LocalDateTime> orderThan) {
+                                           @RequestParam(required = false) String tagName,
+                                           @RequestParam(required = false) Optional<LocalDateTime> orderThan) {
         boolean searchByMember = memberId != null;
         boolean searchByTag = tagName != null;
 
@@ -56,5 +55,16 @@ public class FeedController {
         }
 
         return ResponseEntity.ok(feeds);
+    }
+
+    @PutMapping("/feeds/{feedId}")
+    public ResponseEntity updateFeed(@AuthenticationPrincipal User user,
+                                     @PathVariable Long feedId,
+                                     @RequestBody FeedUpdateRequest feedUpdateRequest) {
+        Member writer = memberService.getMemberByEmail(user.getUsername());
+
+        FeedResponse updatedFeed = feedService.updateFeed(feedId, writer, feedUpdateRequest);
+
+        return ResponseEntity.ok(updatedFeed);
     }
 }

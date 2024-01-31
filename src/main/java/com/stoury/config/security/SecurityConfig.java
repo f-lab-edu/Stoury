@@ -94,7 +94,7 @@ public class SecurityConfig {
                 String email = Objects.requireNonNull(loginMember.getUsername(), "Login email cannot be null.");
 
                 String token = JwtUtils.issueToken(email, TOKEN_SECRET);
-                response.addHeader("Authorization", "Bearer " + token);
+                response.addHeader("Authorization", token);
             }
         };
     }

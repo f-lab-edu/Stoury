@@ -120,6 +120,7 @@ public class FeedService {
         return feeds.stream().map(feed -> FeedResponse.from(feed, likeRepository.countByFeed(feed))).toList();
     }
 
+    @Transactional
     public FeedResponse updateFeed(Long feedId, Member writer, FeedUpdateRequest feedUpdateRequest) {
         Feed feed = feedRepository.findById(Objects.requireNonNull(feedId))
                 .orElseThrow(FeedSearchException::new);

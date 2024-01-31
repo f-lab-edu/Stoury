@@ -8,6 +8,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.StringJoiner;
+import java.util.UUID;
 
 public class FileUtils {
     public static final String FILE_SEPARATOR = System.getProperty("file.separator");
@@ -21,6 +22,7 @@ public class FileUtils {
 
     public static String createFilePath(MultipartFile file, String pathPrefix) {
         SupportedFileType fileType = SupportedFileType.getFileType(file);
-        return pathPrefix + FILE_SEPARATOR + fileType.getType() + FILE_SEPARATOR + getFileNameByCurrentTime(file);
+        return pathPrefix + FILE_SEPARATOR + fileType.getType() + FILE_SEPARATOR
+                + UUID.randomUUID().toString().substring(0,8) + getFileNameByCurrentTime(file);
     }
 }
