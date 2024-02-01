@@ -1,4 +1,4 @@
-package com.stoury
+package com.stoury.service
 
 import com.stoury.domain.Feed
 import com.stoury.domain.Like
@@ -6,16 +6,17 @@ import com.stoury.domain.Member
 import com.stoury.exception.AlreadyLikedFeedException
 import com.stoury.exception.feed.FeedSearchException
 import com.stoury.exception.member.MemberSearchException
+import com.stoury.repository.FeedRepository
 import com.stoury.repository.LikeRepository
-import com.stoury.service.LikeService
-import com.stoury.validator.Validator
+import com.stoury.repository.MemberRepository
 import spock.lang.Specification
 
 class LikeServiceTest extends Specification {
-    def likeRepository = Mock(LikeRepository)
+    def likeRedisRepository = Mock(LikeRepository)
     def memberRepository = Mock(MemberRepository)
     def feedRepository = Mock(FeedRepository)
-    def likeService = new LikeService(likeRepository, memberRepository, feedRepository)
+    def likeService = new LikeService(likeRedisRepository, memberRepository, feedRepository)
+
     def liker = Mock(Member)
     def feed = Mock(Feed)
 
@@ -29,7 +30,7 @@ class LikeServiceTest extends Specification {
         likeService.like(1L, 2L);
 
         then:
-        1 * likeRepository.save(_ as Like)
+        1 * likeRedisRepository.save(_ as Like)
     }
 
     def "좋아요 실패 - 존재하지 않는 사용자"() {
@@ -52,7 +53,7 @@ class LikeServiceTest extends Specification {
 
     def "좋아요 실패 - 이미 좋아요 한 피드"() {
         setup:
-        likeRepository.existsByMemberAndFeed(_ as Member, _ as Feed) >> true
+        likeRedisRepository.existsByMemberAndFeed(_ as Member, _ as Feed) >> true
 
         when:
         likeService.like(1L, 2L);
@@ -64,15 +65,16 @@ class LikeServiceTest extends Specification {
     def "좋아요 취소 성공"() {
         when:
         likeService.likeCancel(1L, 2L)
-
         then:
-        1 * likeRepository.deleteByMemberAndFeed(liker, feed)
+        1 * likeRedisRepository.deleteByMemberAndFeed(_, _)
     }
 
     def "특정 피드의 좋아요만 가져오기"() {
+        given:
+        likeRedisRepository.countByFeed(_ as Feed) >> 5
         when:
-        likeService.getLikesOfFeed(1L)
+        def likes = likeService.getLikesOfFeed(1L)
         then:
-        1 * likeRepository.countByFeed(_ as Feed)
+        likes == 5
     }
 }
