@@ -43,7 +43,7 @@ public class Comment {
     @Column(name = "CREATED_AT", nullable = false)
     private LocalDateTime createdAt;
 
-    @Column(name = "DELETE", nullable = false)
+    @Column(name = "DELETED", nullable = false)
     private boolean deleted;
 
     public Comment(Member member, Feed feed, String textContent) {

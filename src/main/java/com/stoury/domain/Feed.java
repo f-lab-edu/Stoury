@@ -18,9 +18,7 @@ import java.util.List;
 @Getter
 @EntityListeners(AuditingEntityListener.class)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Table(name = "FEED",
-        indexes = @Index(name = "INDEX_CREATED_AT", columnList = "CREATED_AT")
-)
+@Table(name = "FEED")
 public class Feed {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
