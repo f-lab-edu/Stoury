@@ -6,7 +6,7 @@ import org.springframework.util.StringUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class StringUtilTest {
+class StringUtilTest {
     @Test
     @DisplayName("hasText()가 only 공백이면 거짓임")
     void hasTextTest(){
