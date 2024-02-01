@@ -2,11 +2,12 @@ package com.stoury.utils;
 
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.util.StringUtils;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 
 import java.util.Date;
 
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class JwtUtils {
     public static String issueToken(String userEmail, final String TOKEN_SECRET) {
         return Jwts.builder()

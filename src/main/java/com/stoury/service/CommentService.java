@@ -26,7 +26,7 @@ import java.util.Objects;
 @Service
 @RequiredArgsConstructor
 public class CommentService {
-    public final int PAGE_SIZE = 20;
+    public static final int PAGE_SIZE = 20;
     private final CommentRepository commentRepository;
     private final MemberRepository memberRepository;
     private final FeedRepository feedRepository;

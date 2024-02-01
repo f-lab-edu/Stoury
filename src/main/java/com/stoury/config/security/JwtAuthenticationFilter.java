@@ -10,7 +10,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
@@ -24,7 +23,7 @@ import java.io.IOException;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final MemberService memberService;
     @Value("${token-secret}")
-    private String TOKEN_SECRET;
+    private String tokenSecret;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
@@ -36,7 +35,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         String token = header.substring(7);
-        String email = JwtUtils.getEmailFromToken(token,TOKEN_SECRET);
+        String email = JwtUtils.getEmailFromToken(token, tokenSecret);
 
         if (StringUtils.hasText(email) && SecurityContextHolder.getContext().getAuthentication() == null) {
             UserDetails user = memberService.loadUserByUsername(email);

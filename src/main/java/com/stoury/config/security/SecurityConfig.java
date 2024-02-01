@@ -2,9 +2,9 @@ package com.stoury.config.security;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.stoury.dto.LoginRequest;
+import com.stoury.exception.LoginRequestBindingException;
 import com.stoury.utils.JwtUtils;
 import jakarta.servlet.FilterChain;
-import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -26,10 +26,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.servlet.util.matcher.MvcRequestMatcher;
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.web.servlet.handler.HandlerMappingIntrospector;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Objects;
 
@@ -40,7 +38,7 @@ public class SecurityConfig {
     private final ObjectMapper objectMapper;
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     @Value("${token-secret}")
-    private String TOKEN_SECRET;
+    private String tokenSecret;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http, HandlerMappingIntrospector introspector) throws Exception {
@@ -77,7 +75,7 @@ public class SecurityConfig {
                 try {
                     loginRequest = objectMapper.readValue(request.getInputStream(), LoginRequest.class);
                 } catch (Exception e) {
-                    throw new RuntimeException(e);
+                    throw new LoginRequestBindingException(e);
                 }
 
                 return getAuthenticationManager().authenticate(
@@ -89,11 +87,11 @@ public class SecurityConfig {
             }
 
             @Override
-            protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authResult) throws IOException, ServletException {
+            protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authResult) {
                 UserDetails loginMember = (UserDetails) authResult.getPrincipal();
                 String email = Objects.requireNonNull(loginMember.getUsername(), "Login email cannot be null.");
 
-                String token = JwtUtils.issueToken(email, TOKEN_SECRET);
+                String token = JwtUtils.issueToken(email, tokenSecret);
                 response.addHeader("Authorization", token);
             }
         };

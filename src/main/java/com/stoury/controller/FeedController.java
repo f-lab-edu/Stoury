@@ -44,7 +44,7 @@ public class FeedController {
     }
 
     @GetMapping("/feeds")
-    public ResponseEntity getFeedsOfMember(@RequestParam(required = false) Long memberId,
+    public ResponseEntity<Object> getFeedsOfMember(@RequestParam(required = false) Long memberId,
                                            @RequestParam(required = false) String tagName,
                                            @RequestParam(required = false) Optional<LocalDateTime> orderThan) {
         boolean searchByMember = memberId != null;
@@ -64,7 +64,7 @@ public class FeedController {
     }
 
     @PutMapping("/feeds/{feedId}")
-    public ResponseEntity updateFeed(@AuthenticationPrincipal User user,
+    public ResponseEntity<FeedResponse> updateFeed(@AuthenticationPrincipal User user,
                                      @PathVariable Long feedId,
                                      @RequestBody FeedUpdateRequest feedUpdateRequest) {
         Member writer = memberService.getMemberByEmail(user.getUsername());
@@ -75,7 +75,7 @@ public class FeedController {
     }
 
     @DeleteMapping("/feeds/{feedId}")
-    public ResponseEntity deleteFeed(@AuthenticationPrincipal User user,
+    public ResponseEntity<Object> deleteFeed(@AuthenticationPrincipal User user,
                                      @PathVariable Long feedId) {
         Member writer = memberService.getMemberByEmail(user.getUsername());
 
@@ -91,12 +91,12 @@ public class FeedController {
     }
 
     @ExceptionHandler(value = {FeedCreateException.class, FeedUpdateException.class})
-    public ResponseEntity handle400(RuntimeException ex) {
+    public ResponseEntity<ErrorResponse> handle400(RuntimeException ex) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ErrorResponse.of(ex.getMessage()));
     }
 
     @ExceptionHandler(value = {FeedSearchException.class, MemberSearchException.class})
-    public ResponseEntity handle404(RuntimeException ex) {
+    public ResponseEntity<ErrorResponse> handle404(RuntimeException ex) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ErrorResponse.of(ex.getMessage()));
     }
 }
