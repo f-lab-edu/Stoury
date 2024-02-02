@@ -1,6 +1,6 @@
 spring:
   datasource:
-    url: jdbc:mariadb://localhost:3306/testdb
+    url: jdbc:mariadb://localhost:3306/stoury_test
     username: ${MYSQL_USERNAME}
     password: ${MYSQL_PW}
     driver-class-name: org.mariadb.jdbc.Driver
@@ -15,6 +15,10 @@ spring:
   sql:
     init:
       mode: always
+  data:
+    redis:
+      host: localhost
+      port: 8379
 logging:
   level:
     org.springframework.security: trace

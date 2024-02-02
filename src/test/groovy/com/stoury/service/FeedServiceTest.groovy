@@ -44,12 +44,12 @@ class FeedServiceTest extends Specification {
             .build()
 
     def setup() {
-        memberRepository.existsById(_) >> true
+        memberRepository.findByEmail(_) >> Optional.of(writer)
     }
 
     def "피드 생성 성공"() {
         when:
-        feedService.createFeed(writer, feedCreateRequest, graphicContents)
+        feedService.createFeed("blabla@email.com", feedCreateRequest, graphicContents)
         then:
         1 * feedRepository.save(_ as Feed) >> savedFeed
     }
@@ -62,7 +62,7 @@ class FeedServiceTest extends Specification {
                 new MockMultipartFile("Files", "third", "image/png", new byte[0])
         )
         when:
-        feedService.createFeed(writer, feedCreateRequest, notSupportedContents)
+        feedService.createFeed("blabla@email.com", feedCreateRequest, notSupportedContents)
         then:
         thrown(FeedCreateException.class)
     }
@@ -71,7 +71,7 @@ class FeedServiceTest extends Specification {
         given:
         def emptyContents = Collections.emptyList()
         when:
-        feedService.createFeed(writer, feedCreateRequest, emptyContents)
+        feedService.createFeed("blabla@email.com", feedCreateRequest, emptyContents)
         then:
         thrown(FeedCreateException.class)
     }
@@ -85,7 +85,6 @@ class FeedServiceTest extends Specification {
 
     def "피드 업데이트 성공"() {
         given:
-        def writer = Mock(Member)
         def feed = new Feed(writer, "before updated", 0.0, 0.0, List.of(Mock(Tag)))
         feed.id = 1L
         feed.graphicContents = new ArrayList<>(List.of(
@@ -97,10 +96,10 @@ class FeedServiceTest extends Specification {
         feedRepository.findById(_ as Long) >> Optional.of(feed)
 
         def feedUpdateRequest = new FeedUpdateRequest(
-                "updated", 11.11, 22.22, Collections.emptyList(), List.of(1,3)
+                "updated", 11.11, 22.22, Collections.emptyList(), Set.of(1,3)
         )
         when:
-        feedService.updateFeed(1L, writer, feedUpdateRequest)
+        feedService.updateFeed(1L, "blabla@email.com", feedUpdateRequest)
         then:
         2 * eventPublisher.publishEvent(_ as GraphicDeleteEvent)
         feed.textContent == "updated"
