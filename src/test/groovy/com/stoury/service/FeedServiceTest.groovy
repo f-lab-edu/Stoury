@@ -1,8 +1,12 @@
 package com.stoury.service
 
 import com.stoury.domain.Feed
+import com.stoury.domain.GraphicContent
 import com.stoury.domain.Member
-import com.stoury.dto.FeedCreateRequest
+import com.stoury.domain.Tag
+import com.stoury.dto.feed.FeedCreateRequest
+import com.stoury.dto.feed.FeedUpdateRequest
+import com.stoury.event.GraphicDeleteEvent
 import com.stoury.exception.feed.FeedCreateException
 import com.stoury.repository.FeedRepository
 import com.stoury.repository.LikeRepository
@@ -40,12 +44,12 @@ class FeedServiceTest extends Specification {
             .build()
 
     def setup() {
-        memberRepository.existsById(_) >> true
+        memberRepository.findByEmail(_) >> Optional.of(writer)
     }
 
     def "피드 생성 성공"() {
         when:
-        feedService.createFeed(writer, feedCreateRequest, graphicContents)
+        feedService.createFeed("blabla@email.com", feedCreateRequest, graphicContents)
         then:
         1 * feedRepository.save(_ as Feed) >> savedFeed
     }
@@ -58,7 +62,7 @@ class FeedServiceTest extends Specification {
                 new MockMultipartFile("Files", "third", "image/png", new byte[0])
         )
         when:
-        feedService.createFeed(writer, feedCreateRequest, notSupportedContents)
+        feedService.createFeed("blabla@email.com", feedCreateRequest, notSupportedContents)
         then:
         thrown(FeedCreateException.class)
     }
@@ -67,7 +71,7 @@ class FeedServiceTest extends Specification {
         given:
         def emptyContents = Collections.emptyList()
         when:
-        feedService.createFeed(writer, feedCreateRequest, emptyContents)
+        feedService.createFeed("blabla@email.com", feedCreateRequest, emptyContents)
         then:
         thrown(FeedCreateException.class)
     }
@@ -77,5 +81,30 @@ class FeedServiceTest extends Specification {
         FeedCreateRequest.builder().build()
         then:
         thrown(FeedCreateException.class)
+    }
+
+    def "피드 업데이트 성공"() {
+        given:
+        def feed = new Feed(writer, "before updated", 0.0, 0.0, List.of(Mock(Tag)))
+        feed.id = 1L
+        feed.graphicContents = new ArrayList<>(List.of(
+                new GraphicContent("path1", 0),
+                new GraphicContent("path2", 1),
+                new GraphicContent("path3", 2),
+                new GraphicContent("path4", 3),
+                new GraphicContent("path5", 4)))
+        feedRepository.findById(_ as Long) >> Optional.of(feed)
+
+        def feedUpdateRequest = new FeedUpdateRequest(
+                "updated", 11.11, 22.22, Collections.emptyList(), Set.of(1,3)
+        )
+        when:
+        feedService.updateFeed(1L, "blabla@email.com", feedUpdateRequest)
+        then:
+        2 * eventPublisher.publishEvent(_ as GraphicDeleteEvent)
+        feed.textContent == "updated"
+        feed.latitude == 11.11
+        feed.longitude == 22.22
+        feed.tags.isEmpty()
     }
 }

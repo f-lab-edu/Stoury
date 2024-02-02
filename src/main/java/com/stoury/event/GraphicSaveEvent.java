@@ -6,7 +6,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 @Getter
 public class GraphicSaveEvent extends ApplicationEvent {
-    private MultipartFile fileToSave;
+    private transient MultipartFile fileToSave;
     private String path;
 
     public GraphicSaveEvent(Object source, MultipartFile fileToSave, String path) {

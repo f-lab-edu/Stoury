@@ -10,7 +10,12 @@ import java.nio.file.Path;
 @Profile("test")
 public class TestStorageService implements StorageService {
     @Override
-    public void saveFilesAtPath(MultipartFile fileToSave, Path path) {
+    public void saveFileAtPath(MultipartFile fileToSave, Path path) {
+
+    }
+
+    @Override
+    public void deleteFileAtPath(Path path) {
 
     }
 }

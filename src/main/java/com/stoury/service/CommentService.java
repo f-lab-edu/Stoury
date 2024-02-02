@@ -3,8 +3,8 @@ package com.stoury.service;
 import com.stoury.domain.Comment;
 import com.stoury.domain.Feed;
 import com.stoury.domain.Member;
-import com.stoury.dto.ChildCommentResponse;
-import com.stoury.dto.CommentResponse;
+import com.stoury.dto.comment.ChildCommentResponse;
+import com.stoury.dto.comment.CommentResponse;
 import com.stoury.exception.CommentCreateException;
 import com.stoury.exception.CommentSearchException;
 import com.stoury.exception.feed.FeedSearchException;
@@ -26,7 +26,7 @@ import java.util.Objects;
 @Service
 @RequiredArgsConstructor
 public class CommentService {
-    public final int PAGE_SIZE = 20;
+    public static final int PAGE_SIZE = 20;
     private final CommentRepository commentRepository;
     private final MemberRepository memberRepository;
     private final FeedRepository feedRepository;
