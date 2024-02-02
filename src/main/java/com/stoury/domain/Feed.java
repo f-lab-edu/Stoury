@@ -49,6 +49,13 @@ public class Feed {
             inverseJoinColumns = @JoinColumn(name = "TAG_ID"))
     private List<Tag> tags = new ArrayList<>();
 
+    @Column(name = "CITY", length = 35)
+    private String city;
+
+    @Column(name = "COUNTRY")
+    @Enumerated(value = EnumType.STRING)
+    private Country country;
+
     @Builder
     public Feed(Member member, String textContent, Double latitude, Double longitude, List<Tag> tags) {
         this.member = member;

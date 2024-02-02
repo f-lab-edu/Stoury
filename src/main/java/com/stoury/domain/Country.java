@@ -1,6 +1,6 @@
 package com.stoury.domain;
 
-public enum Countries {
+public enum Country {
     USA("United States of America"),
     AFGHANISTAN("Afghanistan"),
     ALBANIA("Albania"),
@@ -204,13 +204,22 @@ public enum Countries {
     ZAMBIA("Zambia"),
     ZIMBABWE("Zimbabwe");
 
-    private String country;
+    private String countryName;
 
-    Countries(String country) {
-        this.country = country;
+    Country(String countryName) {
+        this.countryName = countryName;
     }
 
-    public String getCountry() {
-        return country;
+    public String getCountryName() {
+        return countryName;
+    }
+
+
+    public boolean isDomestic(Country country) {
+        return country.equals(SOUTH_KOREA);
+    }
+
+    public boolean isInternational(Country country) {
+        return !isDomestic(country);
     }
 }
