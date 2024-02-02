@@ -90,7 +90,7 @@ public class FeedService {
     private GraphicSaveEvent publishNewFileEvent(MultipartFile file) {
         String path = FileUtils.createFilePath(file, pathPrefix);
         GraphicSaveEvent event = new GraphicSaveEvent(this, file, path);
-        eventPublisher.publishEvent(event);
+        eventPublisher.publishEvent(event); // NOSONAR
         return event;
     }
 
