@@ -1,11 +1,10 @@
 package com.stoury.domain;
 
-import com.stoury.utils.FileUtils;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.springframework.web.multipart.MultipartFile;
+import lombok.Setter;
 
 @Entity
 @Getter
@@ -19,6 +18,7 @@ public class GraphicContent {
     @Column(name = "PATH", unique = true, nullable = false)
     private String path;
 
+    @Setter(value = AccessLevel.PACKAGE)
     @Column(name = "SEQUENCE", columnDefinition = "TINYINT", nullable = false)
     private int sequence;
 

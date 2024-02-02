@@ -3,7 +3,7 @@ package com.stoury
 import com.stoury.domain.Comment
 import com.stoury.domain.Feed
 import com.stoury.domain.Member
-import com.stoury.dto.CommentResponse
+import com.stoury.dto.comment.CommentResponse
 import com.stoury.exception.CommentCreateException
 import com.stoury.exception.CommentSearchException
 import com.stoury.repository.CommentRepository

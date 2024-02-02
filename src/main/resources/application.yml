@@ -15,3 +15,10 @@ spring:
     enabled: true
     baseline-on-migrate: true
     baseline-version: 0
+  servlet:
+    multipart:
+      max-request-size: 50MB
+      max-file-size: 50MB
+path-prefix: /feeds
+profileImage:
+  path-prefix: /members/profiles

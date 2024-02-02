@@ -1,8 +1,8 @@
 package com.stoury.service
 
 import com.stoury.domain.Member
-import com.stoury.dto.MemberCreateRequest
-import com.stoury.dto.MemberUpdateRequest
+import com.stoury.dto.member.MemberCreateRequest
+import com.stoury.dto.member.MemberUpdateRequest
 import com.stoury.exception.member.MemberCreateException
 import com.stoury.exception.member.MemberDeleteException
 import com.stoury.exception.member.MemberSearchException
@@ -105,7 +105,7 @@ class MemberServiceTest extends Specification {
         when:
         memberService.updateMemberWithProfileImage(memberUpdateRequest, profileImage)
         then:
-        1 * storageService.saveFilesAtPath(_, _)
+        1 * storageService.saveFileAtPath(_, _)
         1 * member.update(_,_,_)
     }
 

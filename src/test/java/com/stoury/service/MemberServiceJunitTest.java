@@ -1,7 +1,7 @@
 package com.stoury.service;
 
 import com.stoury.domain.Member;
-import com.stoury.dto.MemberResponse;
+import com.stoury.dto.member.MemberResponse;
 import com.stoury.repository.MemberRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
@@ -22,7 +22,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SpringBootTest
 @ActiveProfiles("test")
 @Transactional
-class MemberServiceTest {
+class MemberServiceJunitTest {
     @Autowired
     Environment env;
     @Autowired

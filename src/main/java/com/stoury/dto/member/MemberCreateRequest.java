@@ -1,4 +1,4 @@
-package com.stoury.dto;
+package com.stoury.dto.member;
 
 import com.stoury.domain.Member;
 import lombok.Builder;

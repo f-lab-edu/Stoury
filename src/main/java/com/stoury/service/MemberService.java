@@ -1,16 +1,17 @@
 package com.stoury.service;
 
 import com.stoury.domain.Member;
-import com.stoury.dto.LoginMemberDetails;
-import com.stoury.dto.MemberCreateRequest;
-import com.stoury.dto.MemberResponse;
-import com.stoury.dto.MemberUpdateRequest;
+import com.stoury.dto.member.MemberCreateRequest;
+import com.stoury.dto.member.MemberResponse;
+import com.stoury.dto.member.MemberUpdateRequest;
 import com.stoury.exception.member.*;
 import com.stoury.repository.MemberRepository;
 import com.stoury.utils.FileUtils;
 import com.stoury.utils.SupportedFileType;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.*;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -21,6 +22,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -30,12 +32,13 @@ public class MemberService implements UserDetailsService {
     private final MemberRepository memberRepository;
     private final PasswordEncoder passwordEncoder;
     private final StorageService storageService;
-    public final static int PASSWORD_LENGTH_MIN = 8;
-    public final static int PASSWORD_LENGTH_MAX = 30;
-    public final static int USERNAME_LENGTH_MAX = 10;
-    public final static int EMAIL_LENGTH_MAX = 25;
-    public final static int PAGE_SIZE = 5;
-    public final static String PROFILE_IMAGE_PATH_PREFIX = "/members/profiles";
+    public static final int PASSWORD_LENGTH_MIN = 8;
+    public static final int PASSWORD_LENGTH_MAX = 30;
+    public static final int USERNAME_LENGTH_MAX = 10;
+    public static final int EMAIL_LENGTH_MAX = 25;
+    public static final int PAGE_SIZE = 5;
+    @Value("${profileImage.path-prefix}")
+    public String profileImagePathPrefix;
 
     @Transactional
     public MemberResponse createMember(MemberCreateRequest memberCreateRequest) {
@@ -100,9 +103,9 @@ public class MemberService implements UserDetailsService {
     public MemberResponse updateMemberWithProfileImage(MemberUpdateRequest memberUpdateRequest, MultipartFile profileImage) {
         validate(profileImage);
 
-        String profileImagePath = FileUtils.createFilePath(profileImage, PROFILE_IMAGE_PATH_PREFIX);
+        String profileImagePath = FileUtils.createFilePath(profileImage, profileImagePathPrefix);
 
-        storageService.saveFilesAtPath(profileImage, Paths.get(profileImagePath));
+        storageService.saveFileAtPath(profileImage, Paths.get(profileImagePath));
 
         Member updateMember = findByIdOrEmail(memberUpdateRequest);
 
@@ -113,6 +116,11 @@ public class MemberService implements UserDetailsService {
         );
 
         return MemberResponse.from(updateMember);
+    }
+
+    public Member getMemberByEmail(String email) {
+        return memberRepository.findByEmail(Objects.requireNonNull(email))
+                .orElseThrow(() -> new UsernameNotFoundException("Cannot find member"));
     }
 
     private void validate(MultipartFile file) {
@@ -154,7 +162,7 @@ public class MemberService implements UserDetailsService {
             throw new MemberSearchException("No keyword for search.");
         }
 
-        Pageable page = PageRequest.of(0,  PAGE_SIZE, Sort.by("username"));
+        Pageable page = PageRequest.of(0, PAGE_SIZE, Sort.by("username"));
 
         Slice<Member> memberEntitySlice = memberRepository.findMembersByUsernameMatches(keyword, page);
 
@@ -171,9 +179,8 @@ public class MemberService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        Member member = memberRepository.findByEmail(Objects.requireNonNull(email))
-                .orElseThrow(() -> new UsernameNotFoundException("Cannot find member"));
+        Member member = getMemberByEmail(email);
 
-        return new LoginMemberDetails(member.getEmail(), member.getEncryptedPassword());
+        return new User(member.getEmail(), member.getEncryptedPassword(), new ArrayList<>());
     }
 }

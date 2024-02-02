@@ -18,6 +18,12 @@ public class GraphicEventListener {
     public void onFileSaveEventHandler(GraphicSaveEvent graphicSaveEvent) {
         MultipartFile fileToSave = graphicSaveEvent.getFileToSave();
         String path = graphicSaveEvent.getPath();
-        storageService.saveFilesAtPath(fileToSave, Paths.get(path));
+        storageService.saveFileAtPath(fileToSave, Paths.get(path));
+    }
+
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    public void onFileDeleteEventHandler(GraphicDeleteEvent graphicDeleteEvent) {
+        String path = graphicDeleteEvent.getPath();
+        storageService.deleteFileAtPath(Paths.get(path));
     }
 }
