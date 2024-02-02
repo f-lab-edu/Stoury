@@ -12,10 +12,10 @@ import com.stoury.repository.MemberRepository
 import spock.lang.Specification
 
 class LikeServiceTest extends Specification {
-    def likeRedisRepository = Mock(LikeRepository)
+    def likeRepository = Mock(LikeRepository)
     def memberRepository = Mock(MemberRepository)
     def feedRepository = Mock(FeedRepository)
-    def likeService = new LikeService(likeRedisRepository, memberRepository, feedRepository)
+    def likeService = new LikeService(likeRepository, memberRepository, feedRepository)
 
     def liker = Mock(Member)
     def feed = Mock(Feed)
@@ -30,7 +30,7 @@ class LikeServiceTest extends Specification {
         likeService.like(1L, 2L);
 
         then:
-        1 * likeRedisRepository.save(_ as Like)
+        1 * likeRepository.save(_ as Like)
     }
 
     def "좋아요 실패 - 존재하지 않는 사용자"() {
@@ -53,7 +53,7 @@ class LikeServiceTest extends Specification {
 
     def "좋아요 실패 - 이미 좋아요 한 피드"() {
         setup:
-        likeRedisRepository.existsByMemberAndFeed(_ as Member, _ as Feed) >> true
+        likeRepository.existsByMemberAndFeed(_ as Member, _ as Feed) >> true
 
         when:
         likeService.like(1L, 2L);
@@ -66,12 +66,12 @@ class LikeServiceTest extends Specification {
         when:
         likeService.likeCancel(1L, 2L)
         then:
-        1 * likeRedisRepository.deleteByMemberAndFeed(_, _)
+        1 * likeRepository.deleteByMemberAndFeed(_, _)
     }
 
     def "특정 피드의 좋아요만 가져오기"() {
         given:
-        likeRedisRepository.countByFeed(_ as Feed) >> 5
+        likeRepository.countByFeed(_ as Feed) >> 5
         when:
         def likes = likeService.getLikesOfFeed(1L)
         then:

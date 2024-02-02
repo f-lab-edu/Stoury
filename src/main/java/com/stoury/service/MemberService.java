@@ -1,6 +1,7 @@
 package com.stoury.service;
 
 import com.stoury.domain.Member;
+import com.stoury.dto.LoginMemberDetails;
 import com.stoury.dto.MemberCreateRequest;
 import com.stoury.dto.MemberResponse;
 import com.stoury.dto.MemberUpdateRequest;
@@ -10,6 +11,9 @@ import com.stoury.utils.FileUtils;
 import com.stoury.utils.SupportedFileType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.*;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,7 +26,7 @@ import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
-public class MemberService {
+public class MemberService implements UserDetailsService {
     private final MemberRepository memberRepository;
     private final PasswordEncoder passwordEncoder;
     private final StorageService storageService;
@@ -163,5 +167,13 @@ public class MemberService {
 
     private boolean isEmpty(String keyword) {
         return !StringUtils.hasText(keyword);
+    }
+
+    @Override
+    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+        Member member = memberRepository.findByEmail(Objects.requireNonNull(email))
+                .orElseThrow(() -> new UsernameNotFoundException("Cannot find member"));
+
+        return new LoginMemberDetails(member.getEmail(), member.getEncryptedPassword());
     }
 }
