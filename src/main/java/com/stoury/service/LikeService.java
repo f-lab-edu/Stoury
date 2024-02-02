@@ -18,7 +18,7 @@ import java.util.Objects;
 @Service
 @RequiredArgsConstructor
 public class LikeService {
-    private final LikeRepository likeRedisRepository;
+    private final LikeRepository likeRepository;
     private final MemberRepository memberRepository;
     private final FeedRepository feedRepository;
 
@@ -29,12 +29,12 @@ public class LikeService {
         Feed feed = feedRepository.findById(Objects.requireNonNull(feedId))
                 .orElseThrow(FeedSearchException::new);
 
-        if (likeRedisRepository.existsByMemberAndFeed(liker, feed)) {
+        if (likeRepository.existsByMemberAndFeed(liker, feed)) {
             throw new AlreadyLikedFeedException("You already liked the feed");
         }
 
         Like like = new Like(liker, feed);
-        likeRedisRepository.save(like);
+        likeRepository.save(like);
     }
 
     @Transactional
@@ -44,14 +44,13 @@ public class LikeService {
         Feed feed = feedRepository.findById(Objects.requireNonNull(feedId))
                 .orElseThrow(FeedSearchException::new);
 
-        likeRedisRepository.deleteByMemberAndFeed(liker, feed);
+        likeRepository.deleteByMemberAndFeed(liker, feed);
     }
 
     @Transactional
     public long getLikesOfFeed(Long feedId) {
         Feed feed = feedRepository.findById(Objects.requireNonNull(feedId))
                 .orElseThrow(FeedSearchException::new);
-
-        return likeRedisRepository.countByFeed(feed);
+        return likeRepository.countByFeed(feed);
     }
 }
