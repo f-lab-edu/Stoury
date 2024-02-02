@@ -17,7 +17,7 @@ public record FeedResponse(Long feedId,
                            Double longitude,
                            long likes,
                            LocalDateTime createdAt) {
-    public static FeedResponse from(Feed feed, int feedLikes) {
+    public static FeedResponse from(Feed feed, long feedLikes) {
         return new FeedResponse(
                 feed.getId(),
                 MemberResponse.from(feed.getMember()),
