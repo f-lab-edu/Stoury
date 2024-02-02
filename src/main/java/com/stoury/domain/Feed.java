@@ -18,9 +18,7 @@ import java.util.Set;
 @Getter
 @EntityListeners(AuditingEntityListener.class)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Table(name = "FEED",
-        indexes = @Index(name = "INDEX_CREATED_AT", columnList = "CREATED_AT")
-)
+@Table(name = "FEED")
 public class Feed {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -33,6 +31,7 @@ public class Feed {
     @CreatedDate
     private LocalDateTime createdAt;
 
+    @JoinTable(joinColumns = @JoinColumn(name = "FEED_ID"))
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<GraphicContent> graphicContents = new ArrayList<>();
 
