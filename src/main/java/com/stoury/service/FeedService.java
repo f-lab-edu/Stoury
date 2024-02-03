@@ -4,10 +4,10 @@ import com.stoury.domain.Feed;
 import com.stoury.domain.GraphicContent;
 import com.stoury.domain.Member;
 import com.stoury.domain.Tag;
-import com.stoury.dto.LocationResponse;
 import com.stoury.dto.feed.FeedCreateRequest;
 import com.stoury.dto.feed.FeedResponse;
 import com.stoury.dto.feed.FeedUpdateRequest;
+import com.stoury.event.GetLocationEvent;
 import com.stoury.event.GraphicDeleteEvent;
 import com.stoury.event.GraphicSaveEvent;
 import com.stoury.exception.NotAuthorizedException;
@@ -18,7 +18,6 @@ import com.stoury.exception.member.MemberSearchException;
 import com.stoury.repository.FeedRepository;
 import com.stoury.repository.LikeRepository;
 import com.stoury.repository.MemberRepository;
-import com.stoury.service.location.LocationService;
 import com.stoury.utils.FileUtils;
 import com.stoury.utils.SupportedFileType;
 import lombok.RequiredArgsConstructor;
@@ -34,7 +33,9 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -46,7 +47,6 @@ public class FeedService {
     private final MemberRepository memberRepository;
     private final LikeRepository likeRepository;
     private final TagService tagService;
-    private final LocationService locationService;
     private final ApplicationEventPublisher eventPublisher;
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
@@ -61,7 +61,14 @@ public class FeedService {
 
         Feed uploadedFeed = feedRepository.save(feedEntity);
 
+        setLocationAsync(uploadedFeed);
+
         return FeedResponse.from(uploadedFeed, 0);
+    }
+
+    private void setLocationAsync(Feed feed) {
+        GetLocationEvent event = new GetLocationEvent(this, feed.getId(), feed.getLatitude(), feed.getLongitude());
+        eventPublisher.publishEvent(event);
     }
 
     private List<GraphicContent> saveGraphicContents(List<MultipartFile> graphicContents) {
@@ -81,8 +88,7 @@ public class FeedService {
 
     private Feed createFeedEntity(Member writer, FeedCreateRequest feedCreateRequest, List<GraphicContent> graphicContents) {
         List<Tag> tags = getOrCreateTags(feedCreateRequest.tagNames());
-        LocationResponse location = locationService.getLocationFrom(feedCreateRequest.latitude(), feedCreateRequest.longitude());
-        return feedCreateRequest.toEntity(writer, graphicContents, tags, location.city(), location.country());
+        return feedCreateRequest.toEntity(writer, graphicContents, tags);
     }
 
     private List<Tag> getOrCreateTags(List<String> tagNames) {
