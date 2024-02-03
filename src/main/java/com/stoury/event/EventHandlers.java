@@ -9,6 +9,7 @@ import com.stoury.service.storage.StorageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
@@ -37,8 +38,8 @@ public class EventHandlers {
         storageService.deleteFileAtPath(Paths.get(path));
     }
 
-    @EventListener
-    @Transactional
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void onGetLocationEventHandler(GetLocationEvent getLocationEvent) {
         LocationResponse location = locationService.getLocationFrom(getLocationEvent.getLatitude(), getLocationEvent.getLongitude());
 
