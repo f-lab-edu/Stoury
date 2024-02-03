@@ -40,6 +40,16 @@ public class FeedController {
         return feedService.getFeedsOfMemberId(memberId, orderThan);
     }
 
+    @GetMapping("/feeds/popular/abroad-spots")
+    public List<String> getPopularAbroadSpots() {
+        return feedService.getPopularAbroadSpots();
+    }
+
+    @GetMapping("/feeds/popular/domestic-spots")
+    public List<String> getPopularDomesticSpots() {
+        return feedService.getPopularDomesticSpots();
+    }
+
     @PutMapping("/feeds/{feedId}")
     public FeedResponse updateFeed(@AuthenticationPrincipal User user,
                                                    @PathVariable Long feedId,

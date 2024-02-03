@@ -191,4 +191,16 @@ public class FeedService {
         return feedRepository.findById(Objects.requireNonNull(feedId))
                 .orElseThrow(FeedSearchException::new);
     }
+
+    @Transactional(readOnly = true)
+    public List<String> getPopularAbroadSpots() {
+        Pageable pageable = PageRequest.of(0, PAGE_SIZE);
+        return feedRepository.findTop10CitiesInKorea(pageable);
+    }
+
+    @Transactional(readOnly = true)
+    public List<String> getPopularDomesticSpots() {
+        Pageable pageable = PageRequest.of(0, PAGE_SIZE);
+        return feedRepository.findTop10CountriesNotKorea(pageable);
+    }
 }
