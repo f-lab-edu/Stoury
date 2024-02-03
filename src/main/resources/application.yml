@@ -23,5 +23,5 @@ path-prefix: /feeds
 profileImage:
   path-prefix: /members/profiles
 google:
-  geocode:
+  geocoding:
     api-key: ${GEOCODE_API_KEY}
