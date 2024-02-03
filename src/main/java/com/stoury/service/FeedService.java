@@ -17,7 +17,9 @@ import com.stoury.exception.member.MemberSearchException;
 import com.stoury.repository.FeedRepository;
 import com.stoury.repository.LikeRepository;
 import com.stoury.repository.MemberRepository;
+import com.stoury.repository.RankingRepository;
 import com.stoury.service.location.LocationService;
+import com.stoury.utils.CacheKeys;
 import com.stoury.utils.FileUtils;
 import com.stoury.utils.SupportedFileType;
 import lombok.RequiredArgsConstructor;
@@ -46,6 +48,7 @@ public class FeedService {
     private final FeedRepository feedRepository;
     private final MemberRepository memberRepository;
     private final LikeRepository likeRepository;
+    private final RankingRepository rankingRepository;
     private final TagService tagService;
     private final LocationService locationService;
     private final ApplicationEventPublisher eventPublisher;
@@ -194,13 +197,11 @@ public class FeedService {
 
     @Transactional(readOnly = true)
     public List<String> getPopularAbroadSpots() {
-        Pageable pageable = PageRequest.of(0, PAGE_SIZE);
-        return feedRepository.findTop10CitiesInKorea(pageable);
+        return rankingRepository.getRankedList(CacheKeys.POPULAR_ABROAD_SPOTS);
     }
 
     @Transactional(readOnly = true)
     public List<String> getPopularDomesticSpots() {
-        Pageable pageable = PageRequest.of(0, PAGE_SIZE);
-        return feedRepository.findTop10CountriesNotKorea(pageable);
+        return rankingRepository.getRankedList(CacheKeys.POPULAR_DOMESTIC_SPOTS);
     }
 }
