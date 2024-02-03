@@ -1,6 +1,5 @@
 package com.stoury.config;
 
-import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.google.maps.GeoApiContext;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -18,7 +17,7 @@ public class ContextConfiguration {
         return new BCryptPasswordEncoder();
     }
 
-    @JsonAnyGetter
+    @Bean
     public GeoApiContext geoApiContext() {
         return new GeoApiContext.Builder()
                 .apiKey(apiKey)
