@@ -1,6 +1,6 @@
 package com.stoury.event;
 
-import com.stoury.service.StorageService;
+import com.stoury.service.storage.StorageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionPhase;

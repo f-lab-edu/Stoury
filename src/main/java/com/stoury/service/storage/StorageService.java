@@ -1,4 +1,4 @@
-package com.stoury.service;
+package com.stoury.service.storage;
 
 import org.springframework.web.multipart.MultipartFile;
 

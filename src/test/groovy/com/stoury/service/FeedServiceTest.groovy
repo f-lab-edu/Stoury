@@ -12,9 +12,7 @@ import com.stoury.exception.feed.FeedCreateException
 import com.stoury.repository.FeedRepository
 import com.stoury.repository.LikeRepository
 import com.stoury.repository.MemberRepository
-import com.stoury.service.FeedService
-import com.stoury.service.TagService
-import org.mockito.Mock
+import com.stoury.service.location.LocationService
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.mock.web.MockMultipartFile
 import spock.lang.Specification
@@ -25,9 +23,9 @@ class FeedServiceTest extends Specification {
     def feedRepository = Mock(FeedRepository)
     def likeRepository = Mock(LikeRepository)
     def eventPublisher = Mock(ApplicationEventPublisher)
-    def geocodingService = Mock(GeocodingService)
+    def locationService = Mock(LocationService)
     def feedService = new FeedService(feedRepository, memberRepository, likeRepository,
-            tagService, geocodingService, eventPublisher)
+            tagService, locationService, eventPublisher)
 
     def writer = Mock(Member)
     def feedCreateRequest = FeedCreateRequest.builder()
@@ -49,7 +47,7 @@ class FeedServiceTest extends Specification {
 
     def setup() {
         memberRepository.findByEmail(_) >> Optional.of(writer)
-        geocodingService.getLocationFrom(_, _) >> new LocationResponse("city", "country")
+        locationService.getLocationFrom(_, _) >> new LocationResponse("city", "country")
     }
 
     def "피드 생성 성공"() {

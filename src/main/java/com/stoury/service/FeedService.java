@@ -18,6 +18,7 @@ import com.stoury.exception.member.MemberSearchException;
 import com.stoury.repository.FeedRepository;
 import com.stoury.repository.LikeRepository;
 import com.stoury.repository.MemberRepository;
+import com.stoury.service.location.LocationService;
 import com.stoury.utils.FileUtils;
 import com.stoury.utils.SupportedFileType;
 import lombok.RequiredArgsConstructor;
@@ -45,7 +46,7 @@ public class FeedService {
     private final MemberRepository memberRepository;
     private final LikeRepository likeRepository;
     private final TagService tagService;
-    private final GeocodingService geocodingService;
+    private final LocationService locationService;
     private final ApplicationEventPublisher eventPublisher;
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
@@ -80,7 +81,7 @@ public class FeedService {
 
     private Feed createFeedEntity(Member writer, FeedCreateRequest feedCreateRequest, List<GraphicContent> graphicContents) {
         List<Tag> tags = getOrCreateTags(feedCreateRequest.tagNames());
-        LocationResponse location = geocodingService.getLocationFrom(feedCreateRequest.latitude(), feedCreateRequest.longitude());
+        LocationResponse location = locationService.getLocationFrom(feedCreateRequest.latitude(), feedCreateRequest.longitude());
         return feedCreateRequest.toEntity(writer, graphicContents, tags, location.city(), location.country());
     }
 
