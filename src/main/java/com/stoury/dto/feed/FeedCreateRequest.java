@@ -23,12 +23,12 @@ public record FeedCreateRequest(String textContent, Double latitude, Double long
             throw new FeedCreateException("Longitude is required");
         }
     }
-    public Feed toEntity(Member writer, List<GraphicContent> graphicContents, List<Tag> tags, String city, String country) {
+    public Feed toEntity(Member writer, List<GraphicContent> graphicContents, List<Tag> tags) {
         Feed feed = Feed.builder()
                 .member(writer)
                 .textContent(textContent)
-                .city(city)
-                .country(country)
+                .latitude(latitude)
+                .longitude(longitude)
                 .tags(tags)
                 .build();
         feed.addGraphicContents(graphicContents);

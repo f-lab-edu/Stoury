@@ -12,9 +12,9 @@ public record FeedResponse(Long feedId,
                            MemberResponse memberResponse,
                            List<String> graphicContentsPaths,
                            String textContent,
+                           Double latitude,
+                           Double lonitude,
                            List<String> tagNames,
-                           String city,
-                           String country,
                            long likes,
                            LocalDateTime createdAt) {
     public static FeedResponse from(Feed feed, long feedLikes) {
@@ -23,9 +23,9 @@ public record FeedResponse(Long feedId,
                 MemberResponse.from(feed.getMember()),
                 feed.getGraphicContents().stream().map(GraphicContent::getPath).toList(),
                 feed.getTextContent(),
+                feed.getLatitude(),
+                feed.getLongitude(),
                 feed.getTags().stream().map(Tag::getTagName).toList(),
-                feed.getCity(),
-                feed.getCountry(),
                 feedLikes,
                 feed.getCreatedAt()
         );

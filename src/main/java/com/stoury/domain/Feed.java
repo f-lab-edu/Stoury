@@ -38,24 +38,30 @@ public class Feed {
     @Column(name = "TEXT_CONTENT", nullable = false, columnDefinition = "text")
     private String textContent;
 
+    @Column(name = "LATITUDE", nullable = false)
+    private Double latitude;
+
+    @Column(name = "LONGITUDE", nullable = false)
+    private Double longitude;
+
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(joinColumns = @JoinColumn(name = "FEED_ID"),
             inverseJoinColumns = @JoinColumn(name = "TAG_ID"))
     private List<Tag> tags = new ArrayList<>();
 
     @Column(name = "CITY", length = 35, nullable = false)
-    private String city;
+    private String city = "UNDEFINED";
 
     @Column(name = "COUNTRY", length = 50, nullable = false)
-    private String country;
+    private String country = "UNDEFINED";
 
     @Builder
-    public Feed(Member member, String textContent, List<Tag> tags, String city, String country) {
+    public Feed(Member member, String textContent, Double latitude, Double longitude, List<Tag> tags) {
         this.member = member;
         this.textContent = textContent;
+        this.latitude = latitude;
+        this.longitude = longitude;
         this.tags = tags;
-        this.city = city;
-        this.country = country;
     }
 
     public void addGraphicContent(GraphicContent graphicContent) {
@@ -96,5 +102,10 @@ public class Feed {
 
     public boolean isWrittenBy(Member member) {
         return this.member.equals(member);
+    }
+
+    public void updateLocation(String city, String country) {
+        this.city = city;
+        this.country = country;
     }
 }
