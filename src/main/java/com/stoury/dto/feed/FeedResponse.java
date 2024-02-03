@@ -3,6 +3,7 @@ package com.stoury.dto.feed;
 import com.stoury.domain.Feed;
 import com.stoury.domain.GraphicContent;
 import com.stoury.domain.Tag;
+import com.stoury.dto.LocationResponse;
 import com.stoury.dto.member.MemberResponse;
 
 import java.time.LocalDateTime;
@@ -15,6 +16,7 @@ public record FeedResponse(Long feedId,
                            Double latitude,
                            Double lonitude,
                            List<String> tagNames,
+                           LocationResponse locationResponse,
                            long likes,
                            LocalDateTime createdAt) {
     public static FeedResponse from(Feed feed, long feedLikes) {
@@ -26,6 +28,7 @@ public record FeedResponse(Long feedId,
                 feed.getLatitude(),
                 feed.getLongitude(),
                 feed.getTags().stream().map(Tag::getTagName).toList(),
+                new LocationResponse(feed.getCity(), feed.getCountry()),
                 feedLikes,
                 feed.getCreatedAt()
         );
