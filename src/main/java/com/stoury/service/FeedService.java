@@ -4,6 +4,7 @@ import com.stoury.domain.Feed;
 import com.stoury.domain.GraphicContent;
 import com.stoury.domain.Member;
 import com.stoury.domain.Tag;
+import com.stoury.dto.LocationResponse;
 import com.stoury.dto.feed.FeedCreateRequest;
 import com.stoury.dto.feed.FeedResponse;
 import com.stoury.dto.feed.FeedUpdateRequest;
@@ -44,6 +45,7 @@ public class FeedService {
     private final MemberRepository memberRepository;
     private final LikeRepository likeRepository;
     private final TagService tagService;
+    private final GeocodingService geocodingService;
     private final ApplicationEventPublisher eventPublisher;
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
@@ -78,7 +80,8 @@ public class FeedService {
 
     private Feed createFeedEntity(Member writer, FeedCreateRequest feedCreateRequest, List<GraphicContent> graphicContents) {
         List<Tag> tags = getOrCreateTags(feedCreateRequest.tagNames());
-        return feedCreateRequest.toEntity(writer, graphicContents, tags);
+        LocationResponse location = geocodingService.getLocationFrom(feedCreateRequest.latitude(), feedCreateRequest.longitude());
+        return feedCreateRequest.toEntity(writer, graphicContents, tags, location.city(), location.country());
     }
 
     private List<Tag> getOrCreateTags(List<String> tagNames) {

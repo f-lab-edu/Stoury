@@ -1,4 +1,4 @@
-package com.stoury.dto;
+package com.stoury.dto.comment;
 
 import com.stoury.domain.Member;
 

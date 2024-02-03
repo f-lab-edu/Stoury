@@ -13,8 +13,8 @@ public record FeedResponse(Long feedId,
                            List<String> graphicContentsPaths,
                            String textContent,
                            List<String> tagNames,
-                           Double latitude,
-                           Double longitude,
+                           String city,
+                           String country,
                            long likes,
                            LocalDateTime createdAt) {
     public static FeedResponse from(Feed feed, long feedLikes) {
@@ -24,8 +24,8 @@ public record FeedResponse(Long feedId,
                 feed.getGraphicContents().stream().map(GraphicContent::getPath).toList(),
                 feed.getTextContent(),
                 feed.getTags().stream().map(Tag::getTagName).toList(),
-                feed.getLatitude(),
-                feed.getLongitude(),
+                feed.getCity(),
+                feed.getCountry(),
                 feedLikes,
                 feed.getCreatedAt()
         );

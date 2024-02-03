@@ -4,6 +4,7 @@ import com.stoury.domain.Feed
 import com.stoury.domain.GraphicContent
 import com.stoury.domain.Member
 import com.stoury.domain.Tag
+import com.stoury.dto.LocationResponse
 import com.stoury.dto.feed.FeedCreateRequest
 import com.stoury.dto.feed.FeedUpdateRequest
 import com.stoury.event.GraphicDeleteEvent
@@ -13,6 +14,7 @@ import com.stoury.repository.LikeRepository
 import com.stoury.repository.MemberRepository
 import com.stoury.service.FeedService
 import com.stoury.service.TagService
+import org.mockito.Mock
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.mock.web.MockMultipartFile
 import spock.lang.Specification
@@ -23,7 +25,9 @@ class FeedServiceTest extends Specification {
     def feedRepository = Mock(FeedRepository)
     def likeRepository = Mock(LikeRepository)
     def eventPublisher = Mock(ApplicationEventPublisher)
-    def feedService = new FeedService(feedRepository, memberRepository, likeRepository, tagService, eventPublisher);
+    def geocodingService = Mock(GeocodingService)
+    def feedService = new FeedService(feedRepository, memberRepository, likeRepository,
+            tagService, geocodingService, eventPublisher)
 
     def writer = Mock(Member)
     def feedCreateRequest = FeedCreateRequest.builder()
@@ -38,13 +42,14 @@ class FeedServiceTest extends Specification {
     def savedFeed = Feed.builder()
             .member(writer)
             .textContent(feedCreateRequest.textContent())
-            .longitude(feedCreateRequest.longitude())
-            .latitude(feedCreateRequest.latitude())
+            .city("Incheon-si")
+            .country("Republic of Korea")
             .tags(new ArrayList<>())
             .build()
 
     def setup() {
         memberRepository.findByEmail(_) >> Optional.of(writer)
+        geocodingService.getLocationFrom(_, _) >> new LocationResponse("city", "country")
     }
 
     def "피드 생성 성공"() {
@@ -85,7 +90,7 @@ class FeedServiceTest extends Specification {
 
     def "피드 업데이트 성공"() {
         given:
-        def feed = new Feed(writer, "before updated", 0.0, 0.0, List.of(Mock(Tag)))
+        def feed = new Feed(writer, "before updated", List.of(Mock(Tag)), "city", "country")
         feed.id = 1L
         feed.graphicContents = new ArrayList<>(List.of(
                 new GraphicContent("path1", 0),
@@ -95,16 +100,12 @@ class FeedServiceTest extends Specification {
                 new GraphicContent("path5", 4)))
         feedRepository.findById(_ as Long) >> Optional.of(feed)
 
-        def feedUpdateRequest = new FeedUpdateRequest(
-                "updated", 11.11, 22.22, Collections.emptyList(), Set.of(1,3)
-        )
+        def feedUpdateRequest = new FeedUpdateRequest("updated",  Collections.emptyList(), Set.of(1,3))
         when:
         feedService.updateFeed(1L, "blabla@email.com", feedUpdateRequest)
         then:
         2 * eventPublisher.publishEvent(_ as GraphicDeleteEvent)
         feed.textContent == "updated"
-        feed.latitude == 11.11
-        feed.longitude == 22.22
         feed.tags.isEmpty()
     }
 }
