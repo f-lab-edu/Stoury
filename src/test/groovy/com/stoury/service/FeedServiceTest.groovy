@@ -6,12 +6,12 @@ import com.stoury.domain.Member
 import com.stoury.domain.Tag
 import com.stoury.dto.feed.FeedCreateRequest
 import com.stoury.dto.feed.FeedUpdateRequest
-import com.stoury.event.GetLocationEvent
 import com.stoury.event.GraphicDeleteEvent
 import com.stoury.exception.feed.FeedCreateException
 import com.stoury.repository.FeedRepository
 import com.stoury.repository.LikeRepository
 import com.stoury.repository.MemberRepository
+import com.stoury.service.location.LocationService
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.mock.web.MockMultipartFile
 import spock.lang.Specification
@@ -22,7 +22,9 @@ class FeedServiceTest extends Specification {
     def feedRepository = Mock(FeedRepository)
     def likeRepository = Mock(LikeRepository)
     def eventPublisher = Mock(ApplicationEventPublisher)
-    def feedService = new FeedService(feedRepository, memberRepository, likeRepository, tagService, eventPublisher)
+    def locationService = Mock(LocationService)
+    def feedService = new FeedService(feedRepository, memberRepository, likeRepository, tagService,
+            locationService, eventPublisher)
 
     def writer = Mock(Member)
     def feedCreateRequest = FeedCreateRequest.builder()
@@ -51,7 +53,7 @@ class FeedServiceTest extends Specification {
         feedService.createFeed("blabla@email.com", feedCreateRequest, graphicContents)
         then:
         1 * feedRepository.save(_ as Feed) >> savedFeed
-        1 * eventPublisher.publishEvent(_ as GetLocationEvent)
+        1 * locationService.setLocation(_, _, _)
     }
 
     def "피드 생성 실패, 지원하지 않는 파일"() {

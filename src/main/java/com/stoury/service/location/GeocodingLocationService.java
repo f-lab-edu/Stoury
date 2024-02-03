@@ -3,15 +3,20 @@ package com.stoury.service.location;
 import com.google.maps.GeoApiContext;
 import com.google.maps.GeocodingApi;
 import com.google.maps.GeocodingApiRequest;
-import com.google.maps.errors.ApiException;
-import com.google.maps.model.*;
-import com.stoury.dto.LocationResponse;
+import com.google.maps.PendingResult;
+import com.google.maps.model.AddressComponentType;
+import com.google.maps.model.GeocodingResult;
+import com.google.maps.model.LatLng;
+import com.google.maps.model.LocationType;
+import com.stoury.domain.Feed;
+import com.stoury.exception.feed.FeedSearchException;
+import com.stoury.repository.FeedRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.io.IOException;
 import java.util.Arrays;
 
 @Service
@@ -20,19 +25,28 @@ import java.util.Arrays;
 @Slf4j
 public class GeocodingLocationService implements LocationService{
     private final GeoApiContext context;
+    private final FeedRepository feedRepository;
+
     @Override
-    public LocationResponse getLocationFrom(double latitude, double longitude) {
+    @Transactional
+    public void setLocation(Long feedId, double latitude, double longitude) {
+        Feed feed = feedRepository.findById(feedId).orElseThrow(FeedSearchException::new);
         LatLng latLng = new LatLng(latitude, longitude);
         GeocodingApiRequest req = GeocodingApi.reverseGeocode(context, latLng)
                 .locationType(LocationType.APPROXIMATE);
 
-        try {
-            GeocodingResult[] results = req.await();
+        req.setCallback(new PendingResult.Callback<>() {
+            @Override
+            public void onResult(GeocodingResult[] result) {
+                feed.updateLocation(getCity(result), getCountry(result));
+                feedRepository.save(feed);
+            }
 
-            return new LocationResponse(getCity(results), getCountry(results));
-        } catch (ApiException | InterruptedException | IOException e) {
-            throw new RuntimeException(e);
-        }
+            @Override
+            public void onFailure(Throwable e) {
+                log.info(e.getMessage());
+            }
+        });
     }
 
     private String getCity(GeocodingResult[] results) {

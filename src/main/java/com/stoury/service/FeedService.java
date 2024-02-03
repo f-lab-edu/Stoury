@@ -7,7 +7,6 @@ import com.stoury.domain.Tag;
 import com.stoury.dto.feed.FeedCreateRequest;
 import com.stoury.dto.feed.FeedResponse;
 import com.stoury.dto.feed.FeedUpdateRequest;
-import com.stoury.event.GetLocationEvent;
 import com.stoury.event.GraphicDeleteEvent;
 import com.stoury.event.GraphicSaveEvent;
 import com.stoury.exception.NotAuthorizedException;
@@ -18,6 +17,7 @@ import com.stoury.exception.member.MemberSearchException;
 import com.stoury.repository.FeedRepository;
 import com.stoury.repository.LikeRepository;
 import com.stoury.repository.MemberRepository;
+import com.stoury.service.location.LocationService;
 import com.stoury.utils.FileUtils;
 import com.stoury.utils.SupportedFileType;
 import lombok.RequiredArgsConstructor;
@@ -47,6 +47,7 @@ public class FeedService {
     private final MemberRepository memberRepository;
     private final LikeRepository likeRepository;
     private final TagService tagService;
+    private final LocationService locationService;
     private final ApplicationEventPublisher eventPublisher;
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
@@ -67,8 +68,7 @@ public class FeedService {
     }
 
     private void setLocationAsync(Feed feed) {
-        GetLocationEvent event = new GetLocationEvent(this, feed.getId(), feed.getLatitude(), feed.getLongitude());
-        eventPublisher.publishEvent(event);
+        locationService.setLocation(feed.getId(), feed.getLatitude(), feed.getLongitude());
     }
 
     private List<GraphicContent> saveGraphicContents(List<MultipartFile> graphicContents) {
