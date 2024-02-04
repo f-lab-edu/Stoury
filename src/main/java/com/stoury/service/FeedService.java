@@ -150,6 +150,7 @@ public class FeedService {
     public FeedResponse updateFeed(Long feedId, FeedUpdateRequest feedUpdateRequest) {
         Feed feed = feedRepository.findById(Objects.requireNonNull(feedId))
                 .orElseThrow(FeedSearchException::new);
+
         List<GraphicContent> beforeDeleteGraphicContents = new ArrayList<>(feed.getGraphicContents());
 
         feed.update(feedUpdateRequest);
