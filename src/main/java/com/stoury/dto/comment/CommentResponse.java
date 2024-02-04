@@ -1,6 +1,7 @@
 package com.stoury.dto.comment;
 
 import com.stoury.domain.Comment;
+import com.stoury.dto.WriterResponse;
 
 import java.time.LocalDateTime;
 import java.util.List;

@@ -137,7 +137,7 @@ public class FeedService {
         return feeds.stream().map(feed -> FeedResponse.from(feed, likeRepository.countByFeed(feed))).toList();
     }
 
-    @PostAuthorize("returnObject.memberResponse().email() == authentication.name")
+    @PostAuthorize("returnObject.writer().id() == authentication.principal.id")
     @Transactional
     public FeedResponse updateFeed(Long feedId, FeedUpdateRequest feedUpdateRequest) {
         Feed feed = feedRepository.findById(Objects.requireNonNull(feedId))
@@ -163,7 +163,7 @@ public class FeedService {
         }
     }
 
-    @PostAuthorize("returnObject.memberResponse().email() == authentication.name")
+    @PostAuthorize("returnObject.writer().id() == authentication.name")
     @Transactional
     public FeedResponse deleteFeed(Long feedId) {
         Feed feed = feedRepository.findById(Objects.requireNonNull(feedId))
