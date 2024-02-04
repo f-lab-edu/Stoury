@@ -1,6 +1,7 @@
 package com.stoury.service;
 
 import com.stoury.domain.Member;
+import com.stoury.dto.member.AuthenticatedMember;
 import com.stoury.dto.member.MemberCreateRequest;
 import com.stoury.dto.member.MemberResponse;
 import com.stoury.dto.member.MemberUpdateRequest;
@@ -182,6 +183,6 @@ public class MemberService implements UserDetailsService {
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         Member member = getMemberByEmail(email);
 
-        return new User(member.getEmail(), member.getEncryptedPassword(), new ArrayList<>());
+        return AuthenticatedMember.from(member);
     }
 }

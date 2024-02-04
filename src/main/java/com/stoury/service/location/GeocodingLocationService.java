@@ -21,7 +21,7 @@ import java.util.Arrays;
 import java.util.Set;
 
 @Service
-@Profile("prod")
+@Profile("dev")
 @RequiredArgsConstructor
 @Slf4j
 public class GeocodingLocationService implements LocationService{

@@ -9,7 +9,7 @@ import com.stoury.dto.feed.FeedResponse;
 import com.stoury.dto.feed.FeedUpdateRequest;
 import com.stoury.event.GraphicDeleteEvent;
 import com.stoury.event.GraphicSaveEvent;
-import com.stoury.exception.NotAuthorizedException;
+import com.stoury.exception.authentication.NotAuthorizedException;
 import com.stoury.exception.feed.FeedCreateException;
 import com.stoury.exception.feed.FeedSearchException;
 import com.stoury.exception.feed.FeedUpdateException;
@@ -28,10 +28,10 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
@@ -54,10 +54,10 @@ public class FeedService {
     private final ApplicationEventPublisher eventPublisher;
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public FeedResponse createFeed(String writerEmail, FeedCreateRequest feedCreateRequest,
+    public FeedResponse createFeed(Long writerId, FeedCreateRequest feedCreateRequest,
                                    List<MultipartFile> graphicContentsFiles) {
-        validate(writerEmail, feedCreateRequest, graphicContentsFiles);
-        Member writer = memberRepository.findByEmail(writerEmail).orElseThrow(MemberSearchException::new);
+        validate(writerId, feedCreateRequest, graphicContentsFiles);
+        Member writer = memberRepository.findById(writerId).orElseThrow(MemberSearchException::new);
 
         List<GraphicContent> graphicContents = saveGraphicContents(graphicContentsFiles);
 
@@ -107,9 +107,9 @@ public class FeedService {
         return event;
     }
 
-    private void validate(String writerEmail, FeedCreateRequest feedCreateRequest, List<MultipartFile> graphicContents) {
-        if (!StringUtils.hasText(writerEmail)) {
-            throw new FeedCreateException("Writer email cannot be null");
+    private void validate(Long writerId, FeedCreateRequest feedCreateRequest, List<MultipartFile> graphicContents) {
+        if (writerId == null) {
+            throw new FeedCreateException("Writer id cannot be null");
         }
         if (graphicContents.isEmpty() || graphicContents.stream().anyMatch(SupportedFileType::isUnsupportedFile)) {
             throw new FeedCreateException("Input files are empty or unsupported.");
@@ -139,19 +139,10 @@ public class FeedService {
         return feeds.stream().map(feed -> FeedResponse.from(feed, likeRepository.countByFeed(feed))).toList();
     }
 
+    @PostAuthorize("returnObject.memberResponse().email() == authentication.name")
     @Transactional
-    public FeedResponse updateFeed(Long feedId, String writerEmail, FeedUpdateRequest feedUpdateRequest) {
+    public FeedResponse updateFeed(Long feedId, FeedUpdateRequest feedUpdateRequest) {
         Feed feed = getFeed(feedId);
-
-        if (!StringUtils.hasText(writerEmail)) {
-            throw new FeedUpdateException("Writer email cannot be null");
-        }
-
-        Member writer = memberRepository.findByEmail(writerEmail).orElseThrow(MemberSearchException::new);
-
-        if (!feed.isWrittenBy(writer)) {
-            throw new NotAuthorizedException();
-        }
 
         List<GraphicContent> beforeDeleteGraphicContents = new ArrayList<>(feed.getGraphicContents());
 
@@ -173,20 +164,12 @@ public class FeedService {
         }
     }
 
+    @PostAuthorize("returnObject.memberResponse().email() == authentication.name")
     @Transactional
-    public void deleteFeed(Long feedId, String writerEmail) {
-        if (!StringUtils.hasText(writerEmail)) {
-            throw new FeedUpdateException("Writer email cannot be null");
-        }
-
-        Member writer = memberRepository.findByEmail(writerEmail).orElseThrow(MemberSearchException::new);
-
+    public FeedResponse deleteFeed(Long feedId) {
         Feed feed = getFeed(feedId);
-
-        if (!feed.isWrittenBy(writer)) {
-            throw new NotAuthorizedException();
-        }
         feedRepository.delete(feed);
+        return FeedResponse.from(feed, 0);
     }
 
     @Transactional(readOnly = true)
