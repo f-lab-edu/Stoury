@@ -9,10 +9,8 @@ import com.stoury.dto.feed.FeedResponse;
 import com.stoury.dto.feed.FeedUpdateRequest;
 import com.stoury.event.GraphicDeleteEvent;
 import com.stoury.event.GraphicSaveEvent;
-import com.stoury.exception.authentication.NotAuthorizedException;
 import com.stoury.exception.feed.FeedCreateException;
 import com.stoury.exception.feed.FeedSearchException;
-import com.stoury.exception.feed.FeedUpdateException;
 import com.stoury.exception.member.MemberSearchException;
 import com.stoury.repository.FeedRepository;
 import com.stoury.repository.LikeRepository;
@@ -142,7 +140,8 @@ public class FeedService {
     @PostAuthorize("returnObject.memberResponse().email() == authentication.name")
     @Transactional
     public FeedResponse updateFeed(Long feedId, FeedUpdateRequest feedUpdateRequest) {
-        Feed feed = getFeed(feedId);
+        Feed feed = feedRepository.findById(Objects.requireNonNull(feedId))
+                .orElseThrow(FeedSearchException::new);
 
         List<GraphicContent> beforeDeleteGraphicContents = new ArrayList<>(feed.getGraphicContents());
 
@@ -167,15 +166,19 @@ public class FeedService {
     @PostAuthorize("returnObject.memberResponse().email() == authentication.name")
     @Transactional
     public FeedResponse deleteFeed(Long feedId) {
-        Feed feed = getFeed(feedId);
+        Feed feed = feedRepository.findById(Objects.requireNonNull(feedId))
+                .orElseThrow(FeedSearchException::new);
         feedRepository.delete(feed);
         return FeedResponse.from(feed, 0);
     }
 
     @Transactional(readOnly = true)
-    public Feed getFeed(Long feedId) {
-        return feedRepository.findById(Objects.requireNonNull(feedId))
+    public FeedResponse getFeed(Long feedId) {
+        Feed feed = feedRepository.findById(Objects.requireNonNull(feedId))
                 .orElseThrow(FeedSearchException::new);
+        long likes = likeRepository.countByFeed(feed);
+
+        return FeedResponse.from(feed, likes);
     }
 
     @Transactional(readOnly = true)

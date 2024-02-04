@@ -27,6 +27,11 @@ public class FeedController {
         return feedService.createFeed(member.getId(), feedCreateRequest, images);
     }
 
+    @GetMapping("/feeds/{feedId}")
+    public FeedResponse getFeed(@PathVariable Long feedId) {
+        return feedService.getFeed(feedId);
+    }
+
     @GetMapping("/feeds/tag/{tagName}")
     public List<FeedResponse> getFeedsOfTag(@PathVariable String tagName,
                                             @RequestParam(required = false, defaultValue = "2100-12-31T00:00:00")
