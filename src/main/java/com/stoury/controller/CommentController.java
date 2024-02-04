@@ -6,10 +6,10 @@ import com.stoury.dto.member.AuthenticatedMember;
 import com.stoury.service.CommentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDateTime;
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -28,5 +28,19 @@ public class CommentController {
                                                    @PathVariable Long commentId,
                                                    @RequestBody String textContent) {
         return commentService.createNestedComment(authenticatedMember.getId(), commentId, textContent);
+    }
+
+    @GetMapping("/comments/feed/{feedId}")
+    public List<CommentResponse> getComments(@PathVariable Long feedId,
+                                             @RequestParam(required = false, defaultValue = "2100-12-31T00:00:00")
+                                             LocalDateTime orderThan) {
+        return commentService.getCommentsOfFeed(feedId, orderThan);
+    }
+
+    @GetMapping("/comments/comment/{commentId}")
+    public List<ChildCommentResponse> getChildComments(@PathVariable Long commentId,
+                                                       @RequestParam(required = false, defaultValue = "2100-12-31T00:00:00")
+                                                       LocalDateTime orderThan) {
+        return commentService.getChildComments(commentId, orderThan);
     }
 }

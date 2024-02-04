@@ -35,6 +35,7 @@ public class SecurityConfig {
                         .requestMatchers(new MvcRequestMatcher.Builder(introspector).pattern(HttpMethod.GET, "/feeds/tag/**")).permitAll()
                         .requestMatchers(new MvcRequestMatcher.Builder(introspector).pattern(HttpMethod.GET, "/feeds/popular/*")).permitAll()
                         .requestMatchers(new MvcRequestMatcher.Builder(introspector).pattern(HttpMethod.GET, "/feeds/*")).permitAll()
+                        .requestMatchers(new MvcRequestMatcher.Builder(introspector).pattern(HttpMethod.GET, "/comments/**")).permitAll()
                         .anyRequest().authenticated())
                 .exceptionHandling(exHandler -> exHandler
                         .authenticationEntryPoint((request, response, authException) -> response
