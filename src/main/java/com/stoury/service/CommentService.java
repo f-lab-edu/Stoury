@@ -68,7 +68,7 @@ public class CommentService {
 
         Pageable pageable = PageRequest.of(0, PAGE_SIZE, Sort.by("createdAt").descending());
 
-        return CommentResponse.from(commentRepository.findAllByFeedAndCreatedAtBefore(feed, orderThan, pageable));
+        return CommentResponse.from(commentRepository.findAllByFeedAndCreatedAtBeforeAndParentCommentIsNull(feed, orderThan, pageable));
     }
 
     @Transactional(readOnly = true)
