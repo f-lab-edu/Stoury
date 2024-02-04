@@ -5,6 +5,7 @@ import com.stoury.dto.comment.CommentResponse;
 import com.stoury.dto.member.AuthenticatedMember;
 import com.stoury.service.CommentService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -42,5 +43,11 @@ public class CommentController {
                                                        @RequestParam(required = false, defaultValue = "2100-12-31T00:00:00")
                                                        LocalDateTime orderThan) {
         return commentService.getChildComments(commentId, orderThan);
+    }
+
+    @DeleteMapping("/comments/{commentId}")
+    public ResponseEntity<Object> deleteComment(@PathVariable Long commentId) {
+        commentService.deleteComment(commentId);
+        return ResponseEntity.ok().build();
     }
 }
