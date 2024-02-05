@@ -39,12 +39,7 @@ public class LikeService {
 
     @Transactional
     public void likeCancel(Long likerId, Long feedId) {
-        Member liker = memberRepository.findById(Objects.requireNonNull(likerId))
-                .orElseThrow(MemberSearchException::new);
-        Feed feed = feedRepository.findById(Objects.requireNonNull(feedId))
-                .orElseThrow(FeedSearchException::new);
-
-        likeRepository.deleteByMemberAndFeed(liker, feed);
+        likeRepository.deleteByMemberAndFeed(likerId.toString(), feedId.toString());
     }
 
     @Transactional

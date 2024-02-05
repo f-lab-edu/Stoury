@@ -65,18 +65,12 @@ class LikeRedisRepositoryTest extends Specification {
         likeRedisRepository.save(new Like(member, feed))
 
         expect:
-        likeRedisRepository.deleteByMemberAndFeed(member, feed)
+        likeRedisRepository.deleteByMemberAndFeed("1", "2")
         !likeRedisRepository.existsByMemberAndFeed(member, feed)
     }
 
     def "좋아요 삭제 - 실패, 없는 데이터 삭제 시도"() {
-        given:
-        def member = new Member()
-        def feed = new Feed()
-        member.id = 1L
-        feed.id = 2L
-
         expect:
-        !likeRedisRepository.deleteByMemberAndFeed(member, feed)
+        !likeRedisRepository.deleteByMemberAndFeed("1", "2")
     }
 }

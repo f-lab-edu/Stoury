@@ -7,6 +7,7 @@ import org.springframework.data.redis.core.SetOperations;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.stereotype.Repository;
+import org.springframework.util.StringUtils;
 
 
 import java.time.temporal.ChronoUnit;
@@ -41,11 +42,10 @@ public class LikeRepository {
         return Boolean.TRUE.equals(opsForSet.isMember(getLikersKey(feedId), memberId));
     }
 
-    public void deleteByMemberAndFeed(Member liker, Feed feed) {
-        String memberId = getMemberIdToString(liker);
-        String feedId = getFeedIdToString(feed);
-
-        opsForSet.remove(getLikersKey(feedId), memberId);
+    public void deleteByMemberAndFeed(String memberId, String feedId) {
+        if (StringUtils.hasText(memberId) && StringUtils.hasText(feedId)) {
+            opsForSet.remove(getLikersKey(feedId), memberId);
+        }
     }
 
     public long getCountByFeed(Feed feed) {
