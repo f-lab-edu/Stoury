@@ -4,13 +4,10 @@ import com.stoury.domain.Feed
 import com.stoury.repository.FeedRepository
 import com.stoury.repository.LikeRepository
 import com.stoury.repository.RankingRepository
-import org.springframework.data.domain.Page
-import org.springframework.data.domain.PageImpl
-import org.springframework.data.domain.Pageable
+import com.stoury.repository.RankingRepositoryTest
 import spock.lang.Specification
 
 import java.time.temporal.ChronoUnit
-import java.util.stream.IntStream
 
 class RankingServiceTest extends Specification {
     def feedRepository = Mock(FeedRepository)

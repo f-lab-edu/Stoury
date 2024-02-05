@@ -23,8 +23,8 @@ public class RankingService {
     private final FeedRepository feedRepository;
     private final RankingRepository rankingRepository;
     private final LikeRepository likeRepository;
-    @Scheduled(fixedRate = 12 * 60 * 60 * 1000)
-    public void updatePopularSpotsCache() {
+    @Scheduled(cron = "0 0 0 * * ?") // 매일 자정에 실행
+    public void updatePopularLocations() {
         Pageable pageable = PageRequest.of(0, 10);
         List<String> rankedDomesticCities = feedRepository.findTop10CitiesInKorea(pageable);
         rankingRepository.update(CacheKeys.POPULAR_DOMESTIC_SPOTS, rankedDomesticCities);
@@ -33,14 +33,17 @@ public class RankingService {
         rankingRepository.update(CacheKeys.POPULAR_ABROAD_SPOTS, rankedCountries);
     }
 
+    @Scheduled(cron = "0 0 0 * * ?") // 매일 자정에 실행
     public void updateDailyHotFeeds() {
         updateHotFeeds(ChronoUnit.DAYS);
     }
 
+    @Scheduled(cron = "0 0 0 ? * SAT") // 매주 토요일 자정에 실행
     public void updateWeeklyHotFeeds() {
         updateHotFeeds(ChronoUnit.WEEKS);
     }
 
+    @Scheduled(cron = "0 0 0 L * ?") // 매월 마지막 날 자정에 실행
     public void updateMonthlyHotFeeds() {
         updateHotFeeds(ChronoUnit.MONTHS);
     }
@@ -74,7 +77,7 @@ public class RankingService {
     }
 
     public List<FeedResponse> getHotFeeds(ChronoUnit chronoUnit) {
-        return rankingRepository.getRankedList(CacheKeys.getHotFeedsKey(chronoUnit))
+        return rankingRepository.getRankedFeedIds(CacheKeys.getHotFeedsKey(chronoUnit))
                 .stream()
                 .map(Long::parseLong)
                 .map(feedRepository::findById)

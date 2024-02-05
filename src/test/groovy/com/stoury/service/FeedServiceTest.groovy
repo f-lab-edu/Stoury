@@ -13,6 +13,7 @@ import com.stoury.repository.FeedRepository
 import com.stoury.repository.LikeRepository
 import com.stoury.repository.MemberRepository
 import com.stoury.repository.RankingRepository
+import com.stoury.repository.RankingRepositoryTest
 import com.stoury.service.location.LocationService
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.mock.web.MockMultipartFile

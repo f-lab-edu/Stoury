@@ -181,11 +181,11 @@ public class FeedService {
 
     @Transactional(readOnly = true)
     public List<String> getPopularAbroadSpots() {
-        return rankingRepository.getRankedList(CacheKeys.POPULAR_ABROAD_SPOTS);
+        return rankingRepository.getRankedLocations(CacheKeys.POPULAR_ABROAD_SPOTS);
     }
 
     @Transactional(readOnly = true)
     public List<String> getPopularDomesticSpots() {
-        return rankingRepository.getRankedList(CacheKeys.POPULAR_DOMESTIC_SPOTS);
+        return rankingRepository.getRankedLocations(CacheKeys.POPULAR_DOMESTIC_SPOTS);
     }
 }
