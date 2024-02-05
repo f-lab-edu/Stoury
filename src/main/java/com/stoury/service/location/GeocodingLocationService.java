@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Arrays;
+import java.util.Set;
 
 @Service
 @Profile("prod")
@@ -50,18 +51,17 @@ public class GeocodingLocationService implements LocationService{
     }
 
     private String getCity(GeocodingResult[] results) {
-        return Arrays.stream(results)
-                .flatMap(res -> Arrays.stream(res.addressComponents))
-                .filter(component -> Arrays.asList(component.types).contains(AddressComponentType.LOCALITY))
-                .map(component -> component.longName)
-                .findFirst()
-                .orElse("UNDEFINED");
+        return getAddressComponent(results, AddressComponentType.LOCALITY);
     }
 
     private String getCountry(GeocodingResult[] results) {
+        return getAddressComponent(results, AddressComponentType.COUNTRY);
+    }
+
+    private String getAddressComponent(GeocodingResult[] results, AddressComponentType type) {
         return Arrays.stream(results)
                 .flatMap(res -> Arrays.stream(res.addressComponents))
-                .filter(component -> Arrays.asList(component.types).contains(AddressComponentType.COUNTRY))
+                .filter(component -> Set.of(component.types).contains(type))
                 .map(component -> component.longName)
                 .findFirst()
                 .orElse("UNDEFINED");
