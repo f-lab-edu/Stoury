@@ -123,7 +123,7 @@ public class FeedService {
         Pageable page = PageRequest.of(0, PAGE_SIZE, Sort.by("createdAt").descending());
         List<Feed> feeds = feedRepository.findAllByMemberAndCreatedAtIsBefore(feedWriter, orderThan, page);
 
-        return feeds.stream().map(feed -> FeedResponse.from(feed, likeRepository.countByFeed(feed))).toList();
+        return feeds.stream().map(feed -> FeedResponse.from(feed, likeRepository.getCountByFeed(feed))).toList();
     }
 
     @Transactional(readOnly = true)
@@ -132,7 +132,7 @@ public class FeedService {
 
         List<Feed> feeds = feedRepository.findByTagAndCreateAtLessThan(tagName, orderThan, page);
 
-        return feeds.stream().map(feed -> FeedResponse.from(feed, likeRepository.countByFeed(feed))).toList();
+        return feeds.stream().map(feed -> FeedResponse.from(feed, likeRepository.getCountByFeed(feed))).toList();
     }
 
     @PostAuthorize("returnObject.writer().id() == authentication.principal.id")
@@ -149,7 +149,7 @@ public class FeedService {
 
         publishDeleteFileEvents(beforeDeleteGraphicContents, feed.getGraphicContents());
 
-        return FeedResponse.from(feed, likeRepository.countByFeed(feed));
+        return FeedResponse.from(feed, likeRepository.getCountByFeed(feed));
     }
 
     private void publishDeleteFileEvents(List<GraphicContent> beforeDeleteGraphicContents,
@@ -174,7 +174,7 @@ public class FeedService {
     public FeedResponse getFeed(Long feedId) {
         Feed feed = feedRepository.findById(Objects.requireNonNull(feedId))
                 .orElseThrow(FeedSearchException::new);
-        long likes = likeRepository.countByFeed(feed);
+        long likes = likeRepository.getCountByFeed(feed);
 
         return FeedResponse.from(feed, likes);
     }

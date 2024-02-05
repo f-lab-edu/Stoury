@@ -51,6 +51,6 @@ public class LikeService {
     public long getLikesOfFeed(Long feedId) {
         Feed feed = feedRepository.findById(Objects.requireNonNull(feedId))
                 .orElseThrow(FeedSearchException::new);
-        return likeRepository.countByFeed(feed);
+        return likeRepository.getCountByFeed(feed);
     }
 }
