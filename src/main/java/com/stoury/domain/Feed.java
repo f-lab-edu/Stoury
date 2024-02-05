@@ -105,7 +105,7 @@ public class Feed {
     }
 
     public void updateLocation(String city, String country) {
-        this.city = city;
-        this.country = country;
+        this.city = this.city.equals("UNDEFINED") ? city : this.city;
+        this.country = this.country.equals("UNDEFINED") ? country : this.country;
     }
 }

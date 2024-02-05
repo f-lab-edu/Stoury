@@ -16,7 +16,7 @@ public record FeedResponse(Long feedId,
                            Double latitude,
                            Double lonitude,
                            List<String> tagNames,
-                           LocationResponse locationResponse,
+                           LocationResponse location,
                            long likes,
                            LocalDateTime createdAt) {
     public static FeedResponse from(Feed feed, long feedLikes) {
