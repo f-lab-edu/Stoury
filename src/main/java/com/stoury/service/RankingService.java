@@ -54,7 +54,7 @@ public class RankingService {
         Page<Feed> page;
         while ((page = feedRepository.findAll(pageable)).hasNext()) {
             for (Feed feed : page.getContent()) {
-                updateHotFeed(chronoUnit, feed);
+                updateHotFeed(chronoUnit, feed.getId().toString());
             }
 
             if (page.hasNext()) {
@@ -63,16 +63,16 @@ public class RankingService {
         }
     }
 
-    private void updateHotFeed(ChronoUnit chronoUnit, Feed feed) {
-        if (!likeRepository.existsByFeed(feed)) {
+    private void updateHotFeed(ChronoUnit chronoUnit, String feedId) {
+        if (!likeRepository.existsByFeedId(feedId)) {
             return;
         }
-        long currentLikes = likeRepository.getCountByFeed(feed);
-        long prevLikes = likeRepository.getCountSnapshotByFeed(feed, chronoUnit);
+        long currentLikes = likeRepository.getCountByFeedId(feedId);
+        long prevLikes = likeRepository.getCountSnapshotByFeed(feedId, chronoUnit);
 
         long likeIncrease = currentLikes - prevLikes;
         if (likeIncrease > 0) {
-            rankingRepository.saveHotFeed(feed.getId().toString(), likeIncrease, chronoUnit);
+            rankingRepository.saveHotFeed(feedId, likeIncrease, chronoUnit);
         }
     }
 

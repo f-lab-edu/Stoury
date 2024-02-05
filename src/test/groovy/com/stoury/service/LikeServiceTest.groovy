@@ -71,7 +71,7 @@ class LikeServiceTest extends Specification {
 
     def "특정 피드의 좋아요만 가져오기"() {
         given:
-        likeRepository.getCountByFeed(_ as Feed) >> 5
+        likeRepository.getCountByFeedId(_) >> 5
         when:
         def likes = likeService.getLikesOfFeed(1L)
         then:

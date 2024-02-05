@@ -48,13 +48,15 @@ public class LikeRepository {
         }
     }
 
-    public long getCountByFeed(Feed feed) {
-        String feedId = getFeedIdToString(feed);
-        return getLikes(feedId);
+    public long getCountByFeedId(String feedId) {
+        if (StringUtils.hasText(feedId)) {
+            return getLikes(feedId);
+        }
+        throw new IllegalArgumentException("Feed id cannot be null");
     }
 
-    public long getCountSnapshotByFeed(Feed feed, ChronoUnit chronoUnit) {
-        String countSnapshotKey = getCountSnapshotKey(chronoUnit, feed.getId().toString());
+    public long getCountSnapshotByFeed(String feedId, ChronoUnit chronoUnit) {
+        String countSnapshotKey = getCountSnapshotKey(chronoUnit, feedId);
         String countStr = opsForVal.get(countSnapshotKey);
         return Optional.ofNullable(countStr).map(Long::parseLong).orElse(0L);
     }
@@ -76,8 +78,8 @@ public class LikeRepository {
     }
 
 
-    public boolean existsByFeed(Feed feed) {
-        String likersKey = getLikersKey(feed.getId().toString());
+    public boolean existsByFeedId(String feedId) {
+        String likersKey = getLikersKey(feedId);
         return Boolean.TRUE.equals(redisTemplate.hasKey(likersKey));
     }
 }

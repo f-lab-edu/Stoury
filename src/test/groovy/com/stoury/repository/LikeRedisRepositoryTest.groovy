@@ -51,7 +51,7 @@ class LikeRedisRepositoryTest extends Specification {
         likeRedisRepository.save(new Like(member3, feed))
 
         when:
-        def likes = likeRedisRepository.getCountByFeed(feed)
+        def likes = likeRedisRepository.getCountByFeedId("1")
         then:
         likes == 3
     }

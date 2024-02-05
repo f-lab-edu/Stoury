@@ -1,10 +1,9 @@
 package com.stoury.service
 
-import com.stoury.domain.Feed
+
 import com.stoury.repository.FeedRepository
 import com.stoury.repository.LikeRepository
 import com.stoury.repository.RankingRepository
-import com.stoury.repository.RankingRepositoryTest
 import spock.lang.Specification
 
 import java.time.temporal.ChronoUnit
@@ -16,22 +15,18 @@ class RankingServiceTest extends Specification {
     def rankingService = new RankingService(feedRepository, rankingRepository, likeRepository)
 
     def setup() {
-        likeRepository.existsByFeed(_ as Feed) >> true
+        likeRepository.existsByFeedId(_) >> true
     }
 
     def "인기 피드 업데이트"() {
         given:
-        def feed1 = new Feed()
-        feed1.id = 1L
-        def feed2 = new Feed()
-        feed2.id = 2L
-        likeRepository.getCountByFeed(feed1) >> 10
-        likeRepository.getCountSnapshotByFeed(feed1, _ as ChronoUnit) >> 5
+        likeRepository.getCountByFeedId("1") >> 10
+        likeRepository.getCountSnapshotByFeed("1", _ as ChronoUnit) >> 5
         when:
-        rankingService.updateHotFeed(ChronoUnit.DAYS, feed1)
-        rankingService.updateHotFeed(ChronoUnit.DAYS, feed2)
+        rankingService.updateHotFeed(ChronoUnit.DAYS, "1")
+        rankingService.updateHotFeed(ChronoUnit.DAYS, "2")
         then:
-        1 * rankingRepository.saveHotFeed(feed1.id.toString(), _, _)
-        0 * rankingRepository.saveHotFeed(feed2.id.toString(), _, _)
+        1 * rankingRepository.saveHotFeed("1", _, _)
+        0 * rankingRepository.saveHotFeed("2", _, _)
     }
 }
