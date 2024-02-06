@@ -18,7 +18,7 @@ class RankingServiceTest extends Specification {
         likeRepository.existsByFeedId(_) >> true
     }
 
-    def "인기 피드 업데이트"() {
+    def "인기 피드 업데이트 - 좋아요수가 증가한 것만 순위에 적용"() {
         given:
         likeRepository.getCountByFeedId("1") >> 10
         likeRepository.getCountSnapshotByFeed("1", _ as ChronoUnit) >> 5

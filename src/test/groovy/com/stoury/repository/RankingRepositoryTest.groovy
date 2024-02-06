@@ -40,11 +40,11 @@ class RankingRepositoryTest extends Specification {
 
         then:
         def rankedList = rankingRepository.getRankedFeedIds(CacheKeys.getHotFeedsKey(ChronoUnit.DAYS))
-        def expectedList = List.of(15, 5,  14, 3,  12,
+        def expectedList = List.of(
+                15, 5,  14, 3,  12,
                        18, 17, 13, 6,  16,
                        11, 7,  1,  10, 8,
                        19, 0,  9,  4,  2)
-        then:
         (0..<20).each { i ->
             rankedList.get(i) == expectedList.get(i)
         }
