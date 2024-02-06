@@ -20,7 +20,7 @@ public class Diary {
     @ManyToOne(optional = false)
     private Member member;
 
-    @JoinTable(joinColumns = @JoinColumn(name = "DIARY_ID"))
+    @JoinColumn(name = "DIARY_ID")
     @OneToMany(fetch = FetchType.LAZY, orphanRemoval = false)
     private List<Feed> feeds = new ArrayList<>();
 
