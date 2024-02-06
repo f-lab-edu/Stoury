@@ -24,7 +24,7 @@ public class RankingService {
     private final RankingRepository rankingRepository;
     private final LikeRepository likeRepository;
     @Scheduled(cron = "0 0 0 * * ?") // 매일 자정에 실행
-    public void updatePopularLocations() {
+    public void updatePopularSpots() {
         Pageable pageable = PageRequest.of(0, 10);
         List<String> rankedDomesticCities = feedRepository.findTop10CitiesInKorea(pageable);
         rankingRepository.update(CacheKeys.POPULAR_DOMESTIC_SPOTS, rankedDomesticCities);
@@ -85,5 +85,14 @@ public class RankingService {
                 .map(Optional::get)
                 .map(feed -> FeedResponse.from(feed, likeRepository.getLikes(feed.getId().toString())))
                 .toList();
+    }
+
+
+    public List<String> getPopularAbroadSpots() {
+        return rankingRepository.getRankedLocations(CacheKeys.POPULAR_ABROAD_SPOTS);
+    }
+
+    public List<String> getPopularDomesticSpots() {
+        return rankingRepository.getRankedLocations(CacheKeys.POPULAR_DOMESTIC_SPOTS);
     }
 }

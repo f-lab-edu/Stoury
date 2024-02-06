@@ -18,7 +18,6 @@ import com.stoury.repository.LikeRepository;
 import com.stoury.repository.MemberRepository;
 import com.stoury.repository.RankingRepository;
 import com.stoury.service.location.LocationService;
-import com.stoury.utils.CacheKeys;
 import com.stoury.utils.FileUtils;
 import com.stoury.utils.SupportedFileType;
 import lombok.RequiredArgsConstructor;
@@ -188,15 +187,5 @@ public class FeedService {
         long likes = likeRepository.getCountByFeedId(feed.getId().toString());
 
         return FeedResponse.from(feed, likes);
-    }
-
-    @Transactional(readOnly = true)
-    public List<String> getPopularAbroadSpots() {
-        return rankingRepository.getRankedLocations(CacheKeys.POPULAR_ABROAD_SPOTS);
-    }
-
-    @Transactional(readOnly = true)
-    public List<String> getPopularDomesticSpots() {
-        return rankingRepository.getRankedLocations(CacheKeys.POPULAR_DOMESTIC_SPOTS);
     }
 }
