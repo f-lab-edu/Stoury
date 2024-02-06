@@ -12,8 +12,6 @@ import com.stoury.exception.feed.FeedCreateException
 import com.stoury.repository.FeedRepository
 import com.stoury.repository.LikeRepository
 import com.stoury.repository.MemberRepository
-import com.stoury.repository.RankingRepository
-import com.stoury.repository.RankingRepositoryTest
 import com.stoury.service.location.LocationService
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.mock.web.MockMultipartFile
@@ -26,8 +24,7 @@ class FeedServiceTest extends Specification {
     def likeRepository = Mock(LikeRepository)
     def eventPublisher = Mock(ApplicationEventPublisher)
     def locationService = Mock(LocationService)
-    def rankingRepository = Mock(RankingRepository)
-    def feedService = new FeedService(feedRepository, memberRepository, likeRepository, rankingRepository,
+    def feedService = new FeedService(feedRepository, memberRepository, likeRepository,
             tagService, locationService, eventPublisher)
 
     def writer = Mock(Member)
