@@ -66,10 +66,10 @@ public class DiaryService {
     }
 
     @NotNull
-    private String getDefaultTitle(List<Feed> feeds) {
+    private String getDefaultTitle(List<Feed> sortedFeeds) {
         String title;
-        Feed firstFeed = feeds.get(0);
-        Feed lastFeed = feeds.get(feeds.size() - 1);
+        Feed firstFeed = sortedFeeds.get(0);
+        Feed lastFeed = sortedFeeds.get(sortedFeeds.size() - 1);
 
         title = firstFeed.getCountry() + ", " + firstFeed.getCity() + ", "
                 + dateFormatter.format(firstFeed.getCreatedAt()) + "~" + dateFormatter.format(lastFeed.getCreatedAt());
