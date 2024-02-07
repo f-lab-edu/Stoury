@@ -1,5 +1,7 @@
 package com.stoury.service.location;
 
+import com.stoury.dto.LocationResponse;
+
 public interface LocationService {
-    void setLocation(Long feedId, double latitude, double longitude);
+    LocationResponse getLocation(double latitude, double longitude);
 }

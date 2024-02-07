@@ -33,9 +33,11 @@ dependencies {
     runtimeOnly 'org.mariadb.jdbc:mariadb-java-client'
     annotationProcessor 'org.projectlombok:lombok'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation 'org.springframework.boot:spring-boot-starter-batch'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.springframework.security:spring-security-test'
     implementation 'org.springframework.session:spring-session-data-redis'
+    testImplementation 'org.springframework.batch:spring-batch-test'
 
     // 구글 지오코딩 api
     implementation 'com.google.maps:google-maps-services:2.2.0'

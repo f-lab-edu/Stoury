@@ -7,6 +7,9 @@ server:
         http-only: true
       timeout: 3600
 spring:
+  batch:
+    job:
+      enabled: true
   datasource:
     url: jdbc:mariadb://localhost:3306/stoury
     username: ${MYSQL_USERNAME}

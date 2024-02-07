@@ -56,12 +56,15 @@ public class Feed {
     private String country = "UNDEFINED";
 
     @Builder
-    public Feed(Member member, String textContent, Double latitude, Double longitude, List<Tag> tags) {
+    public Feed(Member member, String textContent, Double latitude, Double longitude,
+                List<Tag> tags, String city, String country) {
         this.member = member;
         this.textContent = textContent;
         this.latitude = latitude;
         this.longitude = longitude;
         this.tags = tags;
+        this.city = city;
+        this.country = country;
     }
 
     public void addGraphicContent(GraphicContent graphicContent) {
