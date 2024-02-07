@@ -1,5 +1,6 @@
 package com.stoury.service;
 
+import com.stoury.service.storage.FileStorageService;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;

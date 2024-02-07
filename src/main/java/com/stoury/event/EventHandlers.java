@@ -1,6 +1,8 @@
 package com.stoury.event;
 
-import com.stoury.service.StorageService;
+import com.stoury.repository.FeedRepository;
+import com.stoury.service.location.LocationService;
+import com.stoury.service.storage.StorageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionPhase;
@@ -11,7 +13,7 @@ import java.nio.file.Paths;
 
 @Component
 @RequiredArgsConstructor
-public class GraphicEventListener {
+public class EventHandlers {
     private final StorageService storageService;
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)

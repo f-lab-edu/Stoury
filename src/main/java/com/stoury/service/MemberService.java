@@ -6,6 +6,7 @@ import com.stoury.dto.member.MemberResponse;
 import com.stoury.dto.member.MemberUpdateRequest;
 import com.stoury.exception.member.*;
 import com.stoury.repository.MemberRepository;
+import com.stoury.service.storage.StorageService;
 import com.stoury.utils.FileUtils;
 import com.stoury.utils.SupportedFileType;
 import lombok.RequiredArgsConstructor;

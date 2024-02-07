@@ -1,4 +1,4 @@
-package com.stoury.service;
+package com.stoury.service.storage;
 
 import com.stoury.exception.graphiccontent.GraphicContentsException;
 import org.springframework.context.annotation.Profile;

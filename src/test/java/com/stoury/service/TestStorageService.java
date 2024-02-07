@@ -1,5 +1,6 @@
 package com.stoury.service;
 
+import com.stoury.service.storage.StorageService;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;

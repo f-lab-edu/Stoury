@@ -20,35 +20,31 @@ public class FeedController {
     private final FeedService feedService;
 
     @PostMapping("/feeds")
-    public ResponseEntity<FeedResponse> createFeed(@AuthenticationPrincipal User user,
+    public FeedResponse createFeed(@AuthenticationPrincipal User user,
                                                    @RequestPart(name = "feedCreateRequest") FeedCreateRequest feedCreateRequest,
                                                    @RequestPart(required = true) List<MultipartFile> images) {
-        FeedResponse createdFeed = feedService.createFeed(user.getUsername(), feedCreateRequest, images);
-        return ResponseEntity.ok(createdFeed);
+        return feedService.createFeed(user.getUsername(), feedCreateRequest, images);
     }
 
     @GetMapping("/feeds/tag/{tagName}")
-    public ResponseEntity<Object> getFeedsOfTag(@PathVariable String tagName,
-                                                @RequestParam(required = false, defaultValue = "2100-12-31T00:00:00")
+    public List<FeedResponse> getFeedsOfTag(@PathVariable String tagName,
+                                            @RequestParam(required = false, defaultValue = "2100-12-31T00:00:00")
                                                 LocalDateTime orderThan) {
-        List<FeedResponse> feeds = feedService.getFeedsByTag(tagName, orderThan);
-        return ResponseEntity.ok(feeds);
+        return feedService.getFeedsByTag(tagName, orderThan);
     }
 
     @GetMapping("/feeds/member/{memberId}")
-    public ResponseEntity<Object> getFeedsOfMember(@PathVariable Long memberId,
+    public List<FeedResponse> getFeedsOfMember(@PathVariable Long memberId,
                                                    @RequestParam(required = false, defaultValue = "2100-12-31T00:00:00")
                                                    LocalDateTime orderThan) {
-        List<FeedResponse> feeds = feedService.getFeedsOfMemberId(memberId, orderThan);
-        return ResponseEntity.ok(feeds);
+        return feedService.getFeedsOfMemberId(memberId, orderThan);
     }
 
     @PutMapping("/feeds/{feedId}")
-    public ResponseEntity<FeedResponse> updateFeed(@AuthenticationPrincipal User user,
+    public FeedResponse updateFeed(@AuthenticationPrincipal User user,
                                                    @PathVariable Long feedId,
                                                    @RequestBody FeedUpdateRequest feedUpdateRequest) {
-        FeedResponse updatedFeed = feedService.updateFeed(feedId, user.getUsername(), feedUpdateRequest);
-        return ResponseEntity.ok(updatedFeed);
+        return feedService.updateFeed(feedId, user.getUsername(), feedUpdateRequest);
     }
 
     @DeleteMapping("/feeds/{feedId}")

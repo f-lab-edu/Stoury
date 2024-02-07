@@ -22,3 +22,6 @@ spring:
 path-prefix: /feeds
 profileImage:
   path-prefix: /members/profiles
+google:
+  geocoding:
+    api-key: ${GEOCODE_API_KEY}

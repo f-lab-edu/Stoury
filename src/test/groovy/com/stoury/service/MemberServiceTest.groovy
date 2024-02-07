@@ -8,6 +8,7 @@ import com.stoury.exception.member.MemberDeleteException
 import com.stoury.exception.member.MemberSearchException
 import com.stoury.exception.member.MemberUpdateException
 import com.stoury.repository.MemberRepository
+import com.stoury.service.storage.StorageService
 import org.springframework.mock.web.MockMultipartFile
 import org.springframework.security.crypto.password.PasswordEncoder
 import spock.lang.Specification

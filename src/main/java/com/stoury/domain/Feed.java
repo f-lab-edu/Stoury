@@ -49,13 +49,22 @@ public class Feed {
             inverseJoinColumns = @JoinColumn(name = "TAG_ID"))
     private List<Tag> tags = new ArrayList<>();
 
+    @Column(name = "CITY", length = 35, nullable = false)
+    private String city = "UNDEFINED";
+
+    @Column(name = "COUNTRY", length = 50, nullable = false)
+    private String country = "UNDEFINED";
+
     @Builder
-    public Feed(Member member, String textContent, Double latitude, Double longitude, List<Tag> tags) {
+    public Feed(Member member, String textContent, Double latitude, Double longitude,
+                List<Tag> tags, String city, String country) {
         this.member = member;
         this.textContent = textContent;
         this.latitude = latitude;
         this.longitude = longitude;
         this.tags = tags;
+        this.city = city;
+        this.country = country;
     }
 
     public void addGraphicContent(GraphicContent graphicContent) {
@@ -68,8 +77,6 @@ public class Feed {
 
     public void update(FeedUpdateRequest feedUpdateRequest) {
         this.textContent = feedUpdateRequest.textContent();
-        this.longitude = feedUpdateRequest.longitude();
-        this.latitude = feedUpdateRequest.latitude();
     }
 
     public void updateTags(List<Tag> tags) {
@@ -98,5 +105,10 @@ public class Feed {
 
     public boolean isWrittenBy(Member member) {
         return this.member.equals(member);
+    }
+
+    public void updateLocation(String city, String country) {
+        this.city = this.city.equals("UNDEFINED") ? city : this.city;
+        this.country = this.country.equals("UNDEFINED") ? country : this.country;
     }
 }
