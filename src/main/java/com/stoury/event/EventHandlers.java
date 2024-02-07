@@ -1,7 +1,5 @@
 package com.stoury.event;
 
-import com.stoury.repository.FeedRepository;
-import com.stoury.service.location.LocationService;
 import com.stoury.service.storage.StorageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;

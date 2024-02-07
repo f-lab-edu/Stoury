@@ -1,4 +1,7 @@
 spring:
+  batch:
+    jdbc:
+      initialize-schema: always
   datasource:
     url: jdbc:mariadb://localhost:3306/stoury_test
     username: ${MYSQL_USERNAME}
