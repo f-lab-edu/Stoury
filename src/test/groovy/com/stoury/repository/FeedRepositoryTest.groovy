@@ -30,25 +30,25 @@ class FeedRepositoryTest extends Specification {
     def "해외에서 10개 인기 여행장소"() {
         given:
         (0..<3).each { i ->
-            def feed = new Feed(member, "feed#" + i + 8, 11.11, 11.11, Collections.emptyList())
+            def feed = new Feed(member, "feed#" + i + 8, 11.11, 11.11, Collections.emptyList(), "city", "country")
             feed.country = "France"
             feed.city = "Paris"
             feedRepository.save(feed)
         }
         (0..<4).each { i ->
-            def feed = new Feed(member, "feed#" + i, 11.11, 11.11, Collections.emptyList())
+            def feed = new Feed(member, "feed#" + i, 11.11, 11.11, Collections.emptyList(), "city", "country")
             feed.country = "United States"
             feed.city = "NY"
             feedRepository.save(feed)
         }
         (0..<1).each { i ->
-            def feed = new Feed(member, "feed#" + i + 12, 11.11, 11.11, Collections.emptyList())
+            def feed = new Feed(member, "feed#" + i + 12, 11.11, 11.11, Collections.emptyList(), "city", "country")
             feed.country = "Vietnam"
             feed.city = "hanoi"
             feedRepository.save(feed)
         }
         (0..<2).each { i ->
-            def feed = new Feed(member, "feed#" + i + 12, 11.11, 11.11, Collections.emptyList())
+            def feed = new Feed(member, "feed#" + i + 12, 11.11, 11.11, Collections.emptyList(), "city", "country")
             feed.country = "Australia"
             feed.city = "Sydney"
             feedRepository.save(feed)
@@ -67,25 +67,25 @@ class FeedRepositoryTest extends Specification {
     def "국내에서 10개 인기 여행장소"() {
         given:
         (0..<3).each { i ->
-            def feed = new Feed(member, "feed#" + i + 8, 11.11, 11.11, Collections.emptyList())
+            def feed = new Feed(member, "feed#" + i + 8, 11.11, 11.11, Collections.emptyList(), "city", "country")
             feed.country = "South Korea"
             feed.city = "Seoul"
             feedRepository.save(feed)
         }
         (0..<4).each { i ->
-            def feed = new Feed(member, "feed#" + i, 11.11, 11.11, Collections.emptyList())
+            def feed = new Feed(member, "feed#" + i, 11.11, 11.11, Collections.emptyList(), "city", "country")
             feed.country = "South Korea"
             feed.city = "Busan"
             feedRepository.save(feed)
         }
         (0..<1).each { i ->
-            def feed = new Feed(member, "feed#" + i + 12, 11.11, 11.11, Collections.emptyList())
+            def feed = new Feed(member, "feed#" + i + 12, 11.11, 11.11, Collections.emptyList(), "city", "country")
             feed.country = "South Korea"
             feed.city = "Hwacheon"
             feedRepository.save(feed)
         }
         (0..<2).each { i ->
-            def feed = new Feed(member, "feed#" + i + 12, 11.11, 11.11, Collections.emptyList())
+            def feed = new Feed(member, "feed#" + i + 12, 11.11, 11.11, Collections.emptyList(), "city", "country")
             feed.country = "South Korea"
             feed.city = "Daejeon"
             feedRepository.save(feed)

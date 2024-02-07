@@ -4,6 +4,7 @@ import com.stoury.domain.Feed
 import com.stoury.domain.GraphicContent
 import com.stoury.domain.Member
 import com.stoury.domain.Tag
+import com.stoury.dto.LocationResponse
 import com.stoury.dto.feed.FeedCreateRequest
 import com.stoury.dto.feed.FeedUpdateRequest
 import com.stoury.event.GraphicDeleteEvent
@@ -56,7 +57,7 @@ class FeedServiceTest extends Specification {
         feedService.createFeed("blabla@email.com", feedCreateRequest, graphicContents)
         then:
         1 * feedRepository.save(_ as Feed) >> savedFeed
-        1 * locationService.setLocation(_, _, _)
+        1 * locationService.getLocation(_, _) >> new LocationResponse("city", "country")
     }
 
     def "피드 생성 실패, 지원하지 않는 파일"() {
@@ -90,7 +91,8 @@ class FeedServiceTest extends Specification {
 
     def "피드 업데이트 성공"() {
         given:
-        def feed = new Feed(writer, "before updated", 11.11, 22.22, List.of(Mock(Tag)))
+        def feed = new Feed(writer, "before updated", 11.11, 22.22,
+                List.of(Mock(Tag)), "city", "country")
         feed.id = 1L
         feed.graphicContents = new ArrayList<>(List.of(
                 new GraphicContent("path1", 0),
