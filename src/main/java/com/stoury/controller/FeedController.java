@@ -3,6 +3,7 @@ package com.stoury.controller;
 import com.stoury.dto.feed.FeedCreateRequest;
 import com.stoury.dto.feed.FeedResponse;
 import com.stoury.dto.feed.FeedUpdateRequest;
+import com.stoury.dto.member.AuthenticatedMember;
 import com.stoury.service.FeedService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -20,23 +21,28 @@ public class FeedController {
     private final FeedService feedService;
 
     @PostMapping("/feeds")
-    public FeedResponse createFeed(@AuthenticationPrincipal User user,
-                                                   @RequestPart(name = "feedCreateRequest") FeedCreateRequest feedCreateRequest,
-                                                   @RequestPart(required = true) List<MultipartFile> images) {
-        return feedService.createFeed(user.getUsername(), feedCreateRequest, images);
+    public FeedResponse createFeed(@AuthenticationPrincipal AuthenticatedMember member,
+                                   @RequestPart(name = "feedCreateRequest") FeedCreateRequest feedCreateRequest,
+                                   @RequestPart(required = true) List<MultipartFile> images) {
+        return feedService.createFeed(member.getId(), feedCreateRequest, images);
+    }
+
+    @GetMapping("/feeds/{feedId}")
+    public FeedResponse getFeed(@PathVariable Long feedId) {
+        return feedService.getFeed(feedId);
     }
 
     @GetMapping("/feeds/tag/{tagName}")
     public List<FeedResponse> getFeedsOfTag(@PathVariable String tagName,
                                             @RequestParam(required = false, defaultValue = "2100-12-31T00:00:00")
-                                                LocalDateTime orderThan) {
+                                            LocalDateTime orderThan) {
         return feedService.getFeedsByTag(tagName, orderThan);
     }
 
     @GetMapping("/feeds/member/{memberId}")
     public List<FeedResponse> getFeedsOfMember(@PathVariable Long memberId,
-                                                   @RequestParam(required = false, defaultValue = "2100-12-31T00:00:00")
-                                                   LocalDateTime orderThan) {
+                                               @RequestParam(required = false, defaultValue = "2100-12-31T00:00:00")
+                                               LocalDateTime orderThan) {
         return feedService.getFeedsOfMemberId(memberId, orderThan);
     }
 
@@ -51,15 +57,13 @@ public class FeedController {
     }
 
     @PutMapping("/feeds/{feedId}")
-    public FeedResponse updateFeed(@AuthenticationPrincipal User user,
-                                                   @PathVariable Long feedId,
-                                                   @RequestBody FeedUpdateRequest feedUpdateRequest) {
-        return feedService.updateFeed(feedId, user.getUsername(), feedUpdateRequest);
+    public FeedResponse updateFeed(@PathVariable Long feedId, @RequestBody FeedUpdateRequest feedUpdateRequest) {
+        return feedService.updateFeed(feedId, feedUpdateRequest);
     }
 
     @DeleteMapping("/feeds/{feedId}")
-    public ResponseEntity<Object> deleteFeed(@AuthenticationPrincipal User user, @PathVariable Long feedId) {
-        feedService.deleteFeed(feedId, user.getUsername());
+    public ResponseEntity<Object> deleteFeed(@PathVariable Long feedId) {
+        feedService.deleteFeed(feedId);
         return ResponseEntity.ok().build();
     }
 }

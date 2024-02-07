@@ -4,7 +4,7 @@ import com.stoury.domain.Feed
 import com.stoury.domain.GraphicContent
 import com.stoury.domain.Member
 import com.stoury.domain.Tag
-import com.stoury.dto.LocationResponse
+import com.stoury.dto.feed.LocationResponse
 import com.stoury.dto.feed.FeedCreateRequest
 import com.stoury.dto.feed.FeedUpdateRequest
 import com.stoury.event.GraphicDeleteEvent
@@ -14,7 +14,6 @@ import com.stoury.repository.LikeRepository
 import com.stoury.repository.MemberRepository
 import com.stoury.repository.RankingRepository
 import com.stoury.service.location.LocationService
-import org.mockito.Mock
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.mock.web.MockMultipartFile
 import spock.lang.Specification
@@ -49,12 +48,12 @@ class FeedServiceTest extends Specification {
             .build()
 
     def setup() {
-        memberRepository.findByEmail(_) >> Optional.of(writer)
+        memberRepository.findById(_) >> Optional.of(writer)
     }
 
     def "피드 생성 성공"() {
         when:
-        feedService.createFeed("blabla@email.com", feedCreateRequest, graphicContents)
+        feedService.createFeed(1L, feedCreateRequest, graphicContents)
         then:
         1 * feedRepository.save(_ as Feed) >> savedFeed
         1 * locationService.getLocation(_, _) >> new LocationResponse("city", "country")
@@ -68,7 +67,7 @@ class FeedServiceTest extends Specification {
                 new MockMultipartFile("Files", "third", "image/png", new byte[0])
         )
         when:
-        feedService.createFeed("blabla@email.com", feedCreateRequest, notSupportedContents)
+        feedService.createFeed(1L, feedCreateRequest, notSupportedContents)
         then:
         thrown(FeedCreateException.class)
     }
@@ -77,7 +76,7 @@ class FeedServiceTest extends Specification {
         given:
         def emptyContents = Collections.emptyList()
         when:
-        feedService.createFeed("blabla@email.com", feedCreateRequest, emptyContents)
+        feedService.createFeed(1L, feedCreateRequest, emptyContents)
         then:
         thrown(FeedCreateException.class)
     }
@@ -104,7 +103,7 @@ class FeedServiceTest extends Specification {
 
         def feedUpdateRequest = new FeedUpdateRequest("updated", Collections.emptyList(), Set.of(1, 3))
         when:
-        feedService.updateFeed(1L, "blabla@email.com", feedUpdateRequest)
+        feedService.updateFeed(1L, feedUpdateRequest)
         then:
         2 * eventPublisher.publishEvent(_ as GraphicDeleteEvent)
         feed.textContent == "updated"

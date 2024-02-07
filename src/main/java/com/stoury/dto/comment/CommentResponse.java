@@ -1,11 +1,12 @@
 package com.stoury.dto.comment;
 
 import com.stoury.domain.Comment;
+import com.stoury.dto.WriterResponse;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
-public record CommentResponse(Long id, WriterResponse writerResponse, Long feedId,
+public record CommentResponse(Long id, WriterResponse writer, Long feedId,
                               boolean hasNestedComments, String textContent, LocalDateTime createdAt) {
     public static CommentResponse from(Comment comment) {
         return new CommentResponse(

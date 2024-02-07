@@ -1,4 +1,4 @@
-package com.stoury.exception;
+package com.stoury.exception.authentication;
 
 public class NotAuthorizedException extends RuntimeException {
     public NotAuthorizedException() {

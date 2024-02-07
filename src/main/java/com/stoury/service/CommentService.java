@@ -16,6 +16,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -67,7 +68,7 @@ public class CommentService {
 
         Pageable pageable = PageRequest.of(0, PAGE_SIZE, Sort.by("createdAt").descending());
 
-        return CommentResponse.from(commentRepository.findAllByFeedAndCreatedAtBefore(feed, orderThan, pageable));
+        return CommentResponse.from(commentRepository.findAllByFeedAndCreatedAtBeforeAndParentCommentIsNull(feed, orderThan, pageable));
     }
 
     @Transactional(readOnly = true)
@@ -84,11 +85,13 @@ public class CommentService {
                 orderThan, pageable));
     }
 
+    @PostAuthorize("returnObject.writer.id == authentication.principal.id")
     @Transactional
-    public void deleteComment(Long commentId) {
+    public CommentResponse deleteComment(Long commentId) {
         Comment comment = commentRepository.findById(Objects.requireNonNull(commentId))
                 .orElseThrow(CommentSearchException::new);
 
         comment.delete();
+        return CommentResponse.from(comment);
     }
 }

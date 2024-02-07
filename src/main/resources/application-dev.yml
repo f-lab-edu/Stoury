@@ -22,6 +22,10 @@ spring:
     redis:
       host: localhost
       port: 8379
+  session:
+    redis:
+      namespace: stoury:dev-session
+      flush-mode: on_save
 logging:
   level:
     org.springframework.security: trace

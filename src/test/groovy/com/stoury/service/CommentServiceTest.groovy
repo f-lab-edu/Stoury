@@ -56,7 +56,7 @@ class CommentServiceTest extends Specification {
         when:
         commentService.getCommentsOfFeed(1L, LocalDateTime.now())
         then:
-        1 * commentRepository.findAllByFeedAndCreatedAtBefore(_, _, _) >> List.of(savedComment)
+        1 * commentRepository.findAllByFeedAndCreatedAtBeforeAndParentCommentIsNull(_, _, _) >> List.of(savedComment)
     }
 
     def "대댓글 조회"() {
