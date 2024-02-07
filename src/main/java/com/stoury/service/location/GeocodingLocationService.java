@@ -8,7 +8,7 @@ import com.google.maps.model.AddressComponentType;
 import com.google.maps.model.GeocodingResult;
 import com.google.maps.model.LatLng;
 import com.google.maps.model.LocationType;
-import com.stoury.dto.LocationResponse;
+import com.stoury.dto.feed.LocationResponse;
 import com.stoury.exception.location.GeocodeApiException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

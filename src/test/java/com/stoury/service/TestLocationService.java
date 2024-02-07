@@ -1,6 +1,6 @@
 package com.stoury.service;
 
-import com.stoury.dto.LocationResponse;
+import com.stoury.dto.feed.LocationResponse;
 import com.stoury.service.location.LocationService;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
