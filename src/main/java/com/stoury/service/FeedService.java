@@ -4,6 +4,7 @@ import com.stoury.domain.Feed;
 import com.stoury.domain.GraphicContent;
 import com.stoury.domain.Member;
 import com.stoury.domain.Tag;
+import com.stoury.dto.LocationResponse;
 import com.stoury.dto.feed.FeedCreateRequest;
 import com.stoury.dto.feed.FeedResponse;
 import com.stoury.dto.feed.FeedUpdateRequest;
@@ -58,17 +59,13 @@ public class FeedService {
 
         List<GraphicContent> graphicContents = saveGraphicContents(graphicContentsFiles);
 
-        Feed feedEntity = createFeedEntity(writer, feedCreateRequest, graphicContents);
+        LocationResponse locationResponse = locationService.getLocation(feedCreateRequest.latitude(), feedCreateRequest.longitude());
+
+        Feed feedEntity = createFeedEntity(writer, feedCreateRequest, graphicContents, locationResponse);
 
         Feed uploadedFeed = feedRepository.save(feedEntity);
 
-        setLocationAsync(uploadedFeed);
-
         return FeedResponse.from(uploadedFeed, 0);
-    }
-
-    private void setLocationAsync(Feed feed) {
-        locationService.setLocation(feed.getId(), feed.getLatitude(), feed.getLongitude());
     }
 
     private List<GraphicContent> saveGraphicContents(List<MultipartFile> graphicContents) {
@@ -86,9 +83,10 @@ public class FeedService {
         return graphicContentList;
     }
 
-    private Feed createFeedEntity(Member writer, FeedCreateRequest feedCreateRequest, List<GraphicContent> graphicContents) {
+    private Feed createFeedEntity(Member writer, FeedCreateRequest feedCreateRequest,
+                                  List<GraphicContent> graphicContents, LocationResponse locationResponse) {
         List<Tag> tags = getOrCreateTags(feedCreateRequest.tagNames());
-        return feedCreateRequest.toEntity(writer, graphicContents, tags);
+        return feedCreateRequest.toEntity(writer, graphicContents, tags, locationResponse.city(), locationResponse.country());
     }
 
     private List<Tag> getOrCreateTags(List<String> tagNames) {
