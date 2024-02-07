@@ -24,9 +24,15 @@ import java.util.Set;
 @Profile("prod")
 @RequiredArgsConstructor
 @Slf4j
-public class GeocodingLocationService implements LocationService{
+public class GeocodingLocationService implements LocationService {
     private final GeoApiContext context;
     private final FeedRepository feedRepository;
+    public static final AddressComponentType[] administrativeSteps = {
+            AddressComponentType.LOCALITY,
+            AddressComponentType.ADMINISTRATIVE_AREA_LEVEL_4,
+            AddressComponentType.ADMINISTRATIVE_AREA_LEVEL_3,
+            AddressComponentType.ADMINISTRATIVE_AREA_LEVEL_2,
+    };
 
     @Override
     @Transactional
@@ -51,7 +57,13 @@ public class GeocodingLocationService implements LocationService{
     }
 
     private String getCity(GeocodingResult[] results) {
-        return getAddressComponent(results, AddressComponentType.LOCALITY);
+        for (AddressComponentType addressComponentType : administrativeSteps) {
+            String city = getAddressComponent(results, addressComponentType);
+            if (!"UNDEFINED".equals(city)) {
+                return city;
+            }
+        }
+        return "UNDEFINED";
     }
 
     private String getCountry(GeocodingResult[] results) {
