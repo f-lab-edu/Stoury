@@ -27,25 +27,25 @@ class DiaryServiceTest extends Specification {
 
     def "여행일지 생성 성공"() {
         given:
-        def feed1 = new Feed(writer, "feed#1", 0, 0, Collections.emptyList())
+        def feed1 = new Feed(writer, "feed#1", 0, 0, Collections.emptyList(), "city", "country")
         feed1.id = 1L
         feed1.createdAt = LocalDateTime.of(2024, 10, 10, 1, 0)
         likeRepository.getLikes("1") >> 2
         feedRepository.findById(1) >> Optional.of(feed1)
 
-        def feed2 = new Feed(writer, "feed#2", 0, 0, Collections.emptyList())
+        def feed2 = new Feed(writer, "feed#2", 0, 0, Collections.emptyList(), "city", "country")
         feed2.id = 2L
         feed2.createdAt = LocalDateTime.of(2024, 10, 10, 2, 0)
         likeRepository.getLikes("2") >> 2
         feedRepository.findById(2) >> Optional.of(feed2)
 
-        def feed3 = new Feed(writer, "feed#3", 0, 0, Collections.emptyList())
+        def feed3 = new Feed(writer, "feed#3", 0, 0, Collections.emptyList(), "city", "country")
         feed3.id = 3L
         feed3.createdAt = LocalDateTime.of(2024, 10, 9, 1, 0)
         likeRepository.getLikes("3") >> 2
         feedRepository.findById(3) >> Optional.of(feed3)
 
-        def feed4 = new Feed(writer, "feed#4", 0, 0, Collections.emptyList())
+        def feed4 = new Feed(writer, "feed#4", 0, 0, Collections.emptyList(), "city", "country")
         feed4.id = 4L
         feed4.createdAt = LocalDateTime.of(2024, 10, 13, 2, 0)
         likeRepository.getLikes("4") >> 2
@@ -66,15 +66,15 @@ class DiaryServiceTest extends Specification {
 
     def "기본 여행일지 제목(나라이름, 도시이름, yyyy-MM-dd~yyyy-MM-dd) 테스트"() {
         given:
-        def feed1 = new Feed(writer, "feed#1", 0, 0, Collections.emptyList())
+        def feed1 = new Feed(writer, "feed#1", 0, 0, Collections.emptyList(), "city", "country")
         feed1.createdAt = LocalDateTime.of(2024, 10, 10, 1, 0)
-        def feed2 = new Feed(writer, "feed#2", 0, 0, Collections.emptyList())
+        def feed2 = new Feed(writer, "feed#2", 0, 0, Collections.emptyList(), "city", "country")
         feed2.createdAt = LocalDateTime.of(2024, 10, 10, 2, 0)
-        def feed3 = new Feed(writer, "feed#3", 0, 0, Collections.emptyList())
+        def feed3 = new Feed(writer, "feed#3", 0, 0, Collections.emptyList(), "city", "country")
         feed3.createdAt = LocalDateTime.of(2024, 10, 9, 1, 0)
         feed3.city = "testCity"
         feed3.country = "testCountry"
-        def feed4 = new Feed(writer, "feed#4", 0, 0, Collections.emptyList())
+        def feed4 = new Feed(writer, "feed#4", 0, 0, Collections.emptyList(), "city", "country")
         feed4.createdAt = LocalDateTime.of(2024, 10, 13, 2, 0)
 
         expect:
