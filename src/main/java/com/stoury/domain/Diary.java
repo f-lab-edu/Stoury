@@ -27,9 +27,13 @@ public class Diary {
     @Column(name = "TITLE", length = 50)
     private String title;
 
-    public Diary(Member member, List<Feed> feeds, String title) {
+    @Column(name = "THUMBNAIL_PATH", unique = true, nullable = false)
+    private String thumbnailPath;
+
+    public Diary(Member member, List<Feed> feeds, String title, String thumbnailPath) {
         this.member = member;
         this.feeds = feeds;
         this.title = title;
+        this.thumbnailPath = thumbnailPath;
     }
 }
