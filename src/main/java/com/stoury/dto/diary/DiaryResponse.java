@@ -3,12 +3,11 @@ package com.stoury.dto.diary;
 import com.stoury.domain.Diary;
 import com.stoury.dto.feed.FeedResponse;
 
-import java.time.Duration;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 
-public record DiaryResponse(Long id, String title, Map<Long, List<FeedResponse>> feeds,
+public record DiaryResponse(Long id, String title, String thumbnailPath, Map<Long, List<FeedResponse>> feeds,
                             LocalDate startDate, LocalDate endDate,
                             String city, String country, long likes) {
 
@@ -29,6 +28,7 @@ public record DiaryResponse(Long id, String title, Map<Long, List<FeedResponse>>
         return new DiaryResponse(
                 diary.getId(),
                 diary.getTitle(),
+                diary.getThumbnailPath(),
                 dailyFeeds,
                 firstFeed.createdAt().toLocalDate(),
                 lastFeed.createdAt().toLocalDate(),

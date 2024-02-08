@@ -1,5 +1,6 @@
 package com.stoury.domain;
 
+import com.stoury.utils.FileUtils;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -26,5 +27,9 @@ public class GraphicContent {
     public GraphicContent(String path, int sequence) {
         this.path = path;
         this.sequence = sequence;
+    }
+
+    public boolean isImage() {
+        return FileUtils.isImage(path);
     }
 }
