@@ -23,11 +23,9 @@ public class ContextConfiguration {
     public GeoApiContext geoApiContext() {
         return new GeoApiContext.Builder()
                 .apiKey(apiKey)
-                .connectTimeout(5, TimeUnit.SECONDS)
+                .connectTimeout(2, TimeUnit.SECONDS)
                 .readTimeout(3, TimeUnit.SECONDS)
-                .retryTimeout(2, TimeUnit.SECONDS)
-                .writeTimeout(5, TimeUnit.SECONDS)
-                .maxRetries(5)
+                .maxRetries(3)
                 .build();
     }
 }
