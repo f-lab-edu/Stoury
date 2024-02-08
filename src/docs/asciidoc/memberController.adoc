@@ -1,0 +1,2 @@
+== RestDocsTestController
+operation::member-controller-test/Join[snippets="http-request,http-response"]
