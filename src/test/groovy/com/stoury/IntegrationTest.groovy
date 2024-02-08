@@ -6,6 +6,8 @@ import com.stoury.domain.Member
 import com.stoury.repository.FeedRepository
 import com.stoury.repository.LikeRepository
 import com.stoury.repository.MemberRepository
+import com.stoury.repository.RankingRepository
+import com.stoury.utils.CacheKeys
 import org.springframework.batch.core.Job
 import org.springframework.batch.test.JobLauncherTestUtils
 import org.springframework.batch.test.context.SpringBatchTest
@@ -15,6 +17,9 @@ import org.springframework.data.domain.PageRequest
 import org.springframework.data.redis.core.StringRedisTemplate
 import org.springframework.test.context.ActiveProfiles
 import spock.lang.Specification
+
+import java.time.temporal.ChronoUnit
+import java.util.stream.IntStream
 
 @SpringBootTest
 @SpringBatchTest
@@ -30,6 +35,8 @@ class IntegrationTest extends Specification {
     MemberRepository memberRepository
     @Autowired
     LikeRepository likeRepository
+    @Autowired
+    RankingRepository rankingRepository
     @Autowired
     StringRedisTemplate redisTemplate
 
@@ -187,5 +194,33 @@ class IntegrationTest extends Specification {
     def "좋아요 삭제 - 실패, 없는 데이터 삭제 시도"() {
         expect:
         !likeRepository.deleteByMemberAndFeed("1", "2")
+    }
+
+    def "인기 피드 랭킹"() {
+        given:
+        def likeIncreases = [
+                //0    1   2   3    4
+                5,   13, 1,  100, 2,
+                //5    6   7   8    9
+                111, 32, 23, 8,   3,
+                //10   11  12  13   14
+                10,  24, 98, 55,  101,
+                //15   16  17  18   19
+                333, 31, 56, 74,  6
+        ]
+        when:
+        IntStream.range(0, 20)
+                .forEach(i -> rankingRepository.saveHotFeed(String.valueOf(i), likeIncreases.get(i), ChronoUnit.DAYS))
+
+        then:
+        def rankedList = rankingRepository.getRankedFeedIds(CacheKeys.getHotFeedsKey(ChronoUnit.DAYS))
+        def expectedList = List.of(
+                15, 5,  14, 3,  12,
+                18, 17, 13, 6,  16,
+                11, 7,  1,  10, 8,
+                19, 0,  9,  4,  2)
+        (0..<20).each { i ->
+            rankedList.get(i) == expectedList.get(i)
+        }
     }
 }
