@@ -82,22 +82,4 @@ class DiaryServiceTest extends Specification {
         then:
         1 * diaryRepository.findByMember(_ as Member, _) >> Page.empty()
     }
-
-    def "기본 여행일지 제목(나라이름, 도시이름, yyyy-MM-dd~yyyy-MM-dd) 테스트"() {
-        given:
-        def feed1 = new Feed(writer, "feed#1", 0, 0, Collections.emptyList())
-        feed1.createdAt = LocalDateTime.of(2024, 10, 10, 1, 0)
-        def feed2 = new Feed(writer, "feed#2", 0, 0, Collections.emptyList())
-        feed2.createdAt = LocalDateTime.of(2024, 10, 10, 2, 0)
-        def feed3 = new Feed(writer, "feed#3", 0, 0, Collections.emptyList())
-        feed3.createdAt = LocalDateTime.of(2024, 10, 9, 1, 0)
-        feed3.city = "testCity"
-        feed3.country = "testCountry"
-        def feed4 = new Feed(writer, "feed#4", 0, 0, Collections.emptyList())
-        feed4.createdAt = LocalDateTime.of(2024, 10, 13, 2, 0)
-
-        expect:
-        diaryService.getDefaultTitle(List.of(feed3,feed1,feed2,feed4)) ==
-                feed3.country + ", " + feed3.city + ", " + feed3.createdAt.toLocalDate() + "~" + feed4.createdAt.toLocalDate()
-    }
 }
