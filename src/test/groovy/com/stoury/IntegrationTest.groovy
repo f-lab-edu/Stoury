@@ -3,10 +3,12 @@ package com.stoury
 import com.stoury.domain.Feed
 import com.stoury.domain.Like
 import com.stoury.domain.Member
+import com.stoury.dto.member.MemberResponse
 import com.stoury.repository.FeedRepository
 import com.stoury.repository.LikeRepository
 import com.stoury.repository.MemberRepository
 import com.stoury.repository.RankingRepository
+import com.stoury.service.MemberService
 import com.stoury.utils.CacheKeys
 import org.springframework.batch.core.Job
 import org.springframework.batch.test.JobLauncherTestUtils
@@ -14,6 +16,7 @@ import org.springframework.batch.test.context.SpringBatchTest
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.data.domain.PageRequest
+import org.springframework.data.domain.Slice
 import org.springframework.data.redis.core.StringRedisTemplate
 import org.springframework.test.context.ActiveProfiles
 import spock.lang.Specification
@@ -30,6 +33,12 @@ class IntegrationTest extends Specification {
     @Autowired
     Job jobUpdatePopularSpots
     @Autowired
+    Job jobDailyFeed
+    @Autowired
+    Job jobWeeklyFeed
+    @Autowired
+    Job jobMonthlyFeed
+    @Autowired
     FeedRepository feedRepository
     @Autowired
     MemberRepository memberRepository
@@ -39,6 +48,8 @@ class IntegrationTest extends Specification {
     RankingRepository rankingRepository
     @Autowired
     StringRedisTemplate redisTemplate
+    @Autowired
+    MemberService memberService
 
     def member = new Member("aaa@dddd.com", "qwdqwdqwd", "username", null);
 
@@ -47,7 +58,7 @@ class IntegrationTest extends Specification {
         memberRepository.deleteAll()
         memberRepository.save(member)
 
-        Set<String> allKeys = redisTemplate.keys("*");
+        Set<String> allKeys = redisTemplate.keys("*")
         redisTemplate.delete(allKeys);
     }
 
@@ -55,18 +66,84 @@ class IntegrationTest extends Specification {
         feedRepository.deleteAll()
         memberRepository.deleteAll()
 
-        Set<String> allKeys = redisTemplate.keys("*");
-        redisTemplate.delete(allKeys);
+        Set<String> allKeys = redisTemplate.keys("*")
+        redisTemplate.delete(allKeys)
     }
-
 
     def "인기 여행지 업데이트 테스트"() {
         given:
-        jobLauncherTestUtils.setJob(jobUpdatePopularSpots);
+        jobLauncherTestUtils.setJob(jobUpdatePopularSpots)
+        def feed = Feed.builder()
+                .member(member)
+                .textContent("blabla")
+                .latitude(0)
+                .longitude(0)
+                .city("city")
+                .country("country")
+                .build()
+        feedRepository.saveAndFlush(feed)
         when:
-        def jobExecution = jobLauncherTestUtils.launchJob();
+        def jobExecution = jobLauncherTestUtils.launchJob()
         then:
         "COMPLETED" == jobExecution.getExitStatus().getExitCode()
+        !rankingRepository.getRankedLocations(CacheKeys.POPULAR_ABROAD_SPOTS).isEmpty()
+    }
+
+    def "일간 인기 피드 업데이트 테스트"() {
+        given:
+        jobLauncherTestUtils.setJob(jobDailyFeed)
+        def feed = Feed.builder()
+                .member(member)
+                .textContent("blabla")
+                .latitude(0)
+                .longitude(0)
+                .city("city")
+                .country("country")
+                .build()
+        def savedFeed = feedRepository.saveAndFlush(feed)
+        likeRepository.save(new Like(member, savedFeed))
+        expect:
+        def jobExecution = jobLauncherTestUtils.launchJob()
+        "COMPLETED" == jobExecution.getExitStatus().getExitCode()
+        !rankingRepository.getRankedFeedIds(CacheKeys.DAILY_HOT_FEEDS).isEmpty()
+    }
+
+    def "주간 인기 피드 업데이트 테스트"() {
+        given:
+        jobLauncherTestUtils.setJob(jobWeeklyFeed)
+        def feed = Feed.builder()
+                .member(member)
+                .textContent("blabla")
+                .latitude(0)
+                .longitude(0)
+                .city("city")
+                .country("country")
+                .build()
+        def savedFeed = feedRepository.saveAndFlush(feed)
+        likeRepository.save(new Like(member, savedFeed))
+        expect:
+        def jobExecution = jobLauncherTestUtils.launchJob()
+        "COMPLETED" == jobExecution.getExitStatus().getExitCode()
+        !rankingRepository.getRankedFeedIds(CacheKeys.WEEKLY_HOT_FEEDS).isEmpty()
+    }
+
+    def "월간 인기 피드 업데이트 테스트"() {
+        given:
+        jobLauncherTestUtils.setJob(jobMonthlyFeed)
+        def feed = Feed.builder()
+                .member(member)
+                .textContent("blabla")
+                .latitude(0)
+                .longitude(0)
+                .city("city")
+                .country("country")
+                .build()
+        def savedFeed = feedRepository.saveAndFlush(feed)
+        likeRepository.save(new Like(member, savedFeed))
+        expect:
+        def jobExecution = jobLauncherTestUtils.launchJob()
+        "COMPLETED" == jobExecution.getExitStatus().getExitCode()
+        !rankingRepository.getRankedFeedIds(CacheKeys.MONTHLY_HOT_FEEDS).isEmpty()
     }
 
     def "해외에서 10개 인기 여행장소"() {
@@ -200,13 +277,13 @@ class IntegrationTest extends Specification {
         given:
         def likeIncreases = [
                 //0    1   2   3    4
-                5,   13, 1,  100, 2,
+                5, 13, 1, 100, 2,
                 //5    6   7   8    9
-                111, 32, 23, 8,   3,
+                111, 32, 23, 8, 3,
                 //10   11  12  13   14
-                10,  24, 98, 55,  101,
+                10, 24, 98, 55, 101,
                 //15   16  17  18   19
-                333, 31, 56, 74,  6
+                333, 31, 56, 74, 6
         ]
         when:
         IntStream.range(0, 20)
@@ -215,12 +292,38 @@ class IntegrationTest extends Specification {
         then:
         def rankedList = rankingRepository.getRankedFeedIds(CacheKeys.getHotFeedsKey(ChronoUnit.DAYS))
         def expectedList = List.of(
-                15, 5,  14, 3,  12,
-                18, 17, 13, 6,  16,
-                11, 7,  1,  10, 8,
-                19, 0,  9,  4,  2)
+                15, 5, 14, 3, 12,
+                18, 17, 13, 6, 16,
+                11, 7, 1, 10, 8,
+                19, 0, 9, 4, 2)
         (0..<20).each { i ->
             rankedList.get(i) == expectedList.get(i)
         }
+    }
+
+    def "사용자 검색"() {
+        given:
+        Member member1 = Member.builder().email("mem1@aaaa.com").encryptedPassword("pwdpwdpwdpwd").username("member1").build();
+        Member member2 = Member.builder().email("mem2@aaaa.com").encryptedPassword("pwdpwdpwdpwd").username("member2").build();
+        Member member3 = Member.builder().email("mem3@aaaa.com").encryptedPassword("pwdpwdpwdpwd").username("mexber3").build();
+        Member member4 = Member.builder().email("mem4@aaaa.com").encryptedPassword("pwdpwdpwdpwd").username("xember4").build();
+        Member member5 = Member.builder().email("mem5@aaaa.com").encryptedPassword("pwdpwdpwdpwd").username("member5").build();
+        Member member6 = Member.builder().email("mem6@aaaa.com").encryptedPassword("pwdpwdpwdpwd").username("member6").build();
+        Member member7 = Member.builder().email("mem7@aaaa.com").encryptedPassword("pwdpwdpwdpwd").username("member7").build();
+        Member member8 = Member.builder().email("mem8@aaaa.com").encryptedPassword("pwdpwdpwdpwd").username("member8").build();
+        memberRepository.saveAll(List.of(member1, member2, member3, member4, member5, member6, member7, member8));
+
+        when:
+        Slice<MemberResponse> slice = memberService.searchMembers("mem");
+        List<MemberResponse> foundMembers = slice.getContent();
+
+        then:
+        slice.size == MemberService.PAGE_SIZE
+        slice.hasNext()
+        foundMembers.get(0).username()==member1.getUsername()
+        foundMembers.get(1).username()==member2.getUsername()
+        foundMembers.get(2).username()==member5.getUsername()
+        foundMembers.get(3).username()==member6.getUsername()
+        foundMembers.get(4).username()==member7.getUsername()
     }
 }

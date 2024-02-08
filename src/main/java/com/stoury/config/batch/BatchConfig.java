@@ -88,7 +88,7 @@ public class BatchConfig {
                 .name("feedReader")
                 .pageSize(100)
                 .entityManagerFactory(entityManagerFactory)
-                .queryString("SELECT f FROM FEED f")
+                .queryString("select f from Feed f")
                 .build();
     }
 
