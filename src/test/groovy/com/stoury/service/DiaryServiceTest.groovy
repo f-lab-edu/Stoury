@@ -12,7 +12,6 @@ import com.stoury.repository.MemberRepository
 import org.springframework.data.domain.Page
 import spock.lang.Specification
 
-import java.awt.print.Pageable
 import java.time.LocalDateTime
 
 class DiaryServiceTest extends Specification {
