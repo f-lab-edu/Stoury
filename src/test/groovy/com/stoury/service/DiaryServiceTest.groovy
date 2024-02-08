@@ -2,6 +2,7 @@ package com.stoury.service
 
 import com.stoury.domain.Diary
 import com.stoury.domain.Feed
+import com.stoury.domain.GraphicContent
 import com.stoury.domain.Member
 import com.stoury.dto.diary.DiaryCreateRequest
 import com.stoury.repository.DiaryRepository
@@ -41,9 +42,13 @@ class DiaryServiceTest extends Specification {
         def feed3 = createFeed(3L, LocalDateTime.of(2024, 10, 9, 1, 0), 2)
         def feed4 = createFeed(4L, LocalDateTime.of(2024, 10, 13, 2, 0), 2)
 
-        diaryRepository.save(_) >> new Diary(writer, List.of(feed1, feed2, feed3, feed4), "test diary")
+        def thumbnail = new GraphicContent("blabla.jpeg", 0)
+        thumbnail.id = 1
+        feed3.graphicContents = List.of(thumbnail)
 
-        def diaryRequest = new DiaryCreateRequest("test diary", List.of(1L, 2L, 3L, 4L))
+        diaryRepository.save(_) >> new Diary(writer, List.of(feed1, feed2, feed3, feed4), "test diary", thumbnail.getPath())
+
+        def diaryRequest = new DiaryCreateRequest("test diary", List.of(1L, 2L, 3L, 4L), thumbnail.id)
         when:
         def diaryResponse = diaryService.createDiary(diaryRequest, 1)
         then:
@@ -52,6 +57,7 @@ class DiaryServiceTest extends Specification {
         diaryResponse.feeds().get(2L).size() == 2
         diaryResponse.feeds().get(5L).size() == 1
         diaryResponse.likes() == 8
+        diaryResponse.thumbnailPath() == thumbnail.path
     }
 
     def "기본 여행일지 제목(나라이름, 도시이름, yyyy-MM-dd~yyyy-MM-dd) 테스트"() {

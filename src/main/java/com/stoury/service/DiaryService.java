@@ -2,6 +2,7 @@ package com.stoury.service;
 
 import com.stoury.domain.Diary;
 import com.stoury.domain.Feed;
+import com.stoury.domain.GraphicContent;
 import com.stoury.domain.Member;
 import com.stoury.dto.diary.DiaryCreateRequest;
 import com.stoury.dto.diary.DiaryResponse;
@@ -48,14 +49,17 @@ public class DiaryService {
                 .filter(feed -> validateOwnership(member, feed))
                 .toList();
 
-        String title ;
-        if (StringUtils.hasText(diaryCreateRequest.title())) {
-            title = diaryCreateRequest.title();
-        } else {
-            title = getDefaultTitle(feeds);
-        }
+        String thumbnailPath = feeds.stream()
+                .flatMap(feed -> feed.getGraphicContents().stream())
+                .filter(GraphicContent::isImage)
+                .filter(graphicContent -> graphicContent.getId().equals(diaryCreateRequest.thumbnailId()))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("Select a thumbnail image from your feed images"))
+                .getPath();
 
-        Diary diary = new Diary(member, feeds, title);
+        String title = getTitle(diaryCreateRequest, feeds);
+
+        Diary diary = new Diary(member, feeds, title, thumbnailPath);
         Diary savedDiary = diaryRepository.save(diary);
 
         List<FeedResponse> feedResponses = feeds.stream()
@@ -63,6 +67,17 @@ public class DiaryService {
                 .toList();
 
         return DiaryResponse.from(savedDiary, feedResponses);
+    }
+
+    @NotNull
+    private String getTitle(DiaryCreateRequest diaryCreateRequest, List<Feed> feeds) {
+        String title ;
+        if (StringUtils.hasText(diaryCreateRequest.title())) {
+            title = diaryCreateRequest.title();
+        } else {
+            title = getDefaultTitle(feeds);
+        }
+        return title;
     }
 
     @NotNull
