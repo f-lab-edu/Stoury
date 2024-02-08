@@ -9,8 +9,10 @@ import com.stoury.repository.DiaryRepository
 import com.stoury.repository.FeedRepository
 import com.stoury.repository.LikeRepository
 import com.stoury.repository.MemberRepository
+import org.springframework.data.domain.Page
 import spock.lang.Specification
 
+import java.awt.print.Pageable
 import java.time.LocalDateTime
 
 class DiaryServiceTest extends Specification {
@@ -72,5 +74,12 @@ class DiaryServiceTest extends Specification {
         expect:
         diaryService.getDefaultTitle(List.of(feed3,feed1,feed2,feed4)) ==
                 feed3.country + ", " + feed3.city + ", " + feed3.createdAt.toLocalDate() + "~" + feed4.createdAt.toLocalDate()
+    }
+
+    def "사용자의 여행일지 조회"() {
+        when:
+        diaryService.getMemberDiaries(1L, 0)
+        then:
+        1 * diaryRepository.findByMember(_ as Member, _) >> Page.empty()
     }
 }
