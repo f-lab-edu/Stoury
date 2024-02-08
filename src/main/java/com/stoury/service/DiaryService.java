@@ -6,6 +6,7 @@ import com.stoury.domain.GraphicContent;
 import com.stoury.domain.Member;
 import com.stoury.dto.diary.DiaryCreateRequest;
 import com.stoury.dto.diary.DiaryResponse;
+import com.stoury.dto.diary.SimpleDiaryResponse;
 import com.stoury.dto.feed.FeedResponse;
 import com.stoury.exception.authentication.NotAuthorizedException;
 import com.stoury.exception.feed.FeedSearchException;
@@ -16,6 +17,7 @@ import com.stoury.repository.LikeRepository;
 import com.stoury.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -27,6 +29,7 @@ import java.util.Objects;
 @Service
 @RequiredArgsConstructor
 public class DiaryService {
+    public static final int PAGE_SIZE = 10;
     private final MemberRepository memberRepository;
     private final FeedRepository feedRepository;
     private final DiaryRepository diaryRepository;
@@ -96,5 +99,16 @@ public class DiaryService {
             throw new NotAuthorizedException("Not your feed");
         }
         return true;
+    }
+
+    @Transactional(readOnly = true)
+    public Page<SimpleDiaryResponse> getMemberDiaries(Long memberId, int pageNo) {
+        Member member = memberRepository.findById(Objects.requireNonNull(memberId, "Member Id cannot be null"))
+                .orElseThrow(MemberSearchException::new);
+        Pageable page = PageRequest.of(pageNo, PAGE_SIZE, Sort.by("createdAt"));
+
+        Page<Diary> diaryPage = diaryRepository.findByMember(member, page);
+
+        return new PageImpl<>(diaryPage.map(SimpleDiaryResponse::from).toList(), diaryPage.getPageable(), diaryPage.getTotalElements());
     }
 }
