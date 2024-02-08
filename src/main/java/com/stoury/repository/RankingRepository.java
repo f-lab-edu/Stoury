@@ -30,6 +30,9 @@ public class RankingRepository {
     }
 
     public void update(CacheKeys cacheKey, List<String> rankedSpots) {
+        if (rankedSpots == null || rankedSpots.isEmpty()) {
+            return;
+        }
         redisTemplate.delete(cacheKey.name());
         opsForList.leftPushAll(cacheKey.name(), rankedSpots);
     }

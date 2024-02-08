@@ -9,7 +9,7 @@ server:
 spring:
   batch:
     job:
-      enabled: true
+      enabled: false
   datasource:
     url: jdbc:mariadb://localhost:3306/stoury
     username: ${MYSQL_USERNAME}
