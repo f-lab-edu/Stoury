@@ -3,6 +3,7 @@ package com.stoury.repository;
 import com.stoury.domain.Feed;
 import com.stoury.domain.Like;
 import com.stoury.domain.Member;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.SetOperations;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
@@ -21,7 +22,7 @@ public class LikeRepository {
     private final SetOperations<String, String> opsForSet;
     private final ValueOperations<String, String> opsForVal;
 
-
+    @Autowired
     public LikeRepository(StringRedisTemplate redisTemplate) {
         this.redisTemplate = redisTemplate;
         opsForSet = redisTemplate.opsForSet();

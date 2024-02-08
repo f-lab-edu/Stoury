@@ -46,7 +46,6 @@ public class FeedService {
     private final FeedRepository feedRepository;
     private final MemberRepository memberRepository;
     private final LikeRepository likeRepository;
-    private final RankingRepository rankingRepository;
     private final TagService tagService;
     private final LocationService locationService;
     private final ApplicationEventPublisher eventPublisher;
