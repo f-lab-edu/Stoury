@@ -7,7 +7,7 @@ import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 
-public record DiaryResponse(Long id, String title, String thumbnailPath, Map<Long, List<FeedResponse>> feeds,
+public record DiaryResponse(Long id, Long memberId, String title, String thumbnailPath, Map<Long, List<FeedResponse>> feeds,
                             LocalDate startDate, LocalDate endDate,
                             String city, String country, long likes) {
 
@@ -27,6 +27,7 @@ public record DiaryResponse(Long id, String title, String thumbnailPath, Map<Lon
 
         return new DiaryResponse(
                 diary.getId(),
+                diary.getMember().getId(),
                 diary.getTitle(),
                 diary.getThumbnailPath(),
                 dailyFeeds,

@@ -9,6 +9,8 @@ import com.stoury.dto.diary.DiaryResponse;
 import com.stoury.dto.diary.SimpleDiaryResponse;
 import com.stoury.dto.feed.FeedResponse;
 import com.stoury.exception.authentication.NotAuthorizedException;
+import com.stoury.exception.diary.DiaryCreateException;
+import com.stoury.exception.diary.DiarySearchException;
 import com.stoury.exception.feed.FeedSearchException;
 import com.stoury.exception.member.MemberSearchException;
 import com.stoury.repository.DiaryRepository;
@@ -18,6 +20,7 @@ import com.stoury.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.data.domain.*;
+import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -40,7 +43,7 @@ public class DiaryService {
     public DiaryResponse createDiary(DiaryCreateRequest diaryCreateRequest, Long memberId) {
         List<Long> feedIds = diaryCreateRequest.feedIds();
         if (feedIds == null || feedIds.isEmpty()) {
-            throw new IllegalArgumentException("Feeds cannot be empty");
+            throw new DiaryCreateException("Feeds cannot be empty");
         }
 
         Member member = memberRepository.findById(Objects.requireNonNull(memberId, "Member Id cannot be null"))
@@ -57,7 +60,7 @@ public class DiaryService {
                 .filter(GraphicContent::isImage)
                 .filter(graphicContent -> graphicContent.getId().equals(diaryCreateRequest.thumbnailId()))
                 .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("Select a thumbnail image from your feed images"))
+                .orElseThrow(() -> new DiaryCreateException("Select a thumbnail image from your feed images"))
                 .getPath();
 
         String title = getTitle(diaryCreateRequest, feeds);
@@ -110,5 +113,15 @@ public class DiaryService {
         Page<Diary> diaryPage = diaryRepository.findByMember(member, page);
 
         return new PageImpl<>(diaryPage.map(SimpleDiaryResponse::from).toList(), diaryPage.getPageable(), diaryPage.getTotalElements());
+    }
+
+    @PostAuthorize("returnObject.memberId() == authentication.principal.id")
+    @Transactional
+    public SimpleDiaryResponse cancelDiary(Long diaryId) {
+        Diary toCancelDiary = diaryRepository.findById(diaryId).orElseThrow(DiarySearchException::new);
+
+        diaryRepository.delete(toCancelDiary);
+
+        return SimpleDiaryResponse.from(toCancelDiary);
     }
 }
