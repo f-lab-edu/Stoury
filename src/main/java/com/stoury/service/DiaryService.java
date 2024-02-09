@@ -55,17 +55,16 @@ public class DiaryService {
                 .filter(feed -> validateOwnership(member, feed))
                 .toList();
 
-        String thumbnailPath = feeds.stream()
+        GraphicContent thumbnail = feeds.stream()
                 .flatMap(feed -> feed.getGraphicContents().stream())
                 .filter(GraphicContent::isImage)
                 .filter(graphicContent -> graphicContent.getId().equals(diaryCreateRequest.thumbnailId()))
                 .findFirst()
-                .orElseThrow(() -> new DiaryCreateException("Select a thumbnail image from your feed images"))
-                .getPath();
+                .orElseThrow(() -> new DiaryCreateException("Select a thumbnail image from your feed images"));
 
         String title = getTitle(diaryCreateRequest, feeds);
 
-        Diary diary = new Diary(member, feeds, title, thumbnailPath);
+        Diary diary = new Diary(member, feeds, title, thumbnail);
         Diary savedDiary = diaryRepository.save(diary);
 
         List<FeedResponse> feedResponses = feeds.stream()

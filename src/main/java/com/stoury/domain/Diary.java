@@ -27,13 +27,14 @@ public class Diary {
     @Column(name = "TITLE", length = 50)
     private String title;
 
-    @Column(name = "THUMBNAIL_PATH", unique = true, nullable = false)
-    private String thumbnailPath;
+    @JoinColumn(name = "THUMBNAIL_ID")
+    @OneToOne(optional = false)
+    private GraphicContent thumbnail;
 
-    public Diary(Member member, List<Feed> feeds, String title, String thumbnailPath) {
+    public Diary(Member member, List<Feed> feeds, String title, GraphicContent thumbnail) {
         this.member = member;
         this.feeds = feeds;
         this.title = title;
-        this.thumbnailPath = thumbnailPath;
+        this.thumbnail = thumbnail;
     }
 }

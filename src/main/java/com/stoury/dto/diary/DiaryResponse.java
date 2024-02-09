@@ -29,7 +29,7 @@ public record DiaryResponse(Long id, Long memberId, String title, String thumbna
                 diary.getId(),
                 diary.getMember().getId(),
                 diary.getTitle(),
-                diary.getThumbnailPath(),
+                diary.getThumbnail().getPath(),
                 dailyFeeds,
                 firstFeed.createdAt().toLocalDate(),
                 lastFeed.createdAt().toLocalDate(),
