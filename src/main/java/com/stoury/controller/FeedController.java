@@ -6,7 +6,6 @@ import com.stoury.dto.feed.FeedUpdateRequest;
 import com.stoury.dto.member.AuthenticatedMember;
 import com.stoury.service.FeedService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -51,8 +50,7 @@ public class FeedController {
     }
 
     @DeleteMapping("/feeds/{feedId}")
-    public ResponseEntity<Object> deleteFeed(@PathVariable Long feedId) {
+    public void deleteFeed(@PathVariable Long feedId) {
         feedService.deleteFeed(feedId);
-        return ResponseEntity.ok().build();
     }
 }

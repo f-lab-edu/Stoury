@@ -5,16 +5,11 @@ import com.stoury.dto.comment.CommentResponse;
 import com.stoury.dto.member.AuthenticatedMember;
 import com.stoury.service.CommentService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
@@ -50,8 +45,7 @@ public class CommentController {
     }
 
     @DeleteMapping("/comments/{commentId}")
-    public ResponseEntity<Object> deleteComment(@PathVariable Long commentId) {
+    public void deleteComment(@PathVariable Long commentId) {
         commentService.deleteComment(commentId);
-        return ResponseEntity.ok().build();
     }
 }

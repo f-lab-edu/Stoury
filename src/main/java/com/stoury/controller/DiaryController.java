@@ -7,7 +7,6 @@ import com.stoury.dto.member.AuthenticatedMember;
 import com.stoury.service.DiaryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -29,8 +28,7 @@ public class DiaryController {
     }
 
     @DeleteMapping("/diaries/{diaryId}")
-    public ResponseEntity<Object> cancelDiary(@PathVariable Long diaryId) {
+    public void cancelDiary(@PathVariable Long diaryId) {
         diaryService.cancelDiary(diaryId);
-        return ResponseEntity.ok().build();
     }
 }
