@@ -9,7 +9,7 @@ import com.stoury.repository.LikeRepository
 import com.stoury.repository.MemberRepository
 import com.stoury.repository.RankingRepository
 import com.stoury.service.MemberService
-import com.stoury.utils.CacheKeys
+import com.stoury.utils.cachekeys.PopularSpotsKey
 import org.springframework.batch.core.Job
 import org.springframework.batch.test.JobLauncherTestUtils
 import org.springframework.batch.test.context.SpringBatchTest
@@ -23,6 +23,8 @@ import spock.lang.Specification
 
 import java.time.temporal.ChronoUnit
 import java.util.stream.IntStream
+
+import static com.stoury.utils.cachekeys.HotFeedsKeys.*
 
 @SpringBootTest
 @SpringBatchTest
@@ -86,7 +88,7 @@ class IntegrationTest extends Specification {
         def jobExecution = jobLauncherTestUtils.launchJob()
         then:
         "COMPLETED" == jobExecution.getExitStatus().getExitCode()
-        !rankingRepository.getRankedLocations(CacheKeys.POPULAR_ABROAD_SPOTS).isEmpty()
+        !rankingRepository.getRankedLocations(PopularSpotsKey.POPULAR_ABROAD_SPOTS).isEmpty()
     }
 
     def "일간 인기 피드 업데이트 테스트"() {
@@ -105,7 +107,7 @@ class IntegrationTest extends Specification {
         expect:
         def jobExecution = jobLauncherTestUtils.launchJob()
         "COMPLETED" == jobExecution.getExitStatus().getExitCode()
-        !rankingRepository.getRankedFeedIds(CacheKeys.DAILY_HOT_FEEDS).isEmpty()
+        !rankingRepository.getRankedFeedIds(DAILY_HOT_FEEDS).isEmpty()
     }
 
     def "주간 인기 피드 업데이트 테스트"() {
@@ -124,7 +126,7 @@ class IntegrationTest extends Specification {
         expect:
         def jobExecution = jobLauncherTestUtils.launchJob()
         "COMPLETED" == jobExecution.getExitStatus().getExitCode()
-        !rankingRepository.getRankedFeedIds(CacheKeys.WEEKLY_HOT_FEEDS).isEmpty()
+        !rankingRepository.getRankedFeedIds(WEEKLY_HOT_FEEDS).isEmpty()
     }
 
     def "월간 인기 피드 업데이트 테스트"() {
@@ -143,7 +145,7 @@ class IntegrationTest extends Specification {
         expect:
         def jobExecution = jobLauncherTestUtils.launchJob()
         "COMPLETED" == jobExecution.getExitStatus().getExitCode()
-        !rankingRepository.getRankedFeedIds(CacheKeys.MONTHLY_HOT_FEEDS).isEmpty()
+        !rankingRepository.getRankedFeedIds(MONTHLY_HOT_FEEDS).isEmpty()
     }
 
     def "해외에서 10개 인기 여행장소"() {
@@ -290,7 +292,7 @@ class IntegrationTest extends Specification {
                 .forEach(i -> rankingRepository.saveHotFeed(String.valueOf(i), likeIncreases.get(i), ChronoUnit.DAYS))
 
         then:
-        def rankedList = rankingRepository.getRankedFeedIds(CacheKeys.getHotFeedsKey(ChronoUnit.DAYS))
+        def rankedList = rankingRepository.getRankedFeedIds(getHotFeedsKey(ChronoUnit.DAYS))
         def expectedList = List.of(
                 15, 5, 14, 3, 12,
                 18, 17, 13, 6, 16,

@@ -1,6 +1,7 @@
 package com.stoury.repository;
 
-import com.stoury.utils.CacheKeys;
+import com.stoury.utils.cachekeys.HotFeedsKeys;
+import com.stoury.utils.cachekeys.PopularSpotsKey;
 import org.springframework.data.redis.core.ListOperations;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.ZSetOperations;
@@ -11,7 +12,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
-import static com.stoury.utils.CacheKeys.getHotFeedsKey;
+import static com.stoury.utils.cachekeys.HotFeedsKeys.getHotFeedsKey;
 
 @Repository
 public class RankingRepository {
@@ -25,11 +26,11 @@ public class RankingRepository {
         opsForZset = redisTemplate.opsForZSet();
     }
 
-    public List<String> getRankedLocations(CacheKeys cacheKey) {
+    public List<String> getRankedLocations(PopularSpotsKey cacheKey) {
         return opsForList.range(cacheKey.name(), 0, -1);
     }
 
-    public void update(CacheKeys cacheKey, List<String> rankedSpots) {
+    public void update(PopularSpotsKey cacheKey, List<String> rankedSpots) {
         if (rankedSpots == null || rankedSpots.isEmpty()) {
             return;
         }
@@ -42,8 +43,8 @@ public class RankingRepository {
         opsForZset.add(key, feedId, likeIncrease);
     }
 
-    public List<String> getRankedFeedIds(CacheKeys cacheKeys) {
-        Set<String> rankedFeedIds = opsForZset.reverseRange(cacheKeys.name(), 0, -1);
+    public List<String> getRankedFeedIds(HotFeedsKeys key) {
+        Set<String> rankedFeedIds = opsForZset.reverseRange(key.name(), 0, -1);
         if (rankedFeedIds == null) {
             return Collections.emptyList();
         }

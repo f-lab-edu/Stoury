@@ -4,9 +4,8 @@ import com.stoury.domain.Feed;
 import com.stoury.repository.FeedRepository;
 import com.stoury.repository.LikeRepository;
 import com.stoury.repository.RankingRepository;
-import com.stoury.utils.CacheKeys;
+import com.stoury.utils.cachekeys.PopularSpotsKey;
 import jakarta.persistence.EntityManagerFactory;
-import jakarta.persistence.PersistenceContext;
 import lombok.RequiredArgsConstructor;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
@@ -20,7 +19,6 @@ import org.springframework.batch.item.ItemWriter;
 import org.springframework.batch.item.database.JpaPagingItemReader;
 import org.springframework.batch.item.database.builder.JpaPagingItemReaderBuilder;
 import org.springframework.batch.repeat.RepeatStatus;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.domain.PageRequest;
@@ -47,7 +45,7 @@ public class BatchConfig {
         return new StepBuilder("stepUpdatePopularDomesticCities", jobRepository)
                 .tasklet((contribution, chunkContext) -> {
                     List<String> rankedDomesticCities = feedRepository.findTop10CitiesInKorea(pageable);
-                    rankingRepository.update(CacheKeys.POPULAR_DOMESTIC_SPOTS, rankedDomesticCities);
+                    rankingRepository.update(PopularSpotsKey.POPULAR_DOMESTIC_SPOTS, rankedDomesticCities);
                     return RepeatStatus.FINISHED;
                 }, tm)
                 .build();
@@ -58,7 +56,7 @@ public class BatchConfig {
         return new StepBuilder("stepUpdatePopularAbroadCities", jobRepository)
                 .tasklet((contribution, chunkContext) -> {
                     List<String> rankedCountries = feedRepository.findTop10CountriesNotKorea(pageable);
-                    rankingRepository.update(CacheKeys.POPULAR_ABROAD_SPOTS, rankedCountries);
+                    rankingRepository.update(PopularSpotsKey.POPULAR_ABROAD_SPOTS, rankedCountries);
                     return RepeatStatus.FINISHED;
                 }, tm)
                 .build();

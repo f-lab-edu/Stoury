@@ -14,7 +14,8 @@ import org.springframework.util.StringUtils;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 
-import static com.stoury.utils.CacheKeys.*;
+import static com.stoury.utils.cachekeys.FeedLikersKey.getLikersKey;
+import static com.stoury.utils.cachekeys.FeedLikesCountSnapshotKeys.getCountSnapshotKey;
 
 @Repository
 public class LikeRepository {
