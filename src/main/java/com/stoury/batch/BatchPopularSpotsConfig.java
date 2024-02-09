@@ -13,7 +13,6 @@ import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.domain.PageRequest;
@@ -25,8 +24,8 @@ import java.util.List;
 
 @Configuration
 @RequiredArgsConstructor
-@ConditionalOnExpression("'${spring.batch.job.names}'.contains('jobHotSpots')")
-public class BatchHotSpotsConfig {
+@ConditionalOnExpression("'${spring.batch.job.names}'.contains('jobPopularSpots')")
+public class BatchPopularSpotsConfig {
     Pageable pageable = PageRequest.of(0, 10);
     private final FeedRepository feedRepository;
     private final RankingRepository rankingRepository;
