@@ -1,4 +1,4 @@
-package com.stoury.config.batch;
+package com.stoury.batch;
 
 import com.stoury.domain.Feed;
 import com.stoury.repository.FeedRepository;
