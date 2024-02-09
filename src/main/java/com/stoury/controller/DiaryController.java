@@ -27,7 +27,9 @@ public class DiaryController {
     }
 
     @DeleteMapping("/diaries/{diaryId}")
-    public void cancelDiary(@PathVariable Long diaryId) {
-        diaryService.cancelDiary(diaryId);
+    public void cancelDiary(
+            @AuthenticationPrincipal AuthenticatedMember authenticatedMember,
+            @PathVariable Long diaryId) {
+        diaryService.cancelDiaryIfOwner(diaryId, authenticatedMember.getId());
     }
 }

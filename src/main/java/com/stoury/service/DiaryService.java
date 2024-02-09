@@ -20,8 +20,10 @@ import com.stoury.repository.LikeRepository;
 import com.stoury.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.NotNull;
-import org.springframework.data.domain.*;
-import org.springframework.security.access.prepost.PostAuthorize;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -115,13 +117,24 @@ public class DiaryService {
         return DiaryPageResponse.from(diaryPage);
     }
 
-    @PostAuthorize("returnObject.memberId() == authentication.principal.id")
-    @Transactional
-    public SimpleDiaryResponse cancelDiary(Long diaryId) {
+    protected SimpleDiaryResponse cancelDiary(Long diaryId) {
         Diary toCancelDiary = diaryRepository.findById(diaryId).orElseThrow(DiarySearchException::new);
 
         diaryRepository.delete(toCancelDiary);
 
         return SimpleDiaryResponse.from(toCancelDiary);
+    }
+
+    @Transactional
+    public SimpleDiaryResponse cancelDiaryIfOwner(Long diaryId, Long memberId) {
+        Diary toCancelDiary = diaryRepository.findById(diaryId).orElseThrow(DiarySearchException::new);
+        if (isNotOwner(memberId, toCancelDiary)) {
+            throw new NotAuthorizedException();
+        }
+        return cancelDiary(diaryId);
+    }
+
+    private boolean isNotOwner(Long memberId, Diary toCancelDiary) {
+        return !toCancelDiary.getMember().getId().equals(memberId);
     }
 }

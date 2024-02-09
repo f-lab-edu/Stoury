@@ -45,7 +45,8 @@ public class CommentController {
     }
 
     @DeleteMapping("/comments/{commentId}")
-    public void deleteComment(@PathVariable Long commentId) {
-        commentService.deleteComment(commentId);
+    public void deleteComment(@AuthenticationPrincipal AuthenticatedMember authenticatedMember,
+                              @PathVariable Long commentId) {
+        commentService.deleteCommentIfOwner(commentId, authenticatedMember.getId());
     }
 }
