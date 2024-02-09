@@ -45,12 +45,15 @@ public class FeedController {
     }
 
     @PutMapping("/feeds/{feedId}")
-    public FeedResponse updateFeed(@PathVariable Long feedId, @RequestBody FeedUpdateRequest feedUpdateRequest) {
-        return feedService.updateFeed(feedId, feedUpdateRequest);
+    public FeedResponse updateFeed(@AuthenticationPrincipal AuthenticatedMember authenticatedMember,
+                                   @PathVariable Long feedId,
+                                   @RequestBody FeedUpdateRequest feedUpdateRequest) {
+        return feedService.updateFeedIfOwner(feedId, feedUpdateRequest, authenticatedMember.getId());
     }
 
     @DeleteMapping("/feeds/{feedId}")
-    public void deleteFeed(@PathVariable Long feedId) {
-        feedService.deleteFeed(feedId);
+    public void deleteFeed(@AuthenticationPrincipal AuthenticatedMember authenticatedMember,
+                           @PathVariable Long feedId) {
+        feedService.deleteFeedIfOwner(feedId, authenticatedMember.getId());
     }
 }
