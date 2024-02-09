@@ -5,6 +5,7 @@ import com.stoury.domain.Feed;
 import com.stoury.domain.GraphicContent;
 import com.stoury.domain.Member;
 import com.stoury.dto.diary.DiaryCreateRequest;
+import com.stoury.dto.diary.DiaryPageResponse;
 import com.stoury.dto.diary.DiaryResponse;
 import com.stoury.dto.diary.SimpleDiaryResponse;
 import com.stoury.dto.feed.FeedResponse;
@@ -104,14 +105,14 @@ public class DiaryService {
     }
 
     @Transactional(readOnly = true)
-    public Page<SimpleDiaryResponse> getMemberDiaries(Long memberId, int pageNo) {
+    public DiaryPageResponse getMemberDiaries(Long memberId, int pageNo) {
         Member member = memberRepository.findById(Objects.requireNonNull(memberId, "Member Id cannot be null"))
                 .orElseThrow(MemberSearchException::new);
         Pageable page = PageRequest.of(pageNo, PAGE_SIZE, Sort.by("createdAt"));
 
         Page<Diary> diaryPage = diaryRepository.findByMember(member, page);
 
-        return new PageImpl<>(diaryPage.map(SimpleDiaryResponse::from).toList(), diaryPage.getPageable(), diaryPage.getTotalElements());
+        return DiaryPageResponse.from(diaryPage);
     }
 
     @PostAuthorize("returnObject.memberId() == authentication.principal.id")
