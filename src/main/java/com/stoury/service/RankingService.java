@@ -10,7 +10,6 @@ import org.springframework.stereotype.Service;
 
 import java.time.temporal.ChronoUnit;
 import java.util.List;
-import java.util.Optional;
 
 import static com.stoury.utils.cachekeys.HotFeedsKeys.getHotFeedsKey;
 
@@ -22,12 +21,12 @@ public class RankingService {
     private final LikeRepository likeRepository;
 
     public List<FeedResponse> getHotFeeds(ChronoUnit chronoUnit) {
-        return rankingRepository.getRankedFeedIds(getHotFeedsKey(chronoUnit))
+        List<Long> feedIds = rankingRepository.getRankedFeedIds(getHotFeedsKey(chronoUnit))
                 .stream()
                 .map(Long::parseLong)
-                .map(feedRepository::findById)
-                .filter(Optional::isPresent)
-                .map(Optional::get)
+                .toList();
+        return feedRepository.findAllById(feedIds)
+                .stream()
                 .map(feed -> FeedResponse.from(feed, likeRepository.getLikes(feed.getId().toString())))
                 .toList();
     }
