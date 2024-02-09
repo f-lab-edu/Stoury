@@ -6,6 +6,8 @@ spring:
   batch:
     jdbc:
       initialize-schema: always
+    job:
+      names: jobHotSpots,jobPopularFeeds
   datasource:
     url: jdbc:mariadb://localhost:3306/testdb
     username: ${MYSQL_USERNAME}

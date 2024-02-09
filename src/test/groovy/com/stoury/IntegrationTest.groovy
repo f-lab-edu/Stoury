@@ -19,6 +19,7 @@ import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Slice
 import org.springframework.data.redis.core.StringRedisTemplate
 import org.springframework.test.context.ActiveProfiles
+import org.springframework.test.context.TestPropertySource
 import spock.lang.Specification
 
 import java.time.temporal.ChronoUnit

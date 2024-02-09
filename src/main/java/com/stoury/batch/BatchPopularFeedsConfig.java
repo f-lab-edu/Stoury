@@ -14,6 +14,8 @@ import org.springframework.batch.item.ItemProcessor;
 import org.springframework.batch.item.ItemWriter;
 import org.springframework.batch.item.database.JpaPagingItemReader;
 import org.springframework.batch.item.database.builder.JpaPagingItemReaderBuilder;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.util.Pair;
@@ -24,6 +26,7 @@ import java.time.temporal.ChronoUnit;
 
 @Configuration
 @RequiredArgsConstructor
+@ConditionalOnExpression("'${spring.batch.job.names}'.contains('jobPopularFeeds')")
 public class BatchPopularFeedsConfig {
     private final EntityManagerFactory entityManagerFactory;
 
