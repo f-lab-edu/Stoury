@@ -11,12 +11,12 @@ import com.stoury.dto.feed.LocationResponse;
 import com.stoury.event.GraphicDeleteEvent;
 import com.stoury.event.GraphicSaveEvent;
 import com.stoury.exception.feed.FeedCreateException;
+import com.stoury.exception.feed.FeedDeleteException;
 import com.stoury.exception.feed.FeedSearchException;
 import com.stoury.exception.member.MemberSearchException;
 import com.stoury.repository.FeedRepository;
 import com.stoury.repository.LikeRepository;
 import com.stoury.repository.MemberRepository;
-import com.stoury.repository.RankingRepository;
 import com.stoury.service.location.LocationService;
 import com.stoury.utils.FileUtils;
 import com.stoury.utils.SupportedFileType;
@@ -47,6 +47,7 @@ public class FeedService {
     private final MemberRepository memberRepository;
     private final LikeRepository likeRepository;
     private final TagService tagService;
+    private final RankingService rankingService;
     private final LocationService locationService;
     private final ApplicationEventPublisher eventPublisher;
 
@@ -173,6 +174,9 @@ public class FeedService {
     @PostAuthorize("returnObject.writer().id() == authentication.name")
     @Transactional
     public FeedResponse deleteFeed(Long feedId) {
+        if (rankingService.isRankedFeed(feedId)) {
+            throw new FeedDeleteException("As the feed is in hot feeds, cannot delete this.");
+        }
         Feed feed = feedRepository.findById(Objects.requireNonNull(feedId))
                 .orElseThrow(FeedSearchException::new);
         feedRepository.delete(feed);

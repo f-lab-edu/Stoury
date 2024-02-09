@@ -1,14 +1,17 @@
 package com.stoury.service;
 
 import com.stoury.dto.feed.FeedResponse;
+import com.stoury.exception.feed.FeedSearchException;
 import com.stoury.repository.FeedRepository;
 import com.stoury.repository.LikeRepository;
 import com.stoury.repository.RankingRepository;
+import com.stoury.utils.cachekeys.HotFeedsKeys;
 import com.stoury.utils.cachekeys.PopularSpotsKey;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.temporal.ChronoUnit;
+import java.util.Comparator;
 import java.util.List;
 
 import static com.stoury.utils.cachekeys.HotFeedsKeys.getHotFeedsKey;
@@ -25,10 +28,16 @@ public class RankingService {
                 .stream()
                 .map(Long::parseLong)
                 .toList();
-        return feedRepository.findAllById(feedIds)
+        List<FeedResponse> hotFeeds =  feedRepository.findAllById(feedIds)
                 .stream()
                 .map(feed -> FeedResponse.from(feed, likeRepository.getLikes(feed.getId().toString())))
+                .sorted(Comparator.comparing(FeedResponse::likes).reversed())
                 .toList();
+        if (hotFeeds.size() != feedIds.size()) {
+            throw new FeedSearchException("Cannot find HotFeeds");
+        }
+
+        return hotFeeds;
     }
 
 
@@ -38,5 +47,14 @@ public class RankingService {
 
     public List<String> getPopularDomesticSpots() {
         return rankingRepository.getRankedLocations(PopularSpotsKey.POPULAR_DOMESTIC_SPOTS);
+    }
+
+    public boolean isRankedFeed(Long feedId) {
+        for (HotFeedsKeys key : HotFeedsKeys.values()) {
+            if (rankingRepository.contains(key, feedId.toString())) {
+                return true;
+            }
+        }
+        return false;
     }
 }

@@ -50,4 +50,10 @@ public class RankingRepository {
         }
         return rankedFeedIds.stream().toList();
     }
+
+    public boolean contains(HotFeedsKeys key, String feedId) {
+        Set<String> ids = opsForZset.range(key.toString(), 0, -1);
+
+        return ids != null && ids.contains(feedId);
+    }
 }
