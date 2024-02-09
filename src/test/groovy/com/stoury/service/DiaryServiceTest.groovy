@@ -48,7 +48,7 @@ class DiaryServiceTest extends Specification {
         thumbnail.id = 1
         feed3.graphicContents = List.of(thumbnail)
 
-        diaryRepository.save(_) >> new Diary(writer, List.of(feed1, feed2, feed3, feed4), "test diary", thumbnail.getPath())
+        diaryRepository.save(_) >> new Diary(writer, List.of(feed1, feed2, feed3, feed4), "test diary", thumbnail)
 
         def diaryRequest = new DiaryCreateRequest("test diary", List.of(1L, 2L, 3L, 4L), thumbnail.id)
         when:
