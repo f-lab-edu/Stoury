@@ -109,7 +109,7 @@ class IntegrationTest extends Specification {
         expect:
         def jobExecution = jobLauncherTestUtils.launchJob()
         "COMPLETED" == jobExecution.getExitStatus().getExitCode()
-        !rankingRepository.getRankedFeedIds(DAILY_HOT_FEEDS).isEmpty()
+        !rankingRepository.getRankedFeeds(DAILY_HOT_FEEDS).isEmpty()
     }
 
     def "주간 인기 피드 업데이트 테스트"() {
@@ -128,7 +128,7 @@ class IntegrationTest extends Specification {
         expect:
         def jobExecution = jobLauncherTestUtils.launchJob()
         "COMPLETED" == jobExecution.getExitStatus().getExitCode()
-        !rankingRepository.getRankedFeedIds(WEEKLY_HOT_FEEDS).isEmpty()
+        !rankingRepository.getRankedFeeds(WEEKLY_HOT_FEEDS).isEmpty()
     }
 
     def "월간 인기 피드 업데이트 테스트"() {
@@ -147,7 +147,7 @@ class IntegrationTest extends Specification {
         expect:
         def jobExecution = jobLauncherTestUtils.launchJob()
         "COMPLETED" == jobExecution.getExitStatus().getExitCode()
-        !rankingRepository.getRankedFeedIds(MONTHLY_HOT_FEEDS).isEmpty()
+        !rankingRepository.getRankedFeeds(MONTHLY_HOT_FEEDS).isEmpty()
     }
 
     def "해외에서 10개 인기 여행장소"() {
@@ -321,7 +321,7 @@ class IntegrationTest extends Specification {
                         ChronoUnit.DAYS))
 
         then:
-        def rankedList = rankingRepository.getRankedFeedIds(getHotFeedsKey(ChronoUnit.DAYS)).stream()
+        def rankedList = rankingRepository.getRankedFeeds(getHotFeedsKey(ChronoUnit.DAYS)).stream()
                 .map(SimpleFeedResponse::id).toList()
         List<Long> expectedList = List.of(
                 15L, 5L, 14L, 3L, 12L,

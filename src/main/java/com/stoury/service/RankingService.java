@@ -18,7 +18,7 @@ public class RankingService {
     private final RankingRepository rankingRepository;
 
     public List<SimpleFeedResponse> getHotFeeds(ChronoUnit chronoUnit) {
-        return rankingRepository.getRankedFeedIds(getHotFeedsKey(chronoUnit))
+        return rankingRepository.getRankedFeeds(getHotFeedsKey(chronoUnit))
                 .stream()
                 .toList();
     }

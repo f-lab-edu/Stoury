@@ -60,7 +60,7 @@ public class RankingRepository {
         return simpleFeedJson;
     }
 
-    public List<SimpleFeedResponse> getRankedFeedIds(HotFeedsKeys key) {
+    public List<SimpleFeedResponse> getRankedFeeds(HotFeedsKeys key) {
         Set<String> rankedSimpleFeeds = opsForZset.reverseRange(key.name(), 0, 9);
         if (rankedSimpleFeeds == null) {
             return Collections.emptyList();
