@@ -12,7 +12,6 @@ import com.stoury.event.GraphicDeleteEvent;
 import com.stoury.event.GraphicSaveEvent;
 import com.stoury.exception.authentication.NotAuthorizedException;
 import com.stoury.exception.feed.FeedCreateException;
-import com.stoury.exception.feed.FeedDeleteException;
 import com.stoury.exception.feed.FeedSearchException;
 import com.stoury.exception.member.MemberSearchException;
 import com.stoury.repository.FeedRepository;
@@ -186,9 +185,6 @@ public class FeedService {
     }
 
     protected void deleteFeed(Long feedId) {
-        if (rankingService.isRankedFeed(feedId)) {
-            throw new FeedDeleteException("As the feed is in hot feeds, cannot delete this.");
-        }
         Feed feed = feedRepository.findById(Objects.requireNonNull(feedId))
                 .orElseThrow(FeedSearchException::new);
         feedRepository.delete(feed);
