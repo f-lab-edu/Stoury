@@ -1,6 +1,6 @@
 package com.stoury.controller;
 
-import com.stoury.dto.feed.FeedResponse;
+import com.stoury.dto.feed.SimpleFeedResponse;
 import com.stoury.service.RankingService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -25,17 +25,17 @@ public class RankingController {
     }
 
     @GetMapping("/rank/daily-hot-feeds")
-    public List<FeedResponse> getDailyHotFeeds() {
+    public List<SimpleFeedResponse> getDailyHotFeeds() {
         return rankingService.getHotFeeds(ChronoUnit.DAYS);
     }
 
     @GetMapping("/rank/weekly-hot-feeds")
-    public List<FeedResponse> getWeeklyHotFeeds() {
+    public List<SimpleFeedResponse> getWeeklyHotFeeds() {
         return rankingService.getHotFeeds(ChronoUnit.WEEKS);
     }
 
     @GetMapping("/rank/monthly-hot-feeds")
-    public List<FeedResponse> getMonthlyHotFeeds() {
+    public List<SimpleFeedResponse> getMonthlyHotFeeds() {
         return rankingService.getHotFeeds(ChronoUnit.MONTHS);
     }
 }

@@ -3,6 +3,8 @@ package com.stoury
 import com.stoury.domain.Feed
 import com.stoury.domain.Like
 import com.stoury.domain.Member
+import com.stoury.dto.WriterResponse
+import com.stoury.dto.feed.SimpleFeedResponse
 import com.stoury.dto.member.MemberResponse
 import com.stoury.repository.FeedRepository
 import com.stoury.repository.LikeRepository
@@ -19,7 +21,6 @@ import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Slice
 import org.springframework.data.redis.core.StringRedisTemplate
 import org.springframework.test.context.ActiveProfiles
-import org.springframework.test.context.TestPropertySource
 import spock.lang.Specification
 
 import java.time.temporal.ChronoUnit
@@ -277,7 +278,31 @@ class IntegrationTest extends Specification {
     }
 
     def "인기 피드 랭킹"() {
+        def writer = new WriterResponse(1L, "writer")
         given:
+        def feeds = [
+                new SimpleFeedResponse(0L, writer, "city0", "country0"),
+                new SimpleFeedResponse(1L, writer, "city1", "country1"),
+                new SimpleFeedResponse(2L, writer, "city2", "country2"),
+                new SimpleFeedResponse(3L, writer, "city3", "country3"),
+                new SimpleFeedResponse(4L, writer, "city4", "country4"),
+                new SimpleFeedResponse(5L, writer, "city5", "country5"),
+                new SimpleFeedResponse(6L, writer, "city6", "country6"),
+                new SimpleFeedResponse(7L, writer, "city7", "country7"),
+                new SimpleFeedResponse(8L, writer, "city8", "country8"),
+                new SimpleFeedResponse(9L, writer, "city9", "country9"),
+                new SimpleFeedResponse(10L, writer, "city10", "country10"),
+                new SimpleFeedResponse(11L, writer, "city11", "country11"),
+                new SimpleFeedResponse(12L, writer, "city12", "country12"),
+                new SimpleFeedResponse(13L, writer, "city13", "country13"),
+                new SimpleFeedResponse(14L, writer, "city14", "country14"),
+                new SimpleFeedResponse(15L, writer, "city15", "country15"),
+                new SimpleFeedResponse(16L, writer, "city16", "country16"),
+                new SimpleFeedResponse(17L, writer, "city17", "country17"),
+                new SimpleFeedResponse(18L, writer, "city18", "country18"),
+                new SimpleFeedResponse(19L, writer, "city19", "country19"),
+        ]
+
         def likeIncreases = [
                 //0    1   2   3    4
                 5, 13, 1, 100, 2,
@@ -290,18 +315,18 @@ class IntegrationTest extends Specification {
         ]
         when:
         IntStream.range(0, 20)
-                .forEach(i -> rankingRepository.saveHotFeed(String.valueOf(i), likeIncreases.get(i), ChronoUnit.DAYS))
+                .forEach(i -> rankingRepository.saveHotFeed(
+                        feeds.get(i),
+                        likeIncreases.get(i),
+                        ChronoUnit.DAYS))
 
         then:
-        def rankedList = rankingRepository.getRankedFeedIds(getHotFeedsKey(ChronoUnit.DAYS))
-        def expectedList = List.of(
-                15, 5, 14, 3, 12,
-                18, 17, 13, 6, 16,
-                11, 7, 1, 10, 8,
-                19, 0, 9, 4, 2)
-        (0..<20).each { i ->
-            rankedList.get(i) == expectedList.get(i)
-        }
+        def rankedList = rankingRepository.getRankedFeedIds(getHotFeedsKey(ChronoUnit.DAYS)).stream()
+                .map(SimpleFeedResponse::id).toList()
+        List<Long> expectedList = List.of(
+                15L, 5L, 14L, 3L, 12L,
+                18L, 17L, 13L, 6L, 16L)
+        rankedList == expectedList
     }
 
     def "사용자 검색"() {
@@ -323,10 +348,10 @@ class IntegrationTest extends Specification {
         then:
         slice.size == MemberService.PAGE_SIZE
         slice.hasNext()
-        foundMembers.get(0).username()==member1.getUsername()
-        foundMembers.get(1).username()==member2.getUsername()
-        foundMembers.get(2).username()==member5.getUsername()
-        foundMembers.get(3).username()==member6.getUsername()
-        foundMembers.get(4).username()==member7.getUsername()
+        foundMembers.get(0).username() == member1.getUsername()
+        foundMembers.get(1).username() == member2.getUsername()
+        foundMembers.get(2).username() == member5.getUsername()
+        foundMembers.get(3).username() == member6.getUsername()
+        foundMembers.get(4).username() == member7.getUsername()
     }
 }

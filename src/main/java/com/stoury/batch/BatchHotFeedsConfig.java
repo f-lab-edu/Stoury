@@ -1,6 +1,7 @@
 package com.stoury.batch;
 
 import com.stoury.domain.Feed;
+import com.stoury.dto.feed.SimpleFeedResponse;
 import com.stoury.repository.LikeRepository;
 import com.stoury.repository.RankingRepository;
 import jakarta.persistence.EntityManagerFactory;
@@ -59,7 +60,7 @@ public class BatchHotFeedsConfig {
     public Step stepDailyFeed(JobRepository jobRepository, PlatformTransactionManager tm,
                               ThreadPoolTaskExecutor taskExecutor, LikeRepository likeRepository) {
         return new StepBuilder("stepDailyFeed", jobRepository)
-                .<Feed, Pair<String, Long>>chunk(100, tm)
+                .<Feed, Pair<SimpleFeedResponse, Long>>chunk(100, tm)
                 .reader(feedReader())
                 .processor(feedProcessor(likeRepository, ChronoUnit.DAYS))
                 .writer(feedWriter(ChronoUnit.DAYS))
@@ -71,7 +72,7 @@ public class BatchHotFeedsConfig {
     public Step stepWeeklyFeed(JobRepository jobRepository, PlatformTransactionManager tm,
                                ThreadPoolTaskExecutor taskExecutor, LikeRepository likeRepository) {
         return new StepBuilder("stepWeeklyFeed", jobRepository)
-                .<Feed, Pair<String, Long>>chunk(100, tm)
+                .<Feed, Pair<SimpleFeedResponse, Long>>chunk(100, tm)
                 .reader(feedReader())
                 .processor(feedProcessor(likeRepository, ChronoUnit.WEEKS))
                 .writer(feedWriter(ChronoUnit.WEEKS))
@@ -83,7 +84,7 @@ public class BatchHotFeedsConfig {
     public Step stepMonthlyFeed(JobRepository jobRepository, PlatformTransactionManager tm,
                                 ThreadPoolTaskExecutor taskExecutor, LikeRepository likeRepository) {
         return new StepBuilder("stepMonthlyFeed", jobRepository)
-                .<Feed, Pair<String, Long>>chunk(100, tm)
+                .<Feed, Pair<SimpleFeedResponse, Long>>chunk(100, tm)
                 .reader(feedReader())
                 .processor(feedProcessor(likeRepository, ChronoUnit.MONTHS))
                 .writer(feedWriter(ChronoUnit.MONTHS))
@@ -101,28 +102,30 @@ public class BatchHotFeedsConfig {
                 .build();
     }
 
-    public ItemProcessor<Feed, Pair<String, Long>> feedProcessor(LikeRepository likeRepository, ChronoUnit chronoUnit) {
+    public ItemProcessor<Feed, Pair<SimpleFeedResponse, Long>> feedProcessor(LikeRepository likeRepository, ChronoUnit chronoUnit) {
         return feed -> {
-            String feedId = feed.getId().toString();
+            Long feedId = feed.getId();
 
-            if (!likeRepository.existsByFeedId(feedId)) {
-                return Pair.of(feedId, 0L);
+            if (!likeRepository.existsByFeedId(feedId.toString())) {
+                return null;
             }
-            long currentLikes = likeRepository.getCountByFeedId(feedId);
-            long prevLikes = likeRepository.getCountSnapshotByFeed(feedId, chronoUnit);
+            long currentLikes = likeRepository.getCountByFeedId(feedId.toString());
+            long prevLikes = likeRepository.getCountSnapshotByFeed(feedId.toString(), chronoUnit);
 
-            return Pair.of(feedId, currentLikes - prevLikes);
+            SimpleFeedResponse simpleFeed = SimpleFeedResponse.from(feed);
+
+            return Pair.of(simpleFeed, currentLikes - prevLikes);
         };
     }
 
-    public ItemWriter<Pair<String, Long>> feedWriter(ChronoUnit chronoUnit) {
+    public ItemWriter<Pair<SimpleFeedResponse, Long>> feedWriter(ChronoUnit chronoUnit) {
         return list -> {
-            for (Pair<String, Long> pair : list) {
-                String feedId = pair.getFirst();
+            for (Pair<SimpleFeedResponse, Long> pair : list) {
+                SimpleFeedResponse rawSimpleFeed = pair.getFirst();
                 Long likeIncrease = pair.getSecond();
 
                 if (likeIncrease > 0) {
-                    rankingRepository.saveHotFeed(feedId, likeIncrease, chronoUnit);
+                    rankingRepository.saveHotFeed(rawSimpleFeed, likeIncrease, chronoUnit);
                 }
             }
         };

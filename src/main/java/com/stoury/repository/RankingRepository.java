@@ -1,7 +1,11 @@
 package com.stoury.repository;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.stoury.dto.feed.SimpleFeedResponse;
 import com.stoury.utils.cachekeys.HotFeedsKeys;
 import com.stoury.utils.cachekeys.PopularSpotsKey;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.ListOperations;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.ZSetOperations;
@@ -19,11 +23,13 @@ public class RankingRepository {
     private final StringRedisTemplate redisTemplate;
     private final ListOperations<String, String> opsForList;
     private final ZSetOperations<String, String> opsForZset;
+    private final ObjectMapper objectMapper;
 
-    public RankingRepository(StringRedisTemplate redisTemplate) {
+    public RankingRepository(StringRedisTemplate redisTemplate, @Autowired ObjectMapper objectMapper) {
         this.redisTemplate = redisTemplate;
         opsForList = redisTemplate.opsForList();
         opsForZset = redisTemplate.opsForZSet();
+        this.objectMapper = objectMapper;
     }
 
     public List<String> getRankedLocations(PopularSpotsKey cacheKey) {
@@ -38,17 +44,38 @@ public class RankingRepository {
         opsForList.leftPushAll(cacheKey.name(), rankedSpots);
     }
 
-    public void saveHotFeed(String feedId, double likeIncrease, ChronoUnit chronoUnit) {
+    public void saveHotFeed(SimpleFeedResponse simpleFeed, double likeIncrease, ChronoUnit chronoUnit) {
         String key = String.valueOf(getHotFeedsKey(chronoUnit));
-        opsForZset.add(key, feedId, likeIncrease);
+        String simpleFeedJson = getFeedJsonString(simpleFeed);
+        opsForZset.add(key, simpleFeedJson, likeIncrease);
     }
 
-    public List<String> getRankedFeedIds(HotFeedsKeys key) {
-        Set<String> rankedFeedIds = opsForZset.reverseRange(key.name(), 0, -1);
-        if (rankedFeedIds == null) {
+    private String getFeedJsonString(SimpleFeedResponse simpleFeed) {
+        String simpleFeedJson = null;
+        try {
+            simpleFeedJson = objectMapper.writeValueAsString(simpleFeed);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+        return simpleFeedJson;
+    }
+
+    public List<SimpleFeedResponse> getRankedFeedIds(HotFeedsKeys key) {
+        Set<String> rankedSimpleFeeds = opsForZset.reverseRange(key.name(), 0, 9);
+        if (rankedSimpleFeeds == null) {
             return Collections.emptyList();
         }
-        return rankedFeedIds.stream().toList();
+        return rankedSimpleFeeds.stream()
+                .map(this::getFeedResponse)
+                .toList();
+    }
+
+    private SimpleFeedResponse getFeedResponse(String rawSimpleFeedJson) {
+        try {
+            return objectMapper.readValue(rawSimpleFeedJson, SimpleFeedResponse.class);
+        } catch (JsonProcessingException e) {
+            return null;
+        }
     }
 
     public boolean contains(HotFeedsKeys key, String feedId) {
