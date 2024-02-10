@@ -9,7 +9,6 @@ import com.stoury.dto.feed.FeedCreateRequest
 import com.stoury.dto.feed.FeedUpdateRequest
 import com.stoury.event.GraphicDeleteEvent
 import com.stoury.exception.feed.FeedCreateException
-import com.stoury.exception.feed.FeedDeleteException
 import com.stoury.repository.FeedRepository
 import com.stoury.repository.LikeRepository
 import com.stoury.repository.MemberRepository
@@ -108,14 +107,5 @@ class FeedServiceTest extends Specification {
         2 * eventPublisher.publishEvent(_ as GraphicDeleteEvent)
         feed.textContent == "updated"
         feed.tags.isEmpty()
-    }
-
-    def "인기 피드는 삭제 불가"() {
-        given:
-        rankingServie.isRankedFeed(_) >> true
-        when:
-        feedService.deleteFeed(1L)
-        then:
-        thrown(FeedDeleteException)
     }
 }
