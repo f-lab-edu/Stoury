@@ -3,12 +3,9 @@ package com.stoury.controller;
 import com.stoury.dto.diary.DiaryCreateRequest;
 import com.stoury.dto.diary.DiaryPageResponse;
 import com.stoury.dto.diary.DiaryResponse;
-import com.stoury.dto.diary.SimpleDiaryResponse;
 import com.stoury.dto.member.AuthenticatedMember;
 import com.stoury.service.DiaryService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -30,9 +27,8 @@ public class DiaryController {
     }
 
     @DeleteMapping("/diaries/{diaryId}")
-    public void cancelDiary(
-            @AuthenticationPrincipal AuthenticatedMember authenticatedMember,
-            @PathVariable Long diaryId) {
+    public void cancelDiary(@AuthenticationPrincipal AuthenticatedMember authenticatedMember,
+                            @PathVariable Long diaryId) {
         diaryService.cancelDiaryIfOwner(diaryId, authenticatedMember.getId());
     }
 }
