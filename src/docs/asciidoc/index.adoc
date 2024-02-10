@@ -6,3 +6,4 @@
 :seclinks:
 
 include::memberController.adoc[]
+include::Create Feed.adoc[]
