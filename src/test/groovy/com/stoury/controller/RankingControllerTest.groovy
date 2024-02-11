@@ -5,6 +5,7 @@ import com.stoury.dto.feed.SimpleFeedResponse
 import com.stoury.service.RankingService
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 import org.springframework.boot.test.mock.mockito.MockBean
+import org.springframework.http.MediaType
 
 import java.time.temporal.ChronoUnit
 
@@ -51,7 +52,7 @@ class RankingControllerTest extends AbstractRestDocsTests {
 
     def "Get popular abroad spots"() {
         given:
-        when(rankingService.getPopularDomesticSpots()).thenReturn(List.of(
+        when(rankingService.getPopularAbroadSpots()).thenReturn(List.of(
                 "United States", "United Kingdom", "Canada", "Australia", "France",
                 "Germany", "Italy", "Spain", "Japan", "China"
         ))
@@ -64,11 +65,11 @@ class RankingControllerTest extends AbstractRestDocsTests {
 
     def "Get daily popular feeds"() {
         expect:
-        mockMvc.perform(get("/rank/%s".formatted(chronoUnit)))
-                .andDo(document())
+        mockMvc.perform(get("/rank/%s".formatted(duration)))
+                .andDo(document("{class-name}/" + "get " + duration))
                 .andExpect(status().isOk())
         where:
-        chronoUnit          | _
+        duration            | _
         "daily-hot-feeds"   | _
         "weekly-hot-feeds"  | _
         "monthly-hot-feeds" | _

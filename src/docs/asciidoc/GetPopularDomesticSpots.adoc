@@ -1,0 +1,2 @@
+== Get popular domestic spots
+operation::ranking-controller-test/Get popular domestic spots[snippets="http-request,http-response"]

@@ -1,0 +1,2 @@
+== Get comments
+operation::comment-controller-test/Get comments[snippets="http-request,http-response,path-parameters,query-parameters"]

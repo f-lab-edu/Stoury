@@ -1,0 +1,2 @@
+== Get popular abroad spots
+operation::ranking-controller-test/Get popular abroad spots[snippets="http-request,http-response"]

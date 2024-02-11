@@ -52,6 +52,12 @@ abstract class AbstractRestDocsTests extends Specification {
                 Preprocessors.preprocessResponse(Preprocessors.prettyPrint()))
     }
 
+    def document(String apiDocsPath){
+        return document(apiDocsPath,
+                Preprocessors.preprocessRequest(Preprocessors.prettyPrint()),
+                Preprocessors.preprocessResponse(Preprocessors.prettyPrint()))
+    }
+
     def documentWithPath(ParameterDescriptor parameterDescriptor) {
         return document("{class-name}/" + specificationContext.currentIteration.name,
                 Preprocessors.preprocessRequest(Preprocessors.prettyPrint()),

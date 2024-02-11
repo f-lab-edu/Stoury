@@ -1,0 +1,2 @@
+== Get diaries of a member
+operation::diary-controller-test/Get diaries of a member[snippets="http-request,http-response,path-parameters,query-parameters"]

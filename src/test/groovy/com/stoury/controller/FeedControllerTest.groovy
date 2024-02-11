@@ -149,7 +149,7 @@ class FeedControllerTest extends AbstractRestDocsTests {
                 .optional()
 
 
-        when(feedService.getFeedsByTag(any(), any())).thenReturn(List.of(
+        when(feedService.getFeedsOfMemberId(any(), any())).thenReturn(List.of(
                 new FeedResponse(
                         1L,
                         new WriterResponse(1L, "testWriter"),

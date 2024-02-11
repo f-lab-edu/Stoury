@@ -84,12 +84,13 @@ class DiaryControllerTest extends AbstractRestDocsTests {
                                         new SimpleDiaryResponse(2, "/feed/images/image_16.jpeg", "South Korea, Seoul, 2023-12-01~2024-01-12", 1),
                                         new SimpleDiaryResponse(3, "/feed/images/image_120.jpeg", "Turkiye travel with family", 1),
                                 ),
-                                0,
+                                1,
                                 false
                         )
                 )
         when:
-        def response = mockMvc.perform(get("/diaries/member/{memberId}", "1"))
+        def response = mockMvc.perform(get("/diaries/member/{memberId}", "1")
+                .param("pageNo", "1"))
                 .andDo(documentWithPathAndQuery(pathParameterDescriptor, queryParameterDescriptor))
         then:
         response.andExpect(status().isOk())

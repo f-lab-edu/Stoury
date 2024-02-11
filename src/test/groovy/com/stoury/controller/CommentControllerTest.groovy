@@ -49,7 +49,7 @@ class CommentControllerTest extends AbstractRestDocsTests {
         response.andExpect(status().isOk())
     }
 
-    def "Create nested comment"() {
+    def "Create child comment"() {
         given:
         def parameterDescriptor = parameterWithName("commentId").description("id of comment")
         def writer = new AuthenticatedMember(1L, "test@email.com", "pwdpwdpwd123")
