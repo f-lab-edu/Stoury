@@ -1,0 +1,2 @@
+== Delete a diary
+operation::diary-controller-test/Delete a diary[snippets="http-request,http-response,path-parameters"]

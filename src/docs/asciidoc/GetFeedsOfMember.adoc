@@ -1,0 +1,2 @@
+== Get feeds of member
+operation::feed-controller-test/Get feeds of member[snippets="http-request,http-response,path-parameters"]

@@ -1,0 +1,2 @@
+== Delete a comment
+operation::comment-controller-test/Delete a comment[snippets="http-request,http-response,path-parameters"]

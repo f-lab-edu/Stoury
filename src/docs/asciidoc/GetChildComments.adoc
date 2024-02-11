@@ -1,0 +1,2 @@
+== Get child comments
+operation::comment-controller-test/Get child comments[snippets="http-request,http-response,path-parameters"]

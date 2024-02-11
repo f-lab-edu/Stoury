@@ -1,0 +1,2 @@
+== Create a diary
+operation::diary-controller-test/Create a diary[snippets="http-request,http-response"]

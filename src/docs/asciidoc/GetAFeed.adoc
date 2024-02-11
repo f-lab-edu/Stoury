@@ -1,0 +1,2 @@
+== Get a feed
+operation::feed-controller-test/Get a feed[snippets="http-request,http-response,path-parameters"]

@@ -1,0 +1,2 @@
+== Like a feed
+operation::like-controller-test/Like a feed[snippets="http-request,http-response,path-parameters"]

@@ -1,0 +1,30 @@
+= Stoury API docs
+:doctype: book
+:source-highlighter: highlightjs
+:toc: left
+:toclevels: 2
+:seclinks:
+
+include::JoinMember.adoc[]
+include::CreateFeed.adoc[]
+include::GetAFeed.adoc[]
+include::GetFeedsByTag.adoc[]
+include::GetFeedsOfMember.adoc[]
+include::UpdateAFeed.adoc[]
+include::DeleteAFeed.adoc[]
+include::LikeAFeed.adoc[]
+include::CancelLike.adoc[]
+include::CreateComment.adoc[]
+include::CreateChildComment.adoc[]
+include::GetComments.adoc[]
+include::GetChildComments.adoc[]
+include::DeleteComments.adoc[]
+include::CreateADiary.adoc[]
+include::GetDiariesOfAMember.adoc[]
+include::DeleteADiary.adoc[]
+include::GetPopularDomesticSpots.adoc[]
+include::GetPopularAbroadSpots.adoc[]
+include::GetDailyHotFeeds.adoc[]
+include::GetWeeklyHotFeeds.adoc[]
+include::GetMonthlyHotFeeds.adoc[]
+

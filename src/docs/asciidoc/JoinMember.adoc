@@ -1,0 +1,2 @@
+== JoinMember
+operation::member-controller-test/JoinMember[snippets="http-request,http-response"]

@@ -1,0 +1,2 @@
+== Get weekly hot feeds
+operation::ranking-controller-test/get weekly-hot-feeds[snippets="http-request,http-response"]

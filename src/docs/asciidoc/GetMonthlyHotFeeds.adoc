@@ -1,0 +1,2 @@
+== Get monthly hot feeds
+operation::ranking-controller-test/get monthly-hot-feeds[snippets="http-request,http-response"]
