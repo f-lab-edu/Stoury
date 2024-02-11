@@ -31,7 +31,7 @@ public class Feed {
     @CreatedDate
     private LocalDateTime createdAt;
 
-    @JoinTable(joinColumns = @JoinColumn(name = "FEED_ID"))
+    @JoinColumn(name = "FEED_ID")
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<GraphicContent> graphicContents = new ArrayList<>();
 
@@ -45,7 +45,9 @@ public class Feed {
     private Double longitude;
 
     @ManyToMany(fetch = FetchType.LAZY)
-    @JoinTable(joinColumns = @JoinColumn(name = "FEED_ID"),
+    @JoinTable(
+            name = "FEED_TAG",
+            joinColumns = @JoinColumn(name = "FEED_ID"),
             inverseJoinColumns = @JoinColumn(name = "TAG_ID"))
     private List<Tag> tags = new ArrayList<>();
 

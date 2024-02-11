@@ -11,14 +11,13 @@ import com.stoury.dto.feed.LocationResponse;
 import com.stoury.event.GraphicDeleteEvent;
 import com.stoury.event.GraphicSaveEvent;
 import com.stoury.exception.feed.FeedCreateException;
+import com.stoury.exception.feed.FeedDeleteException;
 import com.stoury.exception.feed.FeedSearchException;
 import com.stoury.exception.member.MemberSearchException;
 import com.stoury.repository.FeedRepository;
 import com.stoury.repository.LikeRepository;
 import com.stoury.repository.MemberRepository;
-import com.stoury.repository.RankingRepository;
 import com.stoury.service.location.LocationService;
-import com.stoury.utils.CacheKeys;
 import com.stoury.utils.FileUtils;
 import com.stoury.utils.SupportedFileType;
 import lombok.RequiredArgsConstructor;
@@ -47,8 +46,8 @@ public class FeedService {
     private final FeedRepository feedRepository;
     private final MemberRepository memberRepository;
     private final LikeRepository likeRepository;
-    private final RankingRepository rankingRepository;
     private final TagService tagService;
+    private final RankingService rankingService;
     private final LocationService locationService;
     private final ApplicationEventPublisher eventPublisher;
 
@@ -123,7 +122,9 @@ public class FeedService {
         Pageable page = PageRequest.of(0, PAGE_SIZE, Sort.by("createdAt").descending());
         List<Feed> feeds = feedRepository.findAllByMemberAndCreatedAtIsBefore(feedWriter, orderThan, page);
 
-        return feeds.stream().map(feed -> FeedResponse.from(feed, likeRepository.countByFeed(feed))).toList();
+        return feeds.stream()
+                .map(this::toFeedResponse)
+                .toList();
     }
 
     @Transactional(readOnly = true)
@@ -132,7 +133,16 @@ public class FeedService {
 
         List<Feed> feeds = feedRepository.findByTagAndCreateAtLessThan(tagName, orderThan, page);
 
-        return feeds.stream().map(feed -> FeedResponse.from(feed, likeRepository.countByFeed(feed))).toList();
+        return feeds.stream()
+                .map(this::toFeedResponse)
+                .toList();
+    }
+
+    private FeedResponse toFeedResponse(Feed feed) {
+        String feedIdStr = feed.getId().toString();
+        long likes = likeRepository.getCountByFeedId(feedIdStr);
+
+        return FeedResponse.from(feed, likes);
     }
 
     @PostAuthorize("returnObject.writer().id() == authentication.principal.id")
@@ -149,7 +159,7 @@ public class FeedService {
 
         publishDeleteFileEvents(beforeDeleteGraphicContents, feed.getGraphicContents());
 
-        return FeedResponse.from(feed, likeRepository.countByFeed(feed));
+        return FeedResponse.from(feed, likeRepository.getCountByFeedId(feed.getId().toString()));
     }
 
     private void publishDeleteFileEvents(List<GraphicContent> beforeDeleteGraphicContents,
@@ -164,6 +174,9 @@ public class FeedService {
     @PostAuthorize("returnObject.writer().id() == authentication.name")
     @Transactional
     public FeedResponse deleteFeed(Long feedId) {
+        if (rankingService.isRankedFeed(feedId)) {
+            throw new FeedDeleteException("As the feed is in hot feeds, cannot delete this.");
+        }
         Feed feed = feedRepository.findById(Objects.requireNonNull(feedId))
                 .orElseThrow(FeedSearchException::new);
         feedRepository.delete(feed);
@@ -174,18 +187,8 @@ public class FeedService {
     public FeedResponse getFeed(Long feedId) {
         Feed feed = feedRepository.findById(Objects.requireNonNull(feedId))
                 .orElseThrow(FeedSearchException::new);
-        long likes = likeRepository.countByFeed(feed);
+        long likes = likeRepository.getCountByFeedId(feed.getId().toString());
 
         return FeedResponse.from(feed, likes);
-    }
-
-    @Transactional(readOnly = true)
-    public List<String> getPopularAbroadSpots() {
-        return rankingRepository.getRankedList(CacheKeys.POPULAR_ABROAD_SPOTS);
-    }
-
-    @Transactional(readOnly = true)
-    public List<String> getPopularDomesticSpots() {
-        return rankingRepository.getRankedList(CacheKeys.POPULAR_DOMESTIC_SPOTS);
     }
 }

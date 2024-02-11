@@ -22,7 +22,7 @@ public class LikeService {
     private final MemberRepository memberRepository;
     private final FeedRepository feedRepository;
 
-    @Transactional
+    @Transactional(readOnly = true)
     public void like(Long likerId, Long feedId) {
         Member liker = memberRepository.findById(Objects.requireNonNull(likerId))
                 .orElseThrow(MemberSearchException::new);
@@ -37,20 +37,11 @@ public class LikeService {
         likeRepository.save(like);
     }
 
-    @Transactional
     public void likeCancel(Long likerId, Long feedId) {
-        Member liker = memberRepository.findById(Objects.requireNonNull(likerId))
-                .orElseThrow(MemberSearchException::new);
-        Feed feed = feedRepository.findById(Objects.requireNonNull(feedId))
-                .orElseThrow(FeedSearchException::new);
-
-        likeRepository.deleteByMemberAndFeed(liker, feed);
+        likeRepository.deleteByMemberAndFeed(likerId.toString(), feedId.toString());
     }
 
-    @Transactional
     public long getLikesOfFeed(Long feedId) {
-        Feed feed = feedRepository.findById(Objects.requireNonNull(feedId))
-                .orElseThrow(FeedSearchException::new);
-        return likeRepository.countByFeed(feed);
+        return likeRepository.getCountByFeedId(feedId.toString());
     }
 }

@@ -8,7 +8,6 @@ import com.stoury.service.FeedService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -44,16 +43,6 @@ public class FeedController {
                                                @RequestParam(required = false, defaultValue = "2100-12-31T00:00:00")
                                                LocalDateTime orderThan) {
         return feedService.getFeedsOfMemberId(memberId, orderThan);
-    }
-
-    @GetMapping("/feeds/popular/abroad-spots")
-    public List<String> getPopularAbroadSpots() {
-        return feedService.getPopularAbroadSpots();
-    }
-
-    @GetMapping("/feeds/popular/domestic-spots")
-    public List<String> getPopularDomesticSpots() {
-        return feedService.getPopularDomesticSpots();
     }
 
     @PutMapping("/feeds/{feedId}")

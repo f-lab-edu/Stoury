@@ -9,10 +9,10 @@ import com.stoury.dto.feed.FeedCreateRequest
 import com.stoury.dto.feed.FeedUpdateRequest
 import com.stoury.event.GraphicDeleteEvent
 import com.stoury.exception.feed.FeedCreateException
+import com.stoury.exception.feed.FeedDeleteException
 import com.stoury.repository.FeedRepository
 import com.stoury.repository.LikeRepository
 import com.stoury.repository.MemberRepository
-import com.stoury.repository.RankingRepository
 import com.stoury.service.location.LocationService
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.mock.web.MockMultipartFile
@@ -21,13 +21,13 @@ import spock.lang.Specification
 class FeedServiceTest extends Specification {
     def memberRepository = Mock(MemberRepository)
     def tagService = Mock(TagService)
+    def rankingServie = Mock(RankingService)
     def feedRepository = Mock(FeedRepository)
     def likeRepository = Mock(LikeRepository)
     def eventPublisher = Mock(ApplicationEventPublisher)
     def locationService = Mock(LocationService)
-    def rankingRepository = Mock(RankingRepository)
-    def feedService = new FeedService(feedRepository, memberRepository, likeRepository, rankingRepository,
-            tagService, locationService, eventPublisher)
+    def feedService = new FeedService(feedRepository, memberRepository, likeRepository,
+            tagService, rankingServie, locationService, eventPublisher)
 
     def writer = Mock(Member)
     def feedCreateRequest = FeedCreateRequest.builder()
@@ -108,5 +108,14 @@ class FeedServiceTest extends Specification {
         2 * eventPublisher.publishEvent(_ as GraphicDeleteEvent)
         feed.textContent == "updated"
         feed.tags.isEmpty()
+    }
+
+    def "인기 피드는 삭제 불가"() {
+        given:
+        rankingServie.isRankedFeed(_) >> true
+        when:
+        feedService.deleteFeed(1L)
+        then:
+        thrown(FeedDeleteException)
     }
 }
