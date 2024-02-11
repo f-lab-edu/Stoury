@@ -2,7 +2,6 @@ package com.stoury.service;
 
 import com.stoury.dto.feed.SimpleFeedResponse;
 import com.stoury.repository.RankingRepository;
-import com.stoury.utils.cachekeys.HotFeedsKeys;
 import com.stoury.utils.cachekeys.PopularSpotsKey;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -30,14 +29,5 @@ public class RankingService {
 
     public List<String> getPopularDomesticSpots() {
         return rankingRepository.getRankedLocations(PopularSpotsKey.POPULAR_DOMESTIC_SPOTS);
-    }
-
-    public boolean isRankedFeed(Long feedId) {
-        for (HotFeedsKeys key : HotFeedsKeys.values()) {
-            if (rankingRepository.contains(key, feedId.toString())) {
-                return true;
-            }
-        }
-        return false;
     }
 }

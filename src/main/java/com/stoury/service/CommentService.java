@@ -7,6 +7,7 @@ import com.stoury.dto.comment.ChildCommentResponse;
 import com.stoury.dto.comment.CommentResponse;
 import com.stoury.exception.CommentCreateException;
 import com.stoury.exception.CommentSearchException;
+import com.stoury.exception.authentication.NotAuthorizedException;
 import com.stoury.exception.feed.FeedSearchException;
 import com.stoury.exception.member.MemberSearchException;
 import com.stoury.repository.CommentRepository;
@@ -16,7 +17,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -85,13 +85,25 @@ public class CommentService {
                 orderThan, pageable));
     }
 
-    @PostAuthorize("returnObject.writer.id == authentication.principal.id")
-    @Transactional
-    public CommentResponse deleteComment(Long commentId) {
+    protected CommentResponse deleteComment(Long commentId) {
         Comment comment = commentRepository.findById(Objects.requireNonNull(commentId))
                 .orElseThrow(CommentSearchException::new);
 
         comment.delete();
         return CommentResponse.from(comment);
+    }
+
+    @Transactional
+    public CommentResponse deleteCommentIfOwner(Long commentId, Long memberId) {
+        Comment comment = commentRepository.findById(Objects.requireNonNull(commentId))
+                .orElseThrow(CommentSearchException::new);
+        if(isNotOwner(memberId, comment)){
+            throw new NotAuthorizedException();
+        }
+        return deleteComment(commentId);
+    }
+
+    private boolean isNotOwner(Long memberId, Comment comment) {
+        return !comment.getMember().getId().equals(memberId);
     }
 }

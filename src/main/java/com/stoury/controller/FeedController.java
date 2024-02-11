@@ -6,7 +6,6 @@ import com.stoury.dto.feed.FeedUpdateRequest;
 import com.stoury.dto.member.AuthenticatedMember;
 import com.stoury.service.FeedService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -46,13 +45,15 @@ public class FeedController {
     }
 
     @PutMapping("/feeds/{feedId}")
-    public FeedResponse updateFeed(@PathVariable Long feedId, @RequestBody FeedUpdateRequest feedUpdateRequest) {
-        return feedService.updateFeed(feedId, feedUpdateRequest);
+    public FeedResponse updateFeed(@AuthenticationPrincipal AuthenticatedMember authenticatedMember,
+                                   @PathVariable Long feedId,
+                                   @RequestBody FeedUpdateRequest feedUpdateRequest) {
+        return feedService.updateFeedIfOwner(feedId, feedUpdateRequest, authenticatedMember.getId());
     }
 
     @DeleteMapping("/feeds/{feedId}")
-    public ResponseEntity<Object> deleteFeed(@PathVariable Long feedId) {
-        feedService.deleteFeed(feedId);
-        return ResponseEntity.ok().build();
+    public void deleteFeed(@AuthenticationPrincipal AuthenticatedMember authenticatedMember,
+                           @PathVariable Long feedId) {
+        feedService.deleteFeedIfOwner(feedId, authenticatedMember.getId());
     }
 }

@@ -24,4 +24,8 @@ public class FileUtils {
         return pathPrefix + FILE_SEPARATOR + fileType.getType() + FILE_SEPARATOR
                 + UUID.randomUUID().toString().substring(0,8) + getFileNameByCurrentTime(file);
     }
+
+    public static boolean isImage(String path) {
+        return path.endsWith(SupportedFileType.JPG.getExtension());
+    }
 }

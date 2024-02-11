@@ -10,8 +10,8 @@ import com.stoury.dto.feed.FeedUpdateRequest;
 import com.stoury.dto.feed.LocationResponse;
 import com.stoury.event.GraphicDeleteEvent;
 import com.stoury.event.GraphicSaveEvent;
+import com.stoury.exception.authentication.NotAuthorizedException;
 import com.stoury.exception.feed.FeedCreateException;
-import com.stoury.exception.feed.FeedDeleteException;
 import com.stoury.exception.feed.FeedSearchException;
 import com.stoury.exception.member.MemberSearchException;
 import com.stoury.repository.FeedRepository;
@@ -26,7 +26,6 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -41,7 +40,7 @@ import java.util.Objects;
 @RequiredArgsConstructor
 public class FeedService {
     @Value("${path-prefix}")
-    public  String pathPrefix;
+    public String pathPrefix;
     public static final int PAGE_SIZE = 10;
     private final FeedRepository feedRepository;
     private final MemberRepository memberRepository;
@@ -145,9 +144,7 @@ public class FeedService {
         return FeedResponse.from(feed, likes);
     }
 
-    @PostAuthorize("returnObject.writer().id() == authentication.principal.id")
-    @Transactional
-    public FeedResponse updateFeed(Long feedId, FeedUpdateRequest feedUpdateRequest) {
+    protected FeedResponse updateFeed(Long feedId, FeedUpdateRequest feedUpdateRequest) {
         Feed feed = feedRepository.findById(Objects.requireNonNull(feedId))
                 .orElseThrow(FeedSearchException::new);
 
@@ -162,6 +159,22 @@ public class FeedService {
         return FeedResponse.from(feed, likeRepository.getCountByFeedId(feed.getId().toString()));
     }
 
+    @Transactional
+    public FeedResponse updateFeedIfOwner(Long feedId, FeedUpdateRequest feedUpdateRequest, Long memberId) {
+        Feed feed = feedRepository.findById(Objects.requireNonNull(feedId))
+                .orElseThrow(FeedSearchException::new);
+
+        if (isNotOwner(feed, memberId)) {
+            throw new NotAuthorizedException();
+        }
+
+        return updateFeed(feedId, feedUpdateRequest);
+    }
+
+    private boolean isNotOwner(Feed feed, Long memberId) {
+        return !feed.getMember().getId().equals(memberId);
+    }
+
     private void publishDeleteFileEvents(List<GraphicContent> beforeDeleteGraphicContents,
                                          List<GraphicContent> afterDeleteGraphicContents) {
         for (GraphicContent beforeDeleteGraphicContent : beforeDeleteGraphicContents) {
@@ -171,16 +184,21 @@ public class FeedService {
         }
     }
 
-    @PostAuthorize("returnObject.writer().id() == authentication.name")
-    @Transactional
-    public FeedResponse deleteFeed(Long feedId) {
-        if (rankingService.isRankedFeed(feedId)) {
-            throw new FeedDeleteException("As the feed is in hot feeds, cannot delete this.");
-        }
+    protected void deleteFeed(Long feedId) {
         Feed feed = feedRepository.findById(Objects.requireNonNull(feedId))
                 .orElseThrow(FeedSearchException::new);
         feedRepository.delete(feed);
-        return FeedResponse.from(feed, 0);
+    }
+
+    @Transactional
+    public void deleteFeedIfOwner(Long feedId, Long memberId) {
+        Feed feed = feedRepository.findById(Objects.requireNonNull(feedId))
+                .orElseThrow(FeedSearchException::new);
+
+        if (isNotOwner(feed, memberId)) {
+            throw new NotAuthorizedException();
+        }
+        deleteFeed(feedId);
     }
 
     @Transactional(readOnly = true)
