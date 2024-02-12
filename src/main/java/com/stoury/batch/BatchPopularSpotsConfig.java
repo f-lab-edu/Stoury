@@ -24,7 +24,7 @@ import java.util.List;
 
 @Configuration
 @RequiredArgsConstructor
-@ConditionalOnExpression("'${spring.batch.job.names}'.contains('jobPopularSpots')")
+@ConditionalOnExpression("'${spring.batch.job.names}'.contains('updatePopularSpotsJob')")
 public class BatchPopularSpotsConfig {
     Pageable pageable = PageRequest.of(0, 10);
     private final FeedRepository feedRepository;
@@ -32,7 +32,7 @@ public class BatchPopularSpotsConfig {
 
 
     @Bean
-    public Step stepUpdatePopularDomesticCities(JobRepository jobRepository, PlatformTransactionManager tm) {
+    public Step updatePopularDomesticCitiesStep(JobRepository jobRepository, PlatformTransactionManager tm) {
         return new StepBuilder("stepUpdatePopularDomesticCities", jobRepository)
                 .tasklet((contribution, chunkContext) -> {
                     List<String> rankedDomesticCities = feedRepository.findTop10CitiesInKorea(pageable);
@@ -43,7 +43,7 @@ public class BatchPopularSpotsConfig {
     }
 
     @Bean
-    public Step stepUpdatePopularAbroadCities(JobRepository jobRepository, PlatformTransactionManager tm) {
+    public Step updatePopularAbroadCitiesStep(JobRepository jobRepository, PlatformTransactionManager tm) {
         return new StepBuilder("stepUpdatePopularAbroadCities", jobRepository)
                 .tasklet((contribution, chunkContext) -> {
                     List<String> rankedCountries = feedRepository.findTop10CountriesNotKorea(pageable);
@@ -54,13 +54,13 @@ public class BatchPopularSpotsConfig {
     }
 
     @Bean
-    public Job jobUpdatePopularSpots(JobRepository jobRepository, PlatformTransactionManager tm,
+    public Job updatePopularSpotsJob(JobRepository jobRepository, PlatformTransactionManager tm,
                                      ThreadPoolTaskExecutor taskExecutor) {
         Flow flowUpdatePopularAbroadCities = new FlowBuilder<Flow>("flowUpdatePopularAbroadCities")
-                .start(stepUpdatePopularAbroadCities(jobRepository, tm))
+                .start(updatePopularAbroadCitiesStep(jobRepository, tm))
                 .build();
         Flow flowUpdatePopularDomesticCities = new FlowBuilder<Flow>("flowUpdatePopularDomesticCities")
-                .start(stepUpdatePopularDomesticCities(jobRepository, tm))
+                .start(updatePopularDomesticCitiesStep(jobRepository, tm))
                 .build();
 
         return new JobBuilder("updatePopularSpots", jobRepository)

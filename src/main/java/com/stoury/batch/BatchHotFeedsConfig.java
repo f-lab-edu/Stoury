@@ -26,74 +26,74 @@ import java.time.temporal.ChronoUnit;
 
 @Configuration
 @RequiredArgsConstructor
-@ConditionalOnExpression("'${spring.batch.job.names}'.contains('jobHotFeeds')")
+@ConditionalOnExpression("'${spring.batch.job.names}'.contains('updateHotFeedsJob')")
 public class BatchHotFeedsConfig {
     private final EntityManagerFactory entityManagerFactory;
 
     private final RankingRepository rankingRepository;
 
     @Bean
-    public Job jobDailyFeed(JobRepository jobRepository, PlatformTransactionManager tm,
-                            ThreadPoolTaskExecutor taskExecutor, LikeRepository likeRepository) {
+    public Job updateDailyFeedsJob(JobRepository jobRepository, PlatformTransactionManager tm,
+                                   ThreadPoolTaskExecutor taskExecutor, LikeRepository likeRepository) {
         return new JobBuilder("jobDailyFeed", jobRepository)
-                .start(stepDailyFeed(jobRepository, tm, taskExecutor, likeRepository))
+                .start(updateDailyFeedsStep(jobRepository, tm, taskExecutor, likeRepository))
                 .build();
     }
 
     @Bean
-    public Job jobWeeklyFeed(JobRepository jobRepository, PlatformTransactionManager tm,
-                             ThreadPoolTaskExecutor taskExecutor, LikeRepository likeRepository) {
+    public Job updateWeeklyFeedsJob(JobRepository jobRepository, PlatformTransactionManager tm,
+                                    ThreadPoolTaskExecutor taskExecutor, LikeRepository likeRepository) {
         return new JobBuilder("jobWeeklyFeed", jobRepository)
-                .start(stepWeeklyFeed(jobRepository, tm, taskExecutor, likeRepository))
+                .start(updateWeeklyFeedsStep(jobRepository, tm, taskExecutor, likeRepository))
                 .build();
     }
 
     @Bean
-    public Job jobMonthlyFeed(JobRepository jobRepository, PlatformTransactionManager tm,
-                              ThreadPoolTaskExecutor taskExecutor, LikeRepository likeRepository) {
+    public Job updateMonthlyFeedsJob(JobRepository jobRepository, PlatformTransactionManager tm,
+                                     ThreadPoolTaskExecutor taskExecutor, LikeRepository likeRepository) {
         return new JobBuilder("jobMonthlyFeed", jobRepository)
-                .start(stepMonthlyFeed(jobRepository, tm, taskExecutor, likeRepository))
+                .start(updateMonthlyFeedsStep(jobRepository, tm, taskExecutor, likeRepository))
                 .build();
     }
 
     @Bean
-    public Step stepDailyFeed(JobRepository jobRepository, PlatformTransactionManager tm,
-                              ThreadPoolTaskExecutor taskExecutor, LikeRepository likeRepository) {
+    public Step updateDailyFeedsStep(JobRepository jobRepository, PlatformTransactionManager tm,
+                                     ThreadPoolTaskExecutor taskExecutor, LikeRepository likeRepository) {
         return new StepBuilder("stepDailyFeed", jobRepository)
                 .<Feed, Pair<SimpleFeedResponse, Long>>chunk(100, tm)
-                .reader(feedReader())
-                .processor(feedProcessor(likeRepository, ChronoUnit.DAYS))
-                .writer(feedWriter(ChronoUnit.DAYS))
+                .reader(feedsReader())
+                .processor(feedsProcessor(likeRepository, ChronoUnit.DAYS))
+                .writer(feedsWriter(ChronoUnit.DAYS))
                 .taskExecutor(taskExecutor)
                 .build();
     }
 
     @Bean
-    public Step stepWeeklyFeed(JobRepository jobRepository, PlatformTransactionManager tm,
-                               ThreadPoolTaskExecutor taskExecutor, LikeRepository likeRepository) {
+    public Step updateWeeklyFeedsStep(JobRepository jobRepository, PlatformTransactionManager tm,
+                                      ThreadPoolTaskExecutor taskExecutor, LikeRepository likeRepository) {
         return new StepBuilder("stepWeeklyFeed", jobRepository)
                 .<Feed, Pair<SimpleFeedResponse, Long>>chunk(100, tm)
-                .reader(feedReader())
-                .processor(feedProcessor(likeRepository, ChronoUnit.WEEKS))
-                .writer(feedWriter(ChronoUnit.WEEKS))
+                .reader(feedsReader())
+                .processor(feedsProcessor(likeRepository, ChronoUnit.WEEKS))
+                .writer(feedsWriter(ChronoUnit.WEEKS))
                 .taskExecutor(taskExecutor)
                 .build();
     }
 
     @Bean
-    public Step stepMonthlyFeed(JobRepository jobRepository, PlatformTransactionManager tm,
-                                ThreadPoolTaskExecutor taskExecutor, LikeRepository likeRepository) {
+    public Step updateMonthlyFeedsStep(JobRepository jobRepository, PlatformTransactionManager tm,
+                                       ThreadPoolTaskExecutor taskExecutor, LikeRepository likeRepository) {
         return new StepBuilder("stepMonthlyFeed", jobRepository)
                 .<Feed, Pair<SimpleFeedResponse, Long>>chunk(100, tm)
-                .reader(feedReader())
-                .processor(feedProcessor(likeRepository, ChronoUnit.MONTHS))
-                .writer(feedWriter(ChronoUnit.MONTHS))
+                .reader(feedsReader())
+                .processor(feedsProcessor(likeRepository, ChronoUnit.MONTHS))
+                .writer(feedsWriter(ChronoUnit.MONTHS))
                 .taskExecutor(taskExecutor)
                 .build();
     }
 
 
-    public JpaPagingItemReader<Feed> feedReader() {
+    public JpaPagingItemReader<Feed> feedsReader() {
         return new JpaPagingItemReaderBuilder<Feed>()
                 .name("feedReader")
                 .pageSize(100)
@@ -102,7 +102,7 @@ public class BatchHotFeedsConfig {
                 .build();
     }
 
-    public ItemProcessor<Feed, Pair<SimpleFeedResponse, Long>> feedProcessor(LikeRepository likeRepository, ChronoUnit chronoUnit) {
+    public ItemProcessor<Feed, Pair<SimpleFeedResponse, Long>> feedsProcessor(LikeRepository likeRepository, ChronoUnit chronoUnit) {
         return feed -> {
             Long feedId = feed.getId();
 
@@ -118,7 +118,7 @@ public class BatchHotFeedsConfig {
         };
     }
 
-    public ItemWriter<Pair<SimpleFeedResponse, Long>> feedWriter(ChronoUnit chronoUnit) {
+    public ItemWriter<Pair<SimpleFeedResponse, Long>> feedsWriter(ChronoUnit chronoUnit) {
         return list -> {
             for (Pair<SimpleFeedResponse, Long> pair : list) {
                 SimpleFeedResponse rawSimpleFeed = pair.getFirst();

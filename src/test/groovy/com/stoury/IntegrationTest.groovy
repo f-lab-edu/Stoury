@@ -35,13 +35,13 @@ class IntegrationTest extends Specification {
     @Autowired
     JobLauncherTestUtils jobLauncherTestUtils;
     @Autowired
-    Job jobUpdatePopularSpots
+    Job updatePopularSpotsJob
     @Autowired
-    Job jobDailyFeed
+    Job updateDailyFeedsJob
     @Autowired
-    Job jobWeeklyFeed
+    Job updateWeeklyFeedsJob
     @Autowired
-    Job jobMonthlyFeed
+    Job updateMonthlyFeedsJob
     @Autowired
     FeedRepository feedRepository
     @Autowired
@@ -76,7 +76,7 @@ class IntegrationTest extends Specification {
 
     def "인기 여행지 업데이트 테스트"() {
         given:
-        jobLauncherTestUtils.setJob(jobUpdatePopularSpots)
+        jobLauncherTestUtils.setJob(updatePopularSpotsJob)
         def feed = Feed.builder()
                 .member(member)
                 .textContent("blabla")
@@ -95,7 +95,7 @@ class IntegrationTest extends Specification {
 
     def "일간 인기 피드 업데이트 테스트"() {
         given:
-        jobLauncherTestUtils.setJob(jobDailyFeed)
+        jobLauncherTestUtils.setJob(updateDailyFeedsJob)
         def feed = Feed.builder()
                 .member(member)
                 .textContent("blabla")
@@ -114,7 +114,7 @@ class IntegrationTest extends Specification {
 
     def "주간 인기 피드 업데이트 테스트"() {
         given:
-        jobLauncherTestUtils.setJob(jobWeeklyFeed)
+        jobLauncherTestUtils.setJob(updateWeeklyFeedsJob)
         def feed = Feed.builder()
                 .member(member)
                 .textContent("blabla")
@@ -133,7 +133,7 @@ class IntegrationTest extends Specification {
 
     def "월간 인기 피드 업데이트 테스트"() {
         given:
-        jobLauncherTestUtils.setJob(jobMonthlyFeed)
+        jobLauncherTestUtils.setJob(updateMonthlyFeedsJob)
         def feed = Feed.builder()
                 .member(member)
                 .textContent("blabla")
