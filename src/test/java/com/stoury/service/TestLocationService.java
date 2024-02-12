@@ -10,6 +10,6 @@ import org.springframework.stereotype.Service;
 public class TestLocationService implements LocationService {
     @Override
     public LocationResponse getLocation(double latitude, double longitude) {
-        return null;
+        return new LocationResponse("city", "country");
     }
 }
