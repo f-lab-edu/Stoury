@@ -1,8 +1,10 @@
 package com.stoury.repository;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.stoury.dto.member.OnlineMember;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.geo.Point;
+import org.springframework.data.redis.core.GeoOperations;
+import org.springframework.data.redis.core.SetOperations;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Repository;
 
@@ -10,28 +12,34 @@ import java.util.Objects;
 
 @Repository
 public class MemberOnlineStatusRepository {
-    public static final String ONLINE_MEMBER_CACHE_KEY_PREFIX = "online:member:";
+    public static final String ONLINE_MEMBER_CACHE_KEY = "online:member:";
+    public static final String MEMBER_POS_CACHE_KEY = "member:pos:";
     private final StringRedisTemplate redisTemplate;
-    private final ObjectMapper objectMapper;
+    private final SetOperations<String, String> opsForSet;
+    private final GeoOperations<String, String> opsForGeo;
 
-    public MemberOnlineStatusRepository(StringRedisTemplate redisTemplate, ObjectMapper objectMapper) {
+    @Autowired
+    public MemberOnlineStatusRepository(StringRedisTemplate redisTemplate) {
         this.redisTemplate = redisTemplate;
-        this.objectMapper = objectMapper;
+        opsForSet = redisTemplate.opsForSet();
+        opsForGeo = redisTemplate.opsForGeo();
     }
 
     public void save(OnlineMember onlineMember) {
         Long memberId = onlineMember.memberId();
-        String rawOnlineMemberJson;
-        try {
-            rawOnlineMemberJson = objectMapper.writeValueAsString(onlineMember);
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException("Cannot convert onlineMember to json", e);
+        opsForSet.add(ONLINE_MEMBER_CACHE_KEY, memberId.toString());
+        Double latitude = onlineMember.latitude();
+        Double longitude = onlineMember.longitude();
+
+        if (Objects.nonNull(latitude) && Objects.nonNull(longitude)) {
+            Point point = new Point(longitude, latitude);
+            opsForGeo.add(MEMBER_POS_CACHE_KEY, point, memberId.toString());
         }
-        redisTemplate.opsForValue().set(ONLINE_MEMBER_CACHE_KEY_PREFIX + memberId, rawOnlineMemberJson);
     }
 
     public void delete(Long memberId) {
         String memberIdNotNull = Objects.requireNonNull(memberId, "Member id cannot be null").toString();
-        redisTemplate.delete(ONLINE_MEMBER_CACHE_KEY_PREFIX + memberIdNotNull);
+        opsForSet.remove(ONLINE_MEMBER_CACHE_KEY, memberIdNotNull);
+        opsForGeo.remove(MEMBER_POS_CACHE_KEY, memberId.toString());
     }
 }

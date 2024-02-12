@@ -11,7 +11,6 @@ import com.stoury.service.FeedService
 import com.stoury.service.MemberService
 import com.stoury.utils.cachekeys.PopularSpotsKey
 import jakarta.persistence.EntityManager
-import jakarta.persistence.EntityTransaction
 import jakarta.persistence.PersistenceContext
 import org.springframework.batch.core.Job
 import org.springframework.batch.test.JobLauncherTestUtils
@@ -392,18 +391,12 @@ class IntegrationTest extends Specification {
         when:
         authenticationSuccessHandler.onAuthenticationSuccess(request, response, authentication)
         then:
-        redisTemplate.hasKey(MemberOnlineStatusRepository.ONLINE_MEMBER_CACHE_KEY_PREFIX + 1)
+        redisTemplate.opsForSet().isMember(MemberOnlineStatusRepository.ONLINE_MEMBER_CACHE_KEY, "1")
     }
 
     def "로그아웃 성공시 offline상태여야 함"() {
         given:
-        redisTemplate.opsForValue().set(MemberOnlineStatusRepository.ONLINE_MEMBER_CACHE_KEY_PREFIX + 1, """
-        {
-            "memberId" : 1,
-            "latitude" : 37.123123,
-            "longitude" : 127.123123
-        }
-        """)
+        redisTemplate.opsForSet().add(MemberOnlineStatusRepository.ONLINE_MEMBER_CACHE_KEY, "1")
         def request = new MockHttpServletRequest()
         request.setMethod("POST")
         def response = new MockHttpServletResponse()
@@ -412,7 +405,7 @@ class IntegrationTest extends Specification {
         when:
         logoutSuccessHandler.onLogoutSuccess(request, response, authentication)
         then:
-        !redisTemplate.hasKey(MemberOnlineStatusRepository.ONLINE_MEMBER_CACHE_KEY_PREFIX + 1)
+        !redisTemplate.opsForSet().isMember(MemberOnlineStatusRepository.ONLINE_MEMBER_CACHE_KEY, "1")
     }
 
     def "피드 생성 시 이미지 같이 생성돼야함"() {
