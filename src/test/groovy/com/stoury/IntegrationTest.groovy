@@ -1,6 +1,7 @@
 package com.stoury
 
 import com.stoury.domain.Feed
+import com.stoury.domain.GraphicContent
 import com.stoury.domain.Like
 import com.stoury.domain.Member
 import com.stoury.dto.WriterResponse
@@ -404,5 +405,24 @@ class IntegrationTest extends Specification {
         logoutSuccessHandler.onLogoutSuccess(request, response, authentication)
         then:
         !redisTemplate.hasKey(MemberOnlineStatusRepository.ONLINE_MEMBER_CACHE_KEY_PREFIX + 1)
+    }
+
+    def "피드 생성 시 이미지 같이 생성돼야함"() {
+        given:
+        def feed = Feed.builder()
+                .member(member)
+                .textContent("Feed with images")
+                .latitude(36.125).longitude(127.125)
+                .city("city").country("country")
+                .build()
+        feed.addGraphicContents(List.of(
+                new GraphicContent("path1", 0),
+                new GraphicContent("path2", 1),
+                new GraphicContent("path3", 2),
+        ))
+        when:
+        def savedFeed = feedRepository.save(feed)
+        then:
+        savedFeed.graphicContents.size() == 3
     }
 }
