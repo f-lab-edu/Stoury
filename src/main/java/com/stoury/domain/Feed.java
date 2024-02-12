@@ -113,4 +113,8 @@ public class Feed {
         this.city = this.city.equals("UNDEFINED") ? city : this.city;
         this.country = this.country.equals("UNDEFINED") ? country : this.country;
     }
+
+    public boolean isOwnedBy(Long memberId) {
+        return this.member.getId().equals(memberId);
+    }
 }

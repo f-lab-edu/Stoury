@@ -37,4 +37,8 @@ public class Diary {
         this.title = title;
         this.thumbnail = thumbnail;
     }
+
+    public boolean isOwnedBy(Long memberId) {
+        return this.member.getId().equals(memberId);
+    }
 }
