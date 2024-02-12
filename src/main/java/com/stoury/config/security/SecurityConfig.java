@@ -5,7 +5,6 @@ import com.stoury.service.MemberService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -16,8 +15,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
-import org.springframework.security.web.servlet.util.matcher.MvcRequestMatcher;
-import org.springframework.web.servlet.handler.HandlerMappingIntrospector;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 import java.util.Optional;
 
@@ -27,25 +25,26 @@ import java.util.Optional;
 public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http,
-                                                   HandlerMappingIntrospector introspector,
                                                    MemberService memberService) throws Exception {
         return http.csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
                 .formLogin(formLogin -> formLogin
+                        .loginProcessingUrl("/login")
                         .usernameParameter("email")
                         .successHandler(authenticationSuccessHandler(memberService))
                         .failureHandler(authenticationFailureHandler()))
                 .logout(logout -> logout
+                        .logoutUrl("/logout")
                         .logoutSuccessHandler(logoutSuccessHandler(memberService)))
                 .authorizeHttpRequests(httpRequest -> httpRequest
-                        .requestMatchers(new MvcRequestMatcher.Builder(introspector).pattern("/login")).permitAll()
-                        .requestMatchers(new MvcRequestMatcher.Builder(introspector).pattern(HttpMethod.POST, "/members")).permitAll()
-                        .requestMatchers(new MvcRequestMatcher.Builder(introspector).pattern(HttpMethod.GET, "/feeds/member/**")).permitAll()
-                        .requestMatchers(new MvcRequestMatcher.Builder(introspector).pattern(HttpMethod.GET, "/feeds/tag/**")).permitAll()
-                        .requestMatchers(new MvcRequestMatcher.Builder(introspector).pattern(HttpMethod.GET, "/feeds/popular/*")).permitAll()
-                        .requestMatchers(new MvcRequestMatcher.Builder(introspector).pattern(HttpMethod.GET, "/comments/**")).permitAll()
-                        .requestMatchers(new MvcRequestMatcher.Builder(introspector).pattern(HttpMethod.GET, "/rank/**")).permitAll()
-                        .requestMatchers(new MvcRequestMatcher.Builder(introspector).pattern(HttpMethod.GET, "/diaries/**")).permitAll()
+                        .requestMatchers(new AntPathRequestMatcher("/login")).permitAll()
+                        .requestMatchers(new AntPathRequestMatcher("/members", "POST")).permitAll()
+                        .requestMatchers(new AntPathRequestMatcher("/feeds/member/**", "GET")).permitAll()
+                        .requestMatchers(new AntPathRequestMatcher("/feeds/tag/**", "GET")).permitAll()
+                        .requestMatchers(new AntPathRequestMatcher("/feeds/popular/*", "GET")).permitAll()
+                        .requestMatchers(new AntPathRequestMatcher("/comments/**", "GET")).permitAll()
+                        .requestMatchers(new AntPathRequestMatcher("/rank/**", "GET")).permitAll()
+                        .requestMatchers(new AntPathRequestMatcher("/diaries/**", "GET")).permitAll()
                         .anyRequest().authenticated())
                 .exceptionHandling(exHandler -> exHandler
                         .authenticationEntryPoint((request, response, authException) -> response

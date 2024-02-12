@@ -31,7 +31,7 @@ public class Feed {
     @CreatedDate
     private LocalDateTime createdAt;
 
-    @JoinColumn(name = "FEED_ID")
+    @JoinColumn(name = "FEED_ID", referencedColumnName = "ID", nullable = true)
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<GraphicContent> graphicContents = new ArrayList<>();
 
