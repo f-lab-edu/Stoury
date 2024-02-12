@@ -1,22 +1,24 @@
 package com.stoury.utils.cachekeys;
 
 import java.time.temporal.ChronoUnit;
+import java.util.Arrays;
 
 public enum HotFeedsKeys {
-    DAILY_HOT_FEEDS("HotFeeds:" + ChronoUnit.DAYS),
-    WEEKLY_HOT_FEEDS("HotFeeds:" + ChronoUnit.WEEKS),
-    MONTHLY_HOT_FEEDS("HotFeeds:" + ChronoUnit.MONTHS);
+    DAILY_HOT_FEEDS(ChronoUnit.DAYS),
+    WEEKLY_HOT_FEEDS(ChronoUnit.WEEKS),
+    MONTHLY_HOT_FEEDS(ChronoUnit.MONTHS);
     private final String key;
-    HotFeedsKeys(String key) {
-        this.key = key;
+    private final ChronoUnit chronoUnit;
+
+    HotFeedsKeys(ChronoUnit chronoUnit) {
+        this.key = "HotFeeds:" + chronoUnit;
+        this.chronoUnit = chronoUnit;
     }
 
     public static HotFeedsKeys getHotFeedsKey(ChronoUnit chronoUnit) {
-        return switch (chronoUnit) {
-            case DAYS -> DAILY_HOT_FEEDS;
-            case WEEKS -> WEEKLY_HOT_FEEDS;
-            case MONTHS -> MONTHLY_HOT_FEEDS;
-            default -> throw new IllegalArgumentException();
-        };
+        return Arrays.stream(HotFeedsKeys.values())
+                .filter(hotFeedsKey -> hotFeedsKey.chronoUnit.equals(chronoUnit))
+                .findFirst()
+                .orElseThrow(IllegalArgumentException::new);
     }
 }
