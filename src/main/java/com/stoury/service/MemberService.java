@@ -1,11 +1,12 @@
 package com.stoury.service;
 
 import com.stoury.domain.Member;
-import com.stoury.dto.member.AuthenticatedMember;
-import com.stoury.dto.member.MemberCreateRequest;
-import com.stoury.dto.member.MemberResponse;
-import com.stoury.dto.member.MemberUpdateRequest;
-import com.stoury.exception.member.*;
+import com.stoury.dto.member.*;
+import com.stoury.exception.member.MemberCreateException;
+import com.stoury.exception.member.MemberDeleteException;
+import com.stoury.exception.member.MemberSearchException;
+import com.stoury.exception.member.MemberUpdateException;
+import com.stoury.repository.MemberOnlineStatusRepository;
 import com.stoury.repository.MemberRepository;
 import com.stoury.service.storage.StorageService;
 import com.stoury.utils.FileUtils;
@@ -13,7 +14,6 @@ import com.stoury.utils.SupportedFileType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.*;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -24,7 +24,6 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -32,6 +31,7 @@ import java.util.Objects;
 @RequiredArgsConstructor
 public class MemberService implements UserDetailsService {
     private final MemberRepository memberRepository;
+    private final MemberOnlineStatusRepository memberOnlineStatusRepository;
     private final PasswordEncoder passwordEncoder;
     private final StorageService storageService;
     public static final int PASSWORD_LENGTH_MIN = 8;
@@ -184,5 +184,13 @@ public class MemberService implements UserDetailsService {
         Member member = getMemberByEmail(email);
 
         return AuthenticatedMember.from(member);
+    }
+
+    public void setOnline(Long memberId, Double latitude, Double longitude) {
+        memberOnlineStatusRepository.save(new OnlineMember(memberId, latitude, longitude));
+    }
+
+    public void setOffline(Long memberId) {
+        memberOnlineStatusRepository.delete(memberId);
     }
 }

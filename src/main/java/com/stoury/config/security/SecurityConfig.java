@@ -1,5 +1,7 @@
 package com.stoury.config.security;
 
+import com.stoury.dto.member.AuthenticatedMember;
+import com.stoury.service.MemberService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -13,21 +15,28 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
+import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
 import org.springframework.security.web.servlet.util.matcher.MvcRequestMatcher;
 import org.springframework.web.servlet.handler.HandlerMappingIntrospector;
+
+import java.util.Optional;
 
 @Configuration
 @RequiredArgsConstructor
 @EnableWebSecurity
 public class SecurityConfig {
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http, HandlerMappingIntrospector introspector) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http,
+                                                   HandlerMappingIntrospector introspector,
+                                                   MemberService memberService) throws Exception {
         return http.csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
                 .formLogin(formLogin -> formLogin
                         .usernameParameter("email")
-                        .successHandler(authenticationSuccessHandler())
+                        .successHandler(authenticationSuccessHandler(memberService))
                         .failureHandler(authenticationFailureHandler()))
+                .logout(logout -> logout
+                        .logoutSuccessHandler(logoutSuccessHandler(memberService)))
                 .authorizeHttpRequests(httpRequest -> httpRequest
                         .requestMatchers(new MvcRequestMatcher.Builder(introspector).pattern("/login")).permitAll()
                         .requestMatchers(new MvcRequestMatcher.Builder(introspector).pattern(HttpMethod.POST, "/members")).permitAll()
@@ -50,8 +59,25 @@ public class SecurityConfig {
     }
 
     @Bean
-    public AuthenticationSuccessHandler authenticationSuccessHandler() {
-        return (request, response, authentication) -> response.setStatus(200);
+    public AuthenticationSuccessHandler authenticationSuccessHandler(MemberService memberService) {
+        return (request, response, authentication) -> {
+            Long memberId = ((AuthenticatedMember) authentication.getPrincipal()).getId();
+            Double latitude = Optional.ofNullable(request.getParameter("latitude"))
+                    .map(Double::parseDouble).orElse(null);
+            Double longitude = Optional.ofNullable(request.getParameter("longitude"))
+                    .map(Double::parseDouble).orElse(null);
+            memberService.setOnline(memberId, latitude, longitude);
+            response.setStatus(200);
+        };
+    }
+
+    @Bean
+    public LogoutSuccessHandler logoutSuccessHandler(MemberService memberService) {
+        return (request, response, authentication) -> {
+            Long memberId = ((AuthenticatedMember) authentication.getPrincipal()).getId();
+            memberService.setOffline(memberId);
+            response.setStatus(200);
+        };
     }
 
     @Bean

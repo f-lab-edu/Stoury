@@ -5,9 +5,11 @@ import com.stoury.domain.Like
 import com.stoury.domain.Member
 import com.stoury.dto.WriterResponse
 import com.stoury.dto.feed.SimpleFeedResponse
+import com.stoury.dto.member.AuthenticatedMember
 import com.stoury.dto.member.MemberResponse
 import com.stoury.repository.FeedRepository
 import com.stoury.repository.LikeRepository
+import com.stoury.repository.MemberOnlineStatusRepository
 import com.stoury.repository.MemberRepository
 import com.stoury.repository.RankingRepository
 import com.stoury.service.MemberService
@@ -20,6 +22,15 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Slice
 import org.springframework.data.redis.core.StringRedisTemplate
+import org.springframework.http.MediaType
+import org.springframework.mock.web.MockHttpServletRequest
+import org.springframework.mock.web.MockHttpServletResponse
+import org.springframework.mock.web.MockServletContext
+import org.springframework.security.core.Authentication
+import org.springframework.security.core.userdetails.User
+import org.springframework.security.core.userdetails.UserDetails
+import org.springframework.security.web.authentication.AuthenticationSuccessHandler
+import org.springframework.security.web.authentication.logout.LogoutSuccessHandler
 import org.springframework.test.context.ActiveProfiles
 import spock.lang.Specification
 
@@ -54,6 +65,10 @@ class IntegrationTest extends Specification {
     StringRedisTemplate redisTemplate
     @Autowired
     MemberService memberService
+    @Autowired
+    AuthenticationSuccessHandler authenticationSuccessHandler
+    @Autowired
+    LogoutSuccessHandler logoutSuccessHandler
 
     def member = new Member("aaa@dddd.com", "qwdqwdqwd", "username", null);
 
@@ -353,5 +368,41 @@ class IntegrationTest extends Specification {
         foundMembers.get(2).username() == member5.getUsername()
         foundMembers.get(3).username() == member6.getUsername()
         foundMembers.get(4).username() == member7.getUsername()
+    }
+
+    def "로그인 성공시 online상태여야 함"() {
+        given:
+        def request = new MockHttpServletRequest()
+        request.setMethod("POST")
+        request.setContentType(MediaType.MULTIPART_FORM_DATA.toString())
+        request.setParameter("latitude", "37.123123")
+        request.setParameter("longitude", "127.123123")
+        def response = new MockHttpServletResponse()
+        def authentication = Mock(Authentication)
+        authentication.getPrincipal() >> new AuthenticatedMember(1, "test@email.com", "pwdpwdpwd123")
+        when:
+        authenticationSuccessHandler.onAuthenticationSuccess(request, response, authentication)
+        then:
+        redisTemplate.hasKey(MemberOnlineStatusRepository.ONLINE_MEMBER_CACHE_KEY_PREFIX + 1)
+    }
+
+    def "로그아웃 성공시 offline상태여야 함"() {
+        given:
+        redisTemplate.opsForValue().set(MemberOnlineStatusRepository.ONLINE_MEMBER_CACHE_KEY_PREFIX + 1, """
+        {
+            "memberId" : 1,
+            "latitude" : 37.123123,
+            "longitude" : 127.123123
+        }
+        """)
+        def request = new MockHttpServletRequest()
+        request.setMethod("POST")
+        def response = new MockHttpServletResponse()
+        def authentication = Mock(Authentication)
+        authentication.getPrincipal() >> new AuthenticatedMember(1, "test@email.com", "pwdpwdpwd123")
+        when:
+        logoutSuccessHandler.onLogoutSuccess(request, response, authentication)
+        then:
+        !redisTemplate.hasKey(MemberOnlineStatusRepository.ONLINE_MEMBER_CACHE_KEY_PREFIX + 1)
     }
 }
