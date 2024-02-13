@@ -1,13 +1,15 @@
 package com.stoury.repository;
 
-import com.stoury.dto.member.OnlineMember;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.geo.Point;
+import org.springframework.data.geo.*;
+import org.springframework.data.redis.connection.RedisGeoCommands;
 import org.springframework.data.redis.core.GeoOperations;
 import org.springframework.data.redis.core.SetOperations;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Objects;
 
 @Repository
@@ -25,11 +27,8 @@ public class MemberOnlineStatusRepository {
         opsForGeo = redisTemplate.opsForGeo();
     }
 
-    public void save(OnlineMember onlineMember) {
-        Long memberId = onlineMember.memberId();
+    public void save(Long memberId, Double latitude, Double longitude) {
         opsForSet.add(ONLINE_MEMBER_CACHE_KEY, memberId.toString());
-        Double latitude = onlineMember.latitude();
-        Double longitude = onlineMember.longitude();
 
         if (Objects.nonNull(latitude) && Objects.nonNull(longitude)) {
             Point point = new Point(longitude, latitude);
@@ -41,5 +40,25 @@ public class MemberOnlineStatusRepository {
         String memberIdNotNull = Objects.requireNonNull(memberId, "Member id cannot be null").toString();
         opsForSet.remove(ONLINE_MEMBER_CACHE_KEY, memberIdNotNull);
         opsForGeo.remove(MEMBER_POS_CACHE_KEY, memberId.toString());
+    }
+
+    public List<Pair<String, Integer>> findByPoint(Point point, double radiusKm) {
+        Circle within = new Circle(point, new Distance(radiusKm, Metrics.KILOMETERS));
+        RedisGeoCommands.GeoRadiusCommandArgs args = RedisGeoCommands.GeoRadiusCommandArgs.newGeoRadiusArgs()
+                .includeDistance()
+                .sortAscending();
+        List<GeoResult<RedisGeoCommands.GeoLocation<String>>> geoResults = opsForGeo.radius(MEMBER_POS_CACHE_KEY, within, args)
+                .getContent();
+
+        return geoResults.stream()
+                .map(MemberOnlineStatusRepository::memberDistances)
+                .toList();
+    }
+
+    public static Pair<String, Integer> memberDistances(GeoResult<RedisGeoCommands.GeoLocation<String>> geoResult) {
+        String memberId = geoResult.getContent().getName();
+        double distance = geoResult.getDistance().in(Metrics.KILOMETERS).getNormalizedValue();
+
+        return Pair.of(memberId, (int) distance);
     }
 }
