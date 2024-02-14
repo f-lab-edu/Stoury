@@ -10,6 +10,7 @@ import org.springframework.restdocs.RestDocumentationContextProvider
 import org.springframework.restdocs.RestDocumentationExtension
 import org.springframework.restdocs.operation.preprocess.Preprocessors
 import org.springframework.restdocs.request.ParameterDescriptor
+import org.springframework.restdocs.request.QueryParametersSnippet
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.context.SecurityContextHolder
@@ -71,6 +72,13 @@ abstract class AbstractRestDocsTests extends Specification {
                 Preprocessors.preprocessResponse(Preprocessors.prettyPrint()),
                 pathParameters(parameterDescriptor),
                 queryParameters(queryDescriptor))
+    }
+
+    def documentWithQueryParameters(QueryParametersSnippet queryParams) {
+        return document("{class-name}/" + specificationContext.currentIteration.name,
+                Preprocessors.preprocessRequest(Preprocessors.prettyPrint()),
+                Preprocessors.preprocessResponse(Preprocessors.prettyPrint()),
+                queryParams)
     }
 
     static RequestPostProcessor authenticatedMember(AuthenticatedMember member) {
