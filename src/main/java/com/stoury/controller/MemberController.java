@@ -3,13 +3,13 @@ package com.stoury.controller;
 import com.stoury.dto.member.AuthenticatedMember;
 import com.stoury.dto.member.MemberCreateRequest;
 import com.stoury.dto.member.MemberResponse;
+import com.stoury.dto.member.OnlineMember;
 import com.stoury.service.MemberService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -31,5 +31,13 @@ public class MemberController {
     @PostMapping("/members/set-offline")
     public void setOffline(@AuthenticationPrincipal AuthenticatedMember authenticatedMember) {
         memberService.setOffline(authenticatedMember.getId());
+    }
+
+    @GetMapping("/members/around")
+    public List<OnlineMember> getAroundMembers(@AuthenticationPrincipal AuthenticatedMember authenticatedMember,
+                                               @RequestParam(required = true) Double latitude,
+                                               @RequestParam(required = true) Double longitude,
+                                               @RequestParam(required = false, defaultValue = "10") int radiusKm) {
+        return memberService.searchOnlineMembers(authenticatedMember.getId(), latitude, longitude, radiusKm);
     }
 }
