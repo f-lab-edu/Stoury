@@ -94,16 +94,12 @@ public class CommentService {
     }
 
     @Transactional
-    public CommentResponse deleteCommentIfOwner(Long commentId, Long memberId) {
+    public void deleteCommentIfOwner(Long commentId, Long memberId) {
         Comment comment = commentRepository.findById(Objects.requireNonNull(commentId))
                 .orElseThrow(CommentSearchException::new);
-        if(isNotOwner(memberId, comment)){
-            throw new NotAuthorizedException();
+        if (comment.isOwnedBy(memberId)) {
+            deleteComment(commentId);
         }
-        return deleteComment(commentId);
-    }
-
-    private boolean isNotOwner(Long memberId, Comment comment) {
-        return !comment.getMember().getId().equals(memberId);
+        throw new NotAuthorizedException();
     }
 }

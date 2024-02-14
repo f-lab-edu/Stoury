@@ -23,6 +23,10 @@ public class GraphicContent {
     @Column(name = "SEQUENCE", columnDefinition = "TINYINT", nullable = false)
     private int sequence;
 
+    @Getter(value = AccessLevel.PRIVATE)
+    @Setter(value = AccessLevel.PACKAGE)
+    @ManyToOne(optional = false)
+    private Feed feed;
 
     public GraphicContent(String path, int sequence) {
         this.path = path;

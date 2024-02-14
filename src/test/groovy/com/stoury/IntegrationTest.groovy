@@ -1,17 +1,17 @@
 package com.stoury
 
-import com.stoury.domain.Feed
-import com.stoury.domain.Like
-import com.stoury.domain.Member
+import com.stoury.domain.*
 import com.stoury.dto.WriterResponse
+import com.stoury.dto.feed.FeedCreateRequest
 import com.stoury.dto.feed.SimpleFeedResponse
+import com.stoury.dto.member.AuthenticatedMember
 import com.stoury.dto.member.MemberResponse
-import com.stoury.repository.FeedRepository
-import com.stoury.repository.LikeRepository
-import com.stoury.repository.MemberRepository
-import com.stoury.repository.RankingRepository
+import com.stoury.repository.*
+import com.stoury.service.FeedService
 import com.stoury.service.MemberService
 import com.stoury.utils.cachekeys.PopularSpotsKey
+import jakarta.persistence.EntityManager
+import jakarta.persistence.PersistenceContext
 import org.springframework.batch.core.Job
 import org.springframework.batch.test.JobLauncherTestUtils
 import org.springframework.batch.test.context.SpringBatchTest
@@ -20,6 +20,13 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Slice
 import org.springframework.data.redis.core.StringRedisTemplate
+import org.springframework.http.MediaType
+import org.springframework.mock.web.MockHttpServletRequest
+import org.springframework.mock.web.MockHttpServletResponse
+import org.springframework.mock.web.MockMultipartFile
+import org.springframework.security.core.Authentication
+import org.springframework.security.web.authentication.AuthenticationSuccessHandler
+import org.springframework.security.web.authentication.logout.LogoutSuccessHandler
 import org.springframework.test.context.ActiveProfiles
 import spock.lang.Specification
 
@@ -35,31 +42,45 @@ class IntegrationTest extends Specification {
     @Autowired
     JobLauncherTestUtils jobLauncherTestUtils;
     @Autowired
-    Job jobUpdatePopularSpots
+    Job updatePopularSpotsJob
     @Autowired
-    Job jobDailyFeed
+    Job updateDailyFeedsJob
     @Autowired
-    Job jobWeeklyFeed
+    Job updateWeeklyFeedsJob
     @Autowired
-    Job jobMonthlyFeed
+    Job updateMonthlyFeedsJob
+    @Autowired
+    TagRepository tagRepository
     @Autowired
     FeedRepository feedRepository
     @Autowired
     MemberRepository memberRepository
+    @Autowired
+    DiaryRepository diaryRepository
     @Autowired
     LikeRepository likeRepository
     @Autowired
     RankingRepository rankingRepository
     @Autowired
     StringRedisTemplate redisTemplate
+    @PersistenceContext
+    EntityManager entityManager
     @Autowired
     MemberService memberService
+    @Autowired
+    FeedService feedService
+    @Autowired
+    AuthenticationSuccessHandler authenticationSuccessHandler
+    @Autowired
+    LogoutSuccessHandler logoutSuccessHandler
 
     def member = new Member("aaa@dddd.com", "qwdqwdqwd", "username", null);
 
     def setup() {
         feedRepository.deleteAll()
         memberRepository.deleteAll()
+        tagRepository.deleteAll()
+        diaryRepository.deleteAll()
         memberRepository.save(member)
 
         Set<String> allKeys = redisTemplate.keys("*")
@@ -69,6 +90,8 @@ class IntegrationTest extends Specification {
     def cleanup() {
         feedRepository.deleteAll()
         memberRepository.deleteAll()
+        tagRepository.deleteAll()
+        diaryRepository.deleteAll()
 
         Set<String> allKeys = redisTemplate.keys("*")
         redisTemplate.delete(allKeys)
@@ -76,7 +99,7 @@ class IntegrationTest extends Specification {
 
     def "인기 여행지 업데이트 테스트"() {
         given:
-        jobLauncherTestUtils.setJob(jobUpdatePopularSpots)
+        jobLauncherTestUtils.setJob(updatePopularSpotsJob)
         def feed = Feed.builder()
                 .member(member)
                 .textContent("blabla")
@@ -95,7 +118,7 @@ class IntegrationTest extends Specification {
 
     def "일간 인기 피드 업데이트 테스트"() {
         given:
-        jobLauncherTestUtils.setJob(jobDailyFeed)
+        jobLauncherTestUtils.setJob(updateDailyFeedsJob)
         def feed = Feed.builder()
                 .member(member)
                 .textContent("blabla")
@@ -114,7 +137,7 @@ class IntegrationTest extends Specification {
 
     def "주간 인기 피드 업데이트 테스트"() {
         given:
-        jobLauncherTestUtils.setJob(jobWeeklyFeed)
+        jobLauncherTestUtils.setJob(updateWeeklyFeedsJob)
         def feed = Feed.builder()
                 .member(member)
                 .textContent("blabla")
@@ -133,7 +156,7 @@ class IntegrationTest extends Specification {
 
     def "월간 인기 피드 업데이트 테스트"() {
         given:
-        jobLauncherTestUtils.setJob(jobMonthlyFeed)
+        jobLauncherTestUtils.setJob(updateMonthlyFeedsJob)
         def feed = Feed.builder()
                 .member(member)
                 .textContent("blabla")
@@ -353,5 +376,106 @@ class IntegrationTest extends Specification {
         foundMembers.get(2).username() == member5.getUsername()
         foundMembers.get(3).username() == member6.getUsername()
         foundMembers.get(4).username() == member7.getUsername()
+    }
+
+    def "로그인 성공시 online상태여야 함"() {
+        given:
+        def request = new MockHttpServletRequest()
+        request.setMethod("POST")
+        request.setContentType(MediaType.MULTIPART_FORM_DATA.toString())
+        request.setParameter("latitude", "37.123123")
+        request.setParameter("longitude", "127.123123")
+        def response = new MockHttpServletResponse()
+        def authentication = Mock(Authentication)
+        authentication.getPrincipal() >> new AuthenticatedMember(1, "test@email.com", "pwdpwdpwd123")
+        when:
+        authenticationSuccessHandler.onAuthenticationSuccess(request, response, authentication)
+        then:
+        redisTemplate.opsForSet().isMember(MemberOnlineStatusRepository.ONLINE_MEMBER_CACHE_KEY, "1")
+    }
+
+    def "로그아웃 성공시 offline상태여야 함"() {
+        given:
+        redisTemplate.opsForSet().add(MemberOnlineStatusRepository.ONLINE_MEMBER_CACHE_KEY, "1")
+        def request = new MockHttpServletRequest()
+        request.setMethod("POST")
+        def response = new MockHttpServletResponse()
+        def authentication = Mock(Authentication)
+        authentication.getPrincipal() >> new AuthenticatedMember(1, "test@email.com", "pwdpwdpwd123")
+        when:
+        logoutSuccessHandler.onLogoutSuccess(request, response, authentication)
+        then:
+        !redisTemplate.opsForSet().isMember(MemberOnlineStatusRepository.ONLINE_MEMBER_CACHE_KEY, "1")
+    }
+
+    def "피드 생성 시 이미지 같이 생성돼야함"() {
+        given:
+        def feed = Feed.builder()
+                .member(member)
+                .textContent("Feed with images")
+                .latitude(36.125).longitude(127.125)
+                .city("city").country("country")
+                .build()
+        feed.addGraphicContents(List.of(
+                new GraphicContent("path1", 0),
+                new GraphicContent("path2", 1),
+                new GraphicContent("path3", 2),
+        ))
+        when:
+        def savedFeed = feedRepository.save(feed)
+        then:
+        savedFeed.graphicContents.size() == 3
+    }
+
+    def "피드생성시 태그같이 생성되거나 기존 태그 사용"() {
+        given:
+        tagRepository.saveAndFlush(new Tag("tag0"))
+        def feedCreateRequest = FeedCreateRequest.builder()
+                .textContent("Feed with tags")
+                .tagNames(List.of("tag0", "tag1", "tag2"))
+                .latitude(0)
+                .longitude(0)
+                .build()
+        def graphicContents = List.of(new MockMultipartFile("images", "image1.jpeg", "image/jpeg", new byte[0]))
+        when:
+        feedService.createFeed(member.getId(), feedCreateRequest, graphicContents)
+        then:
+        tagRepository.count() == 3
+    }
+
+    def "여행일지 생성&삭제, 삭제해도 기존 피드는 남음"() {
+        given:
+        def feed = Feed.builder()
+                .member(member)
+                .textContent("Feed with images")
+                .latitude(36.125).longitude(127.125)
+                .city("city").country("country")
+                .build()
+        feed.addGraphicContents(List.of(
+                new GraphicContent("path1", 0),
+                new GraphicContent("path2", 1),
+                new GraphicContent("path3", 2),
+        ))
+        def savedFeed = feedRepository.saveAndFlush(feed)
+        def feedId = savedFeed.getId()
+        def diary = new Diary(member, List.of(savedFeed), "test diary", savedFeed.graphicContents.get(0))
+        def savedDiary = diaryRepository.saveAndFlush(diary)
+        when:
+        diaryRepository.delete(savedDiary)
+        then:
+        feedRepository.existsById(feedId)
+
+        def tx
+        try {
+            tx = entityManager.getTransaction()
+            tx.begin()
+            feedRepository.findById(feedId).orElseThrow()
+                    .getGraphicContents().size() == 3
+            tx.commit()
+        }catch (RuntimeException e){
+            if(tx != null && tx.isActive()){
+                tx.rollback()
+            }
+        }
     }
 }

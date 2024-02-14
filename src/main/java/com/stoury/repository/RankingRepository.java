@@ -14,6 +14,7 @@ import org.springframework.stereotype.Repository;
 import java.time.temporal.ChronoUnit;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 import static com.stoury.utils.cachekeys.HotFeedsKeys.getHotFeedsKey;
@@ -67,6 +68,7 @@ public class RankingRepository {
         }
         return rankedSimpleFeeds.stream()
                 .map(this::getFeedResponse)
+                .filter(Objects::nonNull)
                 .toList();
     }
 

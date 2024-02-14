@@ -7,6 +7,7 @@ import com.stoury.exception.member.MemberCreateException
 import com.stoury.exception.member.MemberDeleteException
 import com.stoury.exception.member.MemberSearchException
 import com.stoury.exception.member.MemberUpdateException
+import com.stoury.repository.MemberOnlineStatusRepository
 import com.stoury.repository.MemberRepository
 import com.stoury.service.storage.StorageService
 import org.springframework.mock.web.MockMultipartFile
@@ -17,8 +18,9 @@ class MemberServiceTest extends Specification {
     def memberRepository = Mock(MemberRepository)
     def passwordEncoder = Mock(PasswordEncoder)
     def storageService = Mock(StorageService)
+    def memberOnlineStatusRepository = Mock(MemberOnlineStatusRepository)
 
-    def memberService = new MemberService(memberRepository, passwordEncoder, storageService)
+    def memberService = new MemberService(memberRepository, memberOnlineStatusRepository, passwordEncoder, storageService)
 
     def "사용자 생성 - 성공"() {
         given:

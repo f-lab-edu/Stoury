@@ -69,4 +69,8 @@ public class Comment {
     public void delete() {
         this.deleted = true;
     }
+
+    public boolean isOwnedBy(Long memberId) {
+        return this.member.getId().equals(memberId);
+    }
 }

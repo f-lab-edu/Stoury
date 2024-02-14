@@ -79,7 +79,7 @@ public class DiaryService {
 
     @NotNull
     private String getTitle(DiaryCreateRequest diaryCreateRequest, List<Feed> feeds) {
-        String title ;
+        String title;
         if (StringUtils.hasText(diaryCreateRequest.title())) {
             title = diaryCreateRequest.title();
         } else {
@@ -126,15 +126,11 @@ public class DiaryService {
     }
 
     @Transactional
-    public SimpleDiaryResponse cancelDiaryIfOwner(Long diaryId, Long memberId) {
+    public void cancelDiaryIfOwner(Long diaryId, Long memberId) {
         Diary toCancelDiary = diaryRepository.findById(diaryId).orElseThrow(DiarySearchException::new);
-        if (isNotOwner(memberId, toCancelDiary)) {
-            throw new NotAuthorizedException();
+        if (toCancelDiary.isOwnedBy(memberId)) {
+            cancelDiary(diaryId);
         }
-        return cancelDiary(diaryId);
-    }
-
-    private boolean isNotOwner(Long memberId, Diary toCancelDiary) {
-        return !toCancelDiary.getMember().getId().equals(memberId);
+        throw new NotAuthorizedException();
     }
 }
