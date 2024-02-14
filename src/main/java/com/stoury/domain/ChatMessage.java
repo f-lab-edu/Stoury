@@ -33,4 +33,10 @@ public class ChatMessage {
     @CreatedDate
     @Column(name = "CREATED_AT", nullable = false)
     private LocalDateTime createdAt;
+
+    public ChatMessage(Member sender, ChatRoom chatRoom, String textContent) {
+        this.sender = sender;
+        this.chatRoom = chatRoom;
+        this.textContent = textContent;
+    }
 }

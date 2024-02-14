@@ -1,7 +1,9 @@
 package com.stoury.service
 
+import com.stoury.domain.ChatMessage
 import com.stoury.domain.ChatRoom
 import com.stoury.domain.Member
+import com.stoury.exception.authentication.NotAuthorizedException
 import com.stoury.repository.ChatMessageRepository
 import com.stoury.repository.ChatRoomRepository
 import com.stoury.repository.MemberRepository
@@ -28,5 +30,47 @@ class ChatServiceTest extends Specification {
         then:
         1 * chatRoomRepository.save(_ as ChatRoom) >> new ChatRoom(List.of(sender, receiver))
         chatRoomResponse.members().size() == 2
+    }
+
+    def "채팅메시지 생성"() {
+        given:
+        def sender = new Member("sender@email.com", "pwdpwd123", "sender", null)
+        def chatRoom = new ChatRoom(List.of(sender, Mock(Member)))
+        sender.id = 1
+        chatRoom.id = 1
+        memerRepository.findById(sender.id) >> Optional.of(sender)
+        chatRoomRepository.findById(chatRoom.id) >> Optional.of(chatRoom)
+        when:
+        chatService.createChatMessage(sender.id, chatRoom.id, "Hello, World!")
+        then:
+        1 * chatMessageRepository.save(_ as ChatMessage) >> new ChatMessage(sender, chatRoom,  "Hello, World!")
+    }
+
+    def "채팅메시지 생성불가, 내가 참여한 채팅방이 아님"() {
+        given:
+        def sender = new Member("sender@email.com", "pwdpwd123", "sender", null)
+        def chatRoom = new ChatRoom()
+        sender.id = 1
+        chatRoom.id = 1
+        memerRepository.findById(sender.id) >> Optional.of(sender)
+        chatRoomRepository.findById(chatRoom.id) >> Optional.of(chatRoom)
+        when:
+        chatService.createChatMessage(sender.id, chatRoom.id, "Hello, World!")
+        then:
+        thrown(NotAuthorizedException)
+    }
+
+    def "채팅메시지 생성불가, 메시지 없음"() {
+        given:
+        def sender = new Member("sender@email.com", "pwdpwd123", "sender", null)
+        def chatRoom = new ChatRoom(List.of(sender, Mock(Member)))
+        sender.id = 1
+        chatRoom.id = 1
+        memerRepository.findById(sender.id) >> Optional.of(sender)
+        chatRoomRepository.findById(chatRoom.id) >> Optional.of(chatRoom)
+        when:
+        chatService.createChatMessage(sender.id, chatRoom.id, "")
+        then:
+        thrown(IllegalArgumentException)
     }
 }
