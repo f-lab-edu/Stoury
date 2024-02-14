@@ -1,7 +1,7 @@
 package com.stoury.controller
 
 import com.stoury.domain.Comment
-import com.stoury.dto.WriterResponse
+import com.stoury.dto.SimpleMemberResponse
 import com.stoury.dto.comment.ChildCommentResponse
 import com.stoury.dto.comment.CommentResponse
 import com.stoury.dto.member.AuthenticatedMember
@@ -33,7 +33,7 @@ class CommentControllerTest extends AbstractRestDocsTests {
         when(commentService.createComment(any(), any(), any()))
                 .thenReturn(new CommentResponse(
                         1L,
-                        new WriterResponse(1L, "writer"),
+                        new SimpleMemberResponse(1L, "writer"),
                         1L,
                         false,
                         commentText,
@@ -57,7 +57,7 @@ class CommentControllerTest extends AbstractRestDocsTests {
         when(commentService.createNestedComment(any(), any(), any()))
                 .thenReturn(new ChildCommentResponse(
                         1L,
-                        new WriterResponse(1L, "writer"),
+                        new SimpleMemberResponse(1L, "writer"),
                         1L,
                         commentText,
                         LocalDateTime.of(2024, 12, 31, 13, 30, 05, 101))
@@ -79,9 +79,9 @@ class CommentControllerTest extends AbstractRestDocsTests {
                 .description("Results which created orderThan this value are listed").optional()
 
         when(commentService.getCommentsOfFeed(any(), any(),)).thenReturn(List.of(
-                new CommentResponse(1L, new WriterResponse(2L, "member2"), 1L, false, "First comment", LocalDateTime.now()),
-                new CommentResponse(2L, new WriterResponse(3L, "member3"), 1L, true, Comment.DELETED_CONTENT_TEXT, LocalDateTime.now()),
-                new CommentResponse(3L, new WriterResponse(2L, "member2"), 1L, true, "Third comment", LocalDateTime.now()),
+                new CommentResponse(1L, new SimpleMemberResponse(2L, "member2"), 1L, false, "First comment", LocalDateTime.now()),
+                new CommentResponse(2L, new SimpleMemberResponse(3L, "member3"), 1L, true, Comment.DELETED_CONTENT_TEXT, LocalDateTime.now()),
+                new CommentResponse(3L, new SimpleMemberResponse(2L, "member2"), 1L, true, "Third comment", LocalDateTime.now()),
         ))
         when:
         def response = mockMvc.perform(get("/comments/feed/{feedId}", "1"))
@@ -98,9 +98,9 @@ class CommentControllerTest extends AbstractRestDocsTests {
                 .description("Results which created orderThan this value are listed").optional()
 
         when(commentService.getChildComments(any(), any())).thenReturn(List.of(
-                new ChildCommentResponse(11L, new WriterResponse(1L, "member1"), 1L, "First child comment", LocalDateTime.now()),
-                new ChildCommentResponse(12L, new WriterResponse(2L, "member2"), 1L, "Second child comment", LocalDateTime.now()),
-                new ChildCommentResponse(13L, new WriterResponse(3L, "member3"), 1L, Comment.DELETED_CONTENT_TEXT, LocalDateTime.now()),
+                new ChildCommentResponse(11L, new SimpleMemberResponse(1L, "member1"), 1L, "First child comment", LocalDateTime.now()),
+                new ChildCommentResponse(12L, new SimpleMemberResponse(2L, "member2"), 1L, "Second child comment", LocalDateTime.now()),
+                new ChildCommentResponse(13L, new SimpleMemberResponse(3L, "member3"), 1L, Comment.DELETED_CONTENT_TEXT, LocalDateTime.now()),
         ))
         when:
         def response = mockMvc.perform(get("/comments/comment/{commentId}", "1"))

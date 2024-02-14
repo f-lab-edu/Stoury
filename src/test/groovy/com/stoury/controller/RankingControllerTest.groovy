@@ -1,11 +1,10 @@
 package com.stoury.controller
 
-import com.stoury.dto.WriterResponse
+import com.stoury.dto.SimpleMemberResponse
 import com.stoury.dto.feed.SimpleFeedResponse
 import com.stoury.service.RankingService
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 import org.springframework.boot.test.mock.mockito.MockBean
-import org.springframework.http.MediaType
 
 import java.time.temporal.ChronoUnit
 
@@ -20,16 +19,16 @@ class RankingControllerTest extends AbstractRestDocsTests {
     RankingService rankingService
 
     def simpleFeeds = List.of(
-            new SimpleFeedResponse(2, new WriterResponse(1, "writer1"), "Tokyo", "Japan"),
-            new SimpleFeedResponse(5, new WriterResponse(2, "writer2"), "New York", "United States"),
-            new SimpleFeedResponse(10, new WriterResponse(3, "writer3"), "London", "United Kingdom"),
-            new SimpleFeedResponse(1, new WriterResponse(2, "writer2"), "Moscow", "Russia"),
-            new SimpleFeedResponse(6, new WriterResponse(3, "writer3"), "Seoul", "South Korea"),
-            new SimpleFeedResponse(8, new WriterResponse(4, "writer4"), "Shanghai", "China"),
-            new SimpleFeedResponse(9, new WriterResponse(6, "writer6"), "Osaka", "Japan"),
-            new SimpleFeedResponse(100, new WriterResponse(1, "writer1"), "Taipei", "Taiwan"),
-            new SimpleFeedResponse(56, new WriterResponse(2, "writer2"), "Paris", "France"),
-            new SimpleFeedResponse(102, new WriterResponse(2, "writer2"), "Hanoi", "Vietnam"),
+            new SimpleFeedResponse(2, new SimpleMemberResponse(1, "writer1"), "Tokyo", "Japan"),
+            new SimpleFeedResponse(5, new SimpleMemberResponse(2, "writer2"), "New York", "United States"),
+            new SimpleFeedResponse(10, new SimpleMemberResponse(3, "writer3"), "London", "United Kingdom"),
+            new SimpleFeedResponse(1, new SimpleMemberResponse(2, "writer2"), "Moscow", "Russia"),
+            new SimpleFeedResponse(6, new SimpleMemberResponse(3, "writer3"), "Seoul", "South Korea"),
+            new SimpleFeedResponse(8, new SimpleMemberResponse(4, "writer4"), "Shanghai", "China"),
+            new SimpleFeedResponse(9, new SimpleMemberResponse(6, "writer6"), "Osaka", "Japan"),
+            new SimpleFeedResponse(100, new SimpleMemberResponse(1, "writer1"), "Taipei", "Taiwan"),
+            new SimpleFeedResponse(56, new SimpleMemberResponse(2, "writer2"), "Paris", "France"),
+            new SimpleFeedResponse(102, new SimpleMemberResponse(2, "writer2"), "Hanoi", "Vietnam"),
     )
 
     def setup() {

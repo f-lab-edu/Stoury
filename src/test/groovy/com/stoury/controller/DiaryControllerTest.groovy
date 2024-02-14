@@ -1,7 +1,7 @@
 package com.stoury.controller
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.stoury.dto.WriterResponse
+import com.stoury.dto.SimpleMemberResponse
 import com.stoury.dto.diary.DiaryCreateRequest
 import com.stoury.dto.diary.DiaryPageResponse
 import com.stoury.dto.diary.DiaryResponse
@@ -34,15 +34,15 @@ class DiaryControllerTest extends AbstractRestDocsTests {
     @Autowired
     ObjectMapper objectMapper
 
-    def feed1 = new FeedResponse(1, new WriterResponse(1, "writer1"),
+    def feed1 = new FeedResponse(1, new SimpleMemberResponse(1, "writer1"),
             List.of("/feed/images/image_1.jpeg"),
             "This is feed1", 40.0627, -105.1779, List.of("America", "denver"),
             new LocationResponse("Colorado", "United States"), 20, LocalDateTime.now())
-    def feed2 = new FeedResponse(2, new WriterResponse(1, "writer1"),
+    def feed2 = new FeedResponse(2, new SimpleMemberResponse(1, "writer1"),
             List.of("/feed/images/image_2.jpeg", "/feed/images/image_3.jpeg"),
             "This is feed2", 39.0484, -110.8451, List.of("America", "Utah", "Tavel"),
             new LocationResponse("Utah", "United States"), 13, LocalDateTime.now().plusDays(1))
-    def feed3 = new FeedResponse(3, new WriterResponse(1, "writer1"),
+    def feed3 = new FeedResponse(3, new SimpleMemberResponse(1, "writer1"),
             List.of("/feed/images/image_4.jpeg", "/feed/images/image_5.jpeg"),
             "This is feed3", 38.5269, -115.3801, List.of("Nevada", "UFO"),
             new LocationResponse("Nevada", "United States"), 52, LocalDateTime.now().plusDays(2))

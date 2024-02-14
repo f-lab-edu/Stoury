@@ -1,7 +1,7 @@
 package com.stoury
 
 import com.stoury.domain.*
-import com.stoury.dto.WriterResponse
+import com.stoury.dto.SimpleMemberResponse
 import com.stoury.dto.feed.FeedCreateRequest
 import com.stoury.dto.feed.SimpleFeedResponse
 import com.stoury.dto.member.AuthenticatedMember
@@ -62,6 +62,8 @@ class IntegrationTest extends Specification {
     @Autowired
     RankingRepository rankingRepository
     @Autowired
+    ChatRoomRepository chatRoomRepository
+    @Autowired
     MemberOnlineStatusRepository memberOnlineStatusRepository
     @Autowired
     StringRedisTemplate redisTemplate
@@ -79,6 +81,7 @@ class IntegrationTest extends Specification {
     def member = new Member("aaa@dddd.com", "qwdqwdqwd", "username", null);
 
     def setup() {
+        chatRoomRepository.deleteAll()
         feedRepository.deleteAll()
         memberRepository.deleteAll()
         tagRepository.deleteAll()
@@ -90,6 +93,7 @@ class IntegrationTest extends Specification {
     }
 
     def cleanup() {
+        chatRoomRepository.deleteAll()
         feedRepository.deleteAll()
         memberRepository.deleteAll()
         tagRepository.deleteAll()
@@ -303,7 +307,7 @@ class IntegrationTest extends Specification {
     }
 
     def "인기 피드 랭킹"() {
-        def writer = new WriterResponse(1L, "writer")
+        def writer = new SimpleMemberResponse(1L, "writer")
         given:
         def feeds = [
                 new SimpleFeedResponse(0L, writer, "city0", "country0"),

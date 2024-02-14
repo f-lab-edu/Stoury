@@ -3,13 +3,13 @@ package com.stoury.dto.feed;
 import com.stoury.domain.Feed;
 import com.stoury.domain.GraphicContent;
 import com.stoury.domain.Tag;
-import com.stoury.dto.WriterResponse;
+import com.stoury.dto.SimpleMemberResponse;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
 public record FeedResponse(Long feedId,
-                           WriterResponse writer,
+                           SimpleMemberResponse writer,
                            List<String> graphicContentsPaths,
                            String textContent,
                            Double latitude,
@@ -21,7 +21,7 @@ public record FeedResponse(Long feedId,
     public static FeedResponse from(Feed feed, long feedLikes) {
         return new FeedResponse(
                 feed.getId(),
-                WriterResponse.from(feed.getMember()),
+                SimpleMemberResponse.from(feed.getMember()),
                 feed.getGraphicContents().stream().map(GraphicContent::getPath).toList(),
                 feed.getTextContent(),
                 feed.getLatitude(),
