@@ -31,7 +31,7 @@ public class ChatMessage {
     private String textContent;
 
     @CreatedDate
-    @Column(name = "CREATED_AT", nullable = false)
+    @Column(name = "CREATED_AT", nullable = false, columnDefinition = "DATETIME(6)")
     private LocalDateTime createdAt;
 
     public ChatMessage(Member sender, ChatRoom chatRoom, String textContent) {

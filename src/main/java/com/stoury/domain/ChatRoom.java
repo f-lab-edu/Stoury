@@ -26,4 +26,12 @@ public class ChatRoom {
     public ChatRoom(List<Member> members) {
         this.members = members;
     }
+
+    public ChatRoom(Member member1, Member member2) {
+        this.members = List.of(member1, member2);
+    }
+
+    public boolean hasMember(Member member) {
+        return members.contains(member);
+    }
 }

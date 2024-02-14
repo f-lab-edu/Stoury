@@ -19,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Slice
+import org.springframework.data.domain.Sort
 import org.springframework.data.redis.core.StringRedisTemplate
 import org.springframework.http.MediaType
 import org.springframework.mock.web.MockHttpServletRequest
@@ -64,6 +65,8 @@ class IntegrationTest extends Specification {
     @Autowired
     ChatRoomRepository chatRoomRepository
     @Autowired
+    ChatMessageRepository chatMessageRepository
+    @Autowired
     MemberOnlineStatusRepository memberOnlineStatusRepository
     @Autowired
     StringRedisTemplate redisTemplate
@@ -81,6 +84,7 @@ class IntegrationTest extends Specification {
     def member = new Member("aaa@dddd.com", "qwdqwdqwd", "username", null);
 
     def setup() {
+        chatMessageRepository.deleteAll()
         chatRoomRepository.deleteAll()
         feedRepository.deleteAll()
         memberRepository.deleteAll()
@@ -93,6 +97,7 @@ class IntegrationTest extends Specification {
     }
 
     def cleanup() {
+        chatMessageRepository.deleteAll()
         chatRoomRepository.deleteAll()
         feedRepository.deleteAll()
         memberRepository.deleteAll()
@@ -500,5 +505,23 @@ class IntegrationTest extends Specification {
         then:
         aroundMembers.get(0).memberId() == member2.id
         aroundMembers.get(1).memberId() == member3.id
+    }
+
+    def "이전 채팅 불러오기"() {
+        given:
+        def member1 = memberRepository.save(new Member("test1@email.com", "encrypted", "member1", null))
+        def member2 = memberRepository.save(new Member("test2@email.com", "encrypted", "member2", null))
+        def chatRoom = chatRoomRepository.save(new ChatRoom(member1, member2))
+        def firstChat = new ChatMessage(member1, chatRoom, "firstChat")
+        def secondChat = new ChatMessage(member2, chatRoom, "secondChat")
+        def thirdChat = new ChatMessage(member1, chatRoom, "thirdChat")
+        def savedChats = chatMessageRepository.saveAll(List.of(firstChat, secondChat, thirdChat))
+        when:
+        def prevChats = chatMessageRepository.findAllByChatRoomAndCreatedAtBefore(chatRoom,
+                savedChats.get(2).createdAt,
+                PageRequest.of(0, 10, Sort.by("createdAt").descending()))
+        then:
+        prevChats.get(0).id == savedChats.get(1).id
+        prevChats.get(1).id == savedChats.get(0).id
     }
 }
