@@ -29,4 +29,5 @@ include::GetWeeklyHotFeeds.adoc[]
 include::GetMonthlyHotFeeds.adoc[]
 include::SetStatusOnline.adoc[]
 include::SetStatusOffline.adoc[]
+include::SearchOnlineMembers.adoc[]
 
