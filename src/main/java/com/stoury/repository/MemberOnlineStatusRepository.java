@@ -1,5 +1,7 @@
 package com.stoury.repository;
 
+import com.stoury.exception.location.GetMemberPositionsException;
+import com.stoury.exception.member.MemberSearchException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.geo.*;
 import org.springframework.data.redis.connection.RedisGeoCommands;
@@ -11,18 +13,17 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 @Repository
 public class MemberOnlineStatusRepository {
     public static final String ONLINE_MEMBER_CACHE_KEY = "online:member:";
     public static final String MEMBER_POS_CACHE_KEY = "member:pos:";
-    private final StringRedisTemplate redisTemplate;
     private final SetOperations<String, String> opsForSet;
     private final GeoOperations<String, String> opsForGeo;
 
     @Autowired
     public MemberOnlineStatusRepository(StringRedisTemplate redisTemplate) {
-        this.redisTemplate = redisTemplate;
         opsForSet = redisTemplate.opsForSet();
         opsForGeo = redisTemplate.opsForGeo();
     }
@@ -47,7 +48,8 @@ public class MemberOnlineStatusRepository {
         RedisGeoCommands.GeoRadiusCommandArgs args = RedisGeoCommands.GeoRadiusCommandArgs.newGeoRadiusArgs()
                 .includeDistance()
                 .sortAscending();
-        List<GeoResult<RedisGeoCommands.GeoLocation<String>>> geoResults = opsForGeo.radius(MEMBER_POS_CACHE_KEY, within, args)
+        List<GeoResult<RedisGeoCommands.GeoLocation<String>>> geoResults = Optional.ofNullable(opsForGeo.radius(MEMBER_POS_CACHE_KEY, within, args))
+                .orElseThrow(GetMemberPositionsException::new)
                 .getContent();
 
         return geoResults.stream()
