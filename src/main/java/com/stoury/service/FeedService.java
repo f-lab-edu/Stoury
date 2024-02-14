@@ -62,7 +62,7 @@ public class FeedService {
 
         Feed feedEntity = createFeedEntity(writer, feedCreateRequest, graphicContents, locationResponse);
 
-        Feed uploadedFeed = feedRepository.save(feedEntity);
+        Feed uploadedFeed = feedRepository.saveAndFlush(feedEntity);
 
         return FeedResponse.from(uploadedFeed, 0);
     }

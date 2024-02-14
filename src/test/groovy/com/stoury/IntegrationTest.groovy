@@ -422,7 +422,7 @@ class IntegrationTest extends Specification {
                 new GraphicContent("path3", 2),
         ))
         when:
-        def savedFeed = feedRepository.save(feed)
+        def savedFeed = feedRepository.saveAndFlush(feed)
         then:
         savedFeed.graphicContents.size() == 3
     }

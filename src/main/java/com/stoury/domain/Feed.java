@@ -31,7 +31,8 @@ public class Feed {
     @CreatedDate
     private LocalDateTime createdAt;
 
-    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "feed")
+    @JoinColumn(name = "FEED_ID", referencedColumnName = "ID")
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<GraphicContent> graphicContents = new ArrayList<>();
 
     @Column(name = "TEXT_CONTENT", nullable = false, columnDefinition = "text")
@@ -70,7 +71,6 @@ public class Feed {
 
     public void addGraphicContent(GraphicContent graphicContent) {
         graphicContents.add(graphicContent);
-        graphicContent.setFeed(this);
     }
 
     public void addGraphicContents(List<GraphicContent> graphicContentsPaths) {
