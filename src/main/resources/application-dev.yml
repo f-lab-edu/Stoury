@@ -9,7 +9,7 @@ spring:
     driver-class-name: org.mariadb.jdbc.Driver
   jpa:
     hibernate:
-      ddl-auto: create-drop
+      ddl-auto: none
     show-sql: true
     properties:
       hibernate:
@@ -32,3 +32,6 @@ logging:
 path-prefix: /graphiccontents
 profileImage:
   path-prefix: /profileimages
+google:
+  geocoding:
+    api-key: dummykey
