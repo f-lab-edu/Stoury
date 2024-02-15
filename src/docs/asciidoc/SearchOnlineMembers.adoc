@@ -1,0 +1,2 @@
+== Search around online members
+operation::member-controller-test/Search around online members[snippets="http-request,http-response,query-parameters"]

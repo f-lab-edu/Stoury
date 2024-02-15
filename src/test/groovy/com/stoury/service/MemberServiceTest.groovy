@@ -10,6 +10,7 @@ import com.stoury.exception.member.MemberUpdateException
 import com.stoury.repository.MemberOnlineStatusRepository
 import com.stoury.repository.MemberRepository
 import com.stoury.service.storage.StorageService
+import org.springframework.data.util.Pair
 import org.springframework.mock.web.MockMultipartFile
 import org.springframework.security.crypto.password.PasswordEncoder
 import spock.lang.Specification
@@ -143,5 +144,42 @@ class MemberServiceTest extends Specification {
         thrown(MemberSearchException)
         where:
         keyword << ["", " ", "\t", "\r", "\n", null]
+    }
+
+    def "주변 사용자 검색"() {
+        given:
+        memberOnlineStatusRepository.findByPoint(_, _) >> List.of(
+                Pair.of("3", 10), Pair.of("2", 20), Pair.of("1", 30)
+        )
+        def member1 = new Member("member1@email.com", "pwdpwd1", "member1", null)
+        def member2 = new Member("member2@email.com", "pwdpwd1", "member2", null)
+        def member3 = new Member("member3@email.com", "pwdpwd1", "member3", null)
+        memberRepository.findById(1) >> Optional.of(member1)
+        memberRepository.findById(2) >> Optional.of(member2)
+        memberRepository.findById(3) >> Optional.of(member3)
+        when:
+        def aroundMembers = memberService.searchOnlineMembers(4, 10.0, 10.0, 50.0)
+        then:
+        aroundMembers.get(0).username() == member3.username
+        aroundMembers.get(1).username() == member2.username
+        aroundMembers.get(2).username() == member1.username
+    }
+
+    def "주변 사용자 검색-사용자 본인은 제외되어야 함"() {
+        given:
+        memberOnlineStatusRepository.findByPoint(_, _) >> List.of(
+                Pair.of("3", 10), Pair.of("2", 20), Pair.of("1", 30)
+        )
+        def member1 = new Member("member1@email.com", "pwdpwd1", "member1", null)
+        def member2 = new Member("member2@email.com", "pwdpwd1", "member2", null)
+        def member3 = new Member("member3@email.com", "pwdpwd1", "member3", null)
+        memberRepository.findById(1) >> Optional.of(member1)
+        memberRepository.findById(2) >> Optional.of(member2)
+        memberRepository.findById(3) >> Optional.of(member3)
+        when:
+        def aroundMembers = memberService.searchOnlineMembers(2, 10.0, 10.0, 50.0)
+        then:
+        aroundMembers.get(0).username() == member3.username
+        aroundMembers.get(1).username() == member1.username
     }
 }

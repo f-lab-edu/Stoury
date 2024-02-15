@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="generator" content="Asciidoctor 2.0.18">
-<title>Get feeds of member</title>
+<title>Search around online members</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
 <style>
 /*! Asciidoctor default stylesheet | MIT License | https://asciidoctor.org */
@@ -441,67 +441,52 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </div>
 <div id="content">
 <div class="sect1">
-<h2 id="_get_feeds_of_member">Get feeds of member</h2>
+<h2 id="_search_around_online_members">Search around online members</h2>
 <div class="sectionbody">
 <div class="sect2">
-<h3 id="_get_feeds_of_member_http_request">HTTP request</h3>
+<h3 id="_search_around_online_members_http_request">HTTP request</h3>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight nowrap"><code class="language-http" data-lang="http">GET /feeds/member/1?orderThan=2024-12-31T15%3A00%3A00 HTTP/1.1
+<pre class="highlight nowrap"><code class="language-http" data-lang="http">GET /members/around?latitude=36.12345&amp;longitude=127.12345&amp;radiusKm=50 HTTP/1.1
 Host: localhost:8080</code></pre>
 </div>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_get_feeds_of_member_http_response">HTTP response</h3>
+<h3 id="_search_around_online_members_http_response">HTTP response</h3>
 <div class="listingblock">
 <div class="content">
 <pre class="highlight nowrap"><code class="language-http" data-lang="http">HTTP/1.1 200 OK
 Content-Type: application/json;charset=UTF-8
-Content-Length: 825
+Content-Length: 401
 
 [ {
-  "feedId" : 1,
-  "writer" : {
-    "id" : 1,
-    "username" : "testWriter"
-  },
-  "graphicContentsPaths" : [ "/file1.jpeg", "/file2.mp4", "/file3.jpeg" ],
-  "textContent" : "This is content",
-  "latitude" : 36.5116,
-  "lonitude" : 127.2359,
-  "tagNames" : [ "korea", "travel" ],
-  "location" : {
-    "city" : "sejong-si",
-    "country" : "Republic of Korea"
-  },
-  "likes" : 0,
-  "createdAt" : "2024-12-31T13:30:20.000000014"
+  "memberId" : 3,
+  "username" : "member3",
+  "email" : "member3@email.com",
+  "distance" : 2
 }, {
-  "feedId" : 1,
-  "writer" : {
-    "id" : 2,
-    "username" : "testWriter"
-  },
-  "graphicContentsPaths" : [ ],
-  "textContent" : "This is content2",
-  "latitude" : 36.3157,
-  "lonitude" : 127.3913,
-  "tagNames" : [ "daejeon", "travel" ],
-  "location" : {
-    "city" : "daejeon-si",
-    "country" : "Republic of Korea"
-  },
-  "likes" : 0,
-  "createdAt" : "2024-12-31T13:30:20.000000014"
+  "memberId" : 2,
+  "username" : "member2",
+  "email" : "member2@email.com",
+  "distance" : 10
+}, {
+  "memberId" : 4,
+  "username" : "member4",
+  "email" : "member4@email.com",
+  "distance" : 33
+}, {
+  "memberId" : 5,
+  "username" : "member5",
+  "email" : "member5@email.com",
+  "distance" : 47
 } ]</code></pre>
 </div>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_get_feeds_of_member_path_parameters">Path parameters</h3>
+<h3 id="_search_around_online_members_query_parameters">Query parameters</h3>
 <table class="tableblock frame-all grid-all stretch">
-<caption class="title">Table 1. /feeds/member/{memberId}</caption>
 <colgroup>
 <col style="width: 50%;">
 <col style="width: 50%;">
@@ -514,8 +499,16 @@ Content-Length: 825
 </thead>
 <tbody>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>memberId</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">id of member</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>latitude</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Current user&#8217;s latitude</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>longitude</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Current user&#8217;s longitude</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>radiusKm</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Search radius as kilometers.</p></td>
 </tr>
 </tbody>
 </table>
@@ -526,7 +519,7 @@ Content-Length: 825
 <div id="footer">
 <div id="footer-text">
 Version 0.0.1-SNAPSHOT<br>
-Last updated 2024-02-12 08:50:17 +0900
+Last updated 2024-02-14 13:20:29 +0900
 </div>
 </div>
 </body>

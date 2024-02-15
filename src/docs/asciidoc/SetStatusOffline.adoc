@@ -1,0 +1,2 @@
+== Set status online
+operation::member-controller-test/Set status offline[snippets="http-request,http-response"]

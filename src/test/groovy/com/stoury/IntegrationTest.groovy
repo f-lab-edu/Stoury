@@ -62,6 +62,8 @@ class IntegrationTest extends Specification {
     @Autowired
     RankingRepository rankingRepository
     @Autowired
+    MemberOnlineStatusRepository memberOnlineStatusRepository
+    @Autowired
     StringRedisTemplate redisTemplate
     @PersistenceContext
     EntityManager entityManager
@@ -472,10 +474,27 @@ class IntegrationTest extends Specification {
             feedRepository.findById(feedId).orElseThrow()
                     .getGraphicContents().size() == 3
             tx.commit()
-        }catch (RuntimeException e){
-            if(tx != null && tx.isActive()){
+        } catch (RuntimeException e) {
+            if (tx != null && tx.isActive()) {
                 tx.rollback()
             }
         }
+    }
+
+    def "주변 사용자 레디스에서 검색"() {
+        given:
+        def member1 = memberRepository.save(new Member("test1@email.com", "encrypted", "member1", null))
+        def member2 = memberRepository.save(new Member("test2@email.com", "encrypted", "member2", null))
+        def member3 = memberRepository.save(new Member("test3@email.com", "encrypted", "member3", null))
+        def member4 = memberRepository.save(new Member("test4@email.com", "encrypted", "member4", null))
+        memberOnlineStatusRepository.save(member1.id, 37.566535, 126.97796919999996)
+        memberOnlineStatusRepository.save(member2.id, 37.4562551, 126.70520693063735)
+        memberOnlineStatusRepository.save(member3.id, 36.3504119, 127.38454750000005)
+        memberOnlineStatusRepository.save(member4.id, 35.1795543, 129.07564160000004)
+        when:
+        def aroundMembers = memberService.searchOnlineMembers(member1.id, 37.566535, 126.97796919999996, 200)
+        then:
+        aroundMembers.get(0).memberId() == member2.id
+        aroundMembers.get(1).memberId() == member3.id
     }
 }
