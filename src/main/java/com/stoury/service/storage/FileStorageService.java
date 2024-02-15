@@ -10,7 +10,7 @@ import java.io.IOException;
 import java.nio.file.*;
 
 @Component
-@Profile("dev")
+@Profile("!test")
 public class FileStorageService implements StorageService {
     @Override
     public void saveFileAtPath(MultipartFile fileToSave, Path path) {

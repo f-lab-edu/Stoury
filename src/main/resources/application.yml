@@ -7,22 +7,35 @@ server:
         http-only: true
       timeout: 3600
 spring:
+  data:
+    redis:
+      port: 8379
+      host: localhost
   batch:
     job:
       enabled: false
-      names: ${job.name:NONE}
+      names: updatePopularSpotsJob,updateHotFeedsJob
+    jdbc:
+      initialize-schema: always
   datasource:
-    url: jdbc:mariadb://localhost:3306/stoury
-    username: ${MYSQL_USERNAME}
-    password: ${MYSQL_PW}
+    url: jdbc:mariadb://localhost:4306/stourydev?allowPublicKeyRetrieval=true&useSSL=false
+    username: root
+    password:
     driver-class-name: org.mariadb.jdbc.Driver
   jpa:
+    show-sql: true
     hibernate:
+      ddl-auto: none
       naming:
         physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
     properties:
       hibernate:
         dialect: org.hibernate.dialect.MySQL8Dialect
+        format_sql: true
+      defer-datasource-initialization: false
+  sql:
+    init:
+      mode: always
   flyway:
     enabled: true
     baseline-on-migrate: true
@@ -31,12 +44,15 @@ spring:
     multipart:
       max-request-size: 50MB
       max-file-size: 50MB
+logging:
+  level:
+    org.hibernate.orm.jdbc.bind: trace
 path-prefix: /feeds
 profileImage:
   path-prefix: /members/profiles
 google:
   geocoding:
-    api-key: ${GEOCODE_API_KEY}
+    api-key: geocodeapikey
 origin: https://temp.stoury.com
 token:
   secret: tokensecret

@@ -21,8 +21,8 @@ import java.util.Arrays;
 import java.util.Set;
 
 @Service
-@Profile("dev")
 @RequiredArgsConstructor
+@Profile("!test")
 @Slf4j
 public class GeocodingLocationService implements LocationService {
     public static final String UNDEFINED_LOCATION = "UNDEFINED";
