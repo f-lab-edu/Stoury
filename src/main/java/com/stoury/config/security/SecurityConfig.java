@@ -19,6 +19,10 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 import java.util.Optional;
 
+import static org.springframework.http.HttpMethod.GET;
+import static org.springframework.http.HttpMethod.POST;
+import static org.springframework.http.HttpStatus.*;
+
 @Configuration
 @RequiredArgsConstructor
 @EnableWebSecurity
@@ -38,17 +42,17 @@ public class SecurityConfig {
                         .logoutSuccessHandler(logoutSuccessHandler(memberService)))
                 .authorizeHttpRequests(httpRequest -> httpRequest
                         .requestMatchers(new AntPathRequestMatcher("/login")).permitAll()
-                        .requestMatchers(new AntPathRequestMatcher("/members", "POST")).permitAll()
-                        .requestMatchers(new AntPathRequestMatcher("/feeds/member/**", "GET")).permitAll()
-                        .requestMatchers(new AntPathRequestMatcher("/feeds/tag/**", "GET")).permitAll()
-                        .requestMatchers(new AntPathRequestMatcher("/feeds/popular/*", "GET")).permitAll()
-                        .requestMatchers(new AntPathRequestMatcher("/comments/**", "GET")).permitAll()
-                        .requestMatchers(new AntPathRequestMatcher("/rank/**", "GET")).permitAll()
-                        .requestMatchers(new AntPathRequestMatcher("/diaries/**", "GET")).permitAll()
+                        .requestMatchers(new AntPathRequestMatcher("/members", POST.name())).permitAll()
+                        .requestMatchers(new AntPathRequestMatcher("/feeds/member/**", GET.name())).permitAll()
+                        .requestMatchers(new AntPathRequestMatcher("/feeds/tag/**", GET.name())).permitAll()
+                        .requestMatchers(new AntPathRequestMatcher("/feeds/popular/*", GET.name())).permitAll()
+                        .requestMatchers(new AntPathRequestMatcher("/comments/**", GET.name())).permitAll()
+                        .requestMatchers(new AntPathRequestMatcher("/rank/**", GET.name())).permitAll()
+                        .requestMatchers(new AntPathRequestMatcher("/diaries/**", GET.name())).permitAll()
                         .anyRequest().authenticated())
                 .exceptionHandling(exHandler -> exHandler
                         .authenticationEntryPoint((request, response, authException) -> response
-                                .sendError(401, "Not authorized.")))
+                                .sendError(UNAUTHORIZED.value(), "Not authorized.")))
                 .build();
     }
 
@@ -66,7 +70,7 @@ public class SecurityConfig {
             Double longitude = Optional.ofNullable(request.getParameter("longitude"))
                     .map(Double::parseDouble).orElse(null);
             memberService.setOnline(memberId, latitude, longitude);
-            response.setStatus(200);
+            response.setStatus(OK.value());
         };
     }
 
@@ -75,12 +79,12 @@ public class SecurityConfig {
         return (request, response, authentication) -> {
             Long memberId = ((AuthenticatedMember) authentication.getPrincipal()).getId();
             memberService.setOffline(memberId);
-            response.setStatus(200);
+            response.setStatus(OK.value());
         };
     }
 
     @Bean
     public AuthenticationFailureHandler authenticationFailureHandler() {
-        return (request, response, authentication) -> response.sendError(403);
+        return (request, response, authentication) -> response.sendError(FORBIDDEN.value());
     }
 }
