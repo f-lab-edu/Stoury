@@ -3,6 +3,7 @@ package com.stoury.controller
 import com.stoury.config.security.SecurityConfig
 import com.stoury.dto.member.AuthenticatedMember
 import com.stoury.service.MemberService
+import com.stoury.utils.JwtUtils
 import org.junit.jupiter.api.extension.ExtendWith
 import org.spockframework.spring.SpringBean
 import org.springframework.beans.factory.annotation.Autowired
@@ -36,7 +37,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 
 @SpringBootTest(classes = SecurityConfig.class)
-@MockBean(JpaMetamodelMappingContext.class)
+@MockBean([JpaMetamodelMappingContext.class, JwtUtils.class])
 @ExtendWith(RestDocumentationExtension.class)
 @AutoConfigureRestDocs
 @AutoConfigureMockMvc
