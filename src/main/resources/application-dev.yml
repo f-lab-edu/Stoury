@@ -3,9 +3,9 @@ spring:
     jdbc:
       initialize-schema: always
   datasource:
-    url: jdbc:mariadb://localhost:3306/stoury_test
-    username: ${MYSQL_USERNAME}
-    password: ${MYSQL_PW}
+    url: jdbc:mariadb://localhost:4306/testdb?allowPublicKeyRetrieval=true&useSSL=false
+    username: root
+    password: example
     driver-class-name: org.mariadb.jdbc.Driver
   jpa:
     hibernate:
@@ -29,7 +29,6 @@ spring:
 logging:
   level:
     org.springframework.security: trace
-token-secret: "TOKEN_SECRET_DEV"
-path-prefix: ${FEEDS}
+path-prefix: /graphiccontents
 profileImage:
-  path-prefix: ${PROFILE_IMAGES}
+  path-prefix: /profileimages

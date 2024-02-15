@@ -9,9 +9,9 @@ spring:
     job:
       names: updatePopularSpotsJob,updateHotFeedsJob
   datasource:
-    url: jdbc:mariadb://localhost:3306/testdb
-    username: ${MYSQL_USERNAME}
-    password: ${MYSQL_PW}
+    url: jdbc:mariadb://localhost:4306/testdb?allowPublicKeyRetrieval=true&useSSL=false
+    username: root
+    password: example
     driver-class-name: org.mariadb.jdbc.Driver
   jpa:
     hibernate:
@@ -27,5 +27,3 @@ spring:
 logging:
   level:
     org.hibernate.orm.jdbc.bind: trace
-
-token-secret: TOKEN_SECRET_TEST

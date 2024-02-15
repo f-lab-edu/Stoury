@@ -4,3 +4,11 @@ services:
     image: redis
     ports:
       - "8379:6379"
+  db:
+    image: mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: example
+      MYSQL_DATABASE: testdb
+    ports:
+      - "4306:3306"
