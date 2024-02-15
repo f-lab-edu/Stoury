@@ -30,7 +30,8 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http,
                                                    MemberService memberService) throws Exception {
-        return http.csrf(AbstractHttpConfigurer::disable)
+        return http
+                .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
                 .formLogin(formLogin -> formLogin
                         .loginProcessingUrl("/login")
@@ -49,6 +50,8 @@ public class SecurityConfig {
                         .requestMatchers(new AntPathRequestMatcher("/comments/**", GET.name())).permitAll()
                         .requestMatchers(new AntPathRequestMatcher("/rank/**", GET.name())).permitAll()
                         .requestMatchers(new AntPathRequestMatcher("/diaries/**", GET.name())).permitAll()
+                        .requestMatchers(new AntPathRequestMatcher("/ws-stomp/**", GET.name())).permitAll()
+                        .requestMatchers(new AntPathRequestMatcher("/ws-stomp/**", POST.name())).permitAll()
                         .anyRequest().authenticated())
                 .exceptionHandling(exHandler -> exHandler
                         .authenticationEntryPoint((request, response, authException) -> response

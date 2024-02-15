@@ -37,3 +37,6 @@ profileImage:
 google:
   geocoding:
     api-key: ${GEOCODE_API_KEY}
+origin: https://temp.stoury.com
+token:
+  secret: tokensecret
