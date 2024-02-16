@@ -33,10 +33,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 @AutoConfigureRestDocs
 abstract class AbstractRestDocsTests extends Specification {
     @Autowired
-    private WebApplicationContext context
+    WebApplicationContext context
 
     @Autowired
-    private RestDocumentationContextProvider restDocumentation
+    RestDocumentationContextProvider restDocumentation
 
     MockMvc mockMvc
 

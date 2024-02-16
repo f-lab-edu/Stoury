@@ -24,12 +24,16 @@ public class AuthorizationHeaderFilter implements Filter {
         HttpServletRequest httpServletRequest = (HttpServletRequest) request;
         if (pathMather.match("/chatRoom/auth/**", httpServletRequest.getServletPath())) {
             ContentCachingResponseWrapper responseWrapper = new ContentCachingResponseWrapper((HttpServletResponse) response);
-            UsernamePasswordAuthenticationToken auth = (UsernamePasswordAuthenticationToken) httpServletRequest.getUserPrincipal();
-            AuthenticatedMember authenticatedMember = (AuthenticatedMember) auth.getPrincipal();
+            AuthenticatedMember authenticatedMember = getAuthenticatedMember(httpServletRequest);
             Long chatRoomId = getChatRoomId(httpServletRequest.getServletPath());
             responseWrapper.setHeader("Authorization", jwtUtils.issueToken(authenticatedMember.getId(), chatRoomId));
         }
         chain.doFilter(request, response);
+    }
+
+    protected AuthenticatedMember getAuthenticatedMember(HttpServletRequest httpServletRequest) {
+        UsernamePasswordAuthenticationToken auth = (UsernamePasswordAuthenticationToken) httpServletRequest.getUserPrincipal();
+        return (AuthenticatedMember) auth.getPrincipal();
     }
 
     private Long getChatRoomId(String servletPath) {
