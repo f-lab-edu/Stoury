@@ -1,14 +1,13 @@
 package com.stoury.repository;
 
+import com.stoury.dto.member.MemberDistance;
 import com.stoury.exception.location.GetMemberPositionsException;
-import com.stoury.exception.member.MemberSearchException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.geo.*;
 import org.springframework.data.redis.connection.RedisGeoCommands;
 import org.springframework.data.redis.core.GeoOperations;
 import org.springframework.data.redis.core.SetOperations;
 import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -43,7 +42,7 @@ public class MemberOnlineStatusRepository {
         opsForGeo.remove(MEMBER_POS_CACHE_KEY, memberId.toString());
     }
 
-    public List<Pair<String, Integer>> findByPoint(Point point, double radiusKm) {
+    public List<MemberDistance> findByPoint(Point point, double radiusKm) {
         Circle within = new Circle(point, new Distance(radiusKm, Metrics.KILOMETERS));
         RedisGeoCommands.GeoRadiusCommandArgs args = RedisGeoCommands.GeoRadiusCommandArgs.newGeoRadiusArgs()
                 .includeDistance()
@@ -53,14 +52,14 @@ public class MemberOnlineStatusRepository {
                 .getContent();
 
         return geoResults.stream()
-                .map(MemberOnlineStatusRepository::memberDistances)
+                .map(this::memberDistances)
                 .toList();
     }
 
-    public static Pair<String, Integer> memberDistances(GeoResult<RedisGeoCommands.GeoLocation<String>> geoResult) {
+    private MemberDistance memberDistances(GeoResult<RedisGeoCommands.GeoLocation<String>> geoResult) {
         String memberId = geoResult.getContent().getName();
         double distance = geoResult.getDistance().in(Metrics.KILOMETERS).getNormalizedValue();
 
-        return Pair.of(memberId, (int) distance);
+        return new MemberDistance(Long.parseLong(memberId), (int)distance);
     }
 }

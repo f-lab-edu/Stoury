@@ -2,6 +2,7 @@ package com.stoury.service
 
 import com.stoury.domain.Member
 import com.stoury.dto.member.MemberCreateRequest
+import com.stoury.dto.member.MemberDistance
 import com.stoury.dto.member.MemberUpdateRequest
 import com.stoury.exception.member.MemberCreateException
 import com.stoury.exception.member.MemberDeleteException
@@ -149,7 +150,9 @@ class MemberServiceTest extends Specification {
     def "주변 사용자 검색"() {
         given:
         memberOnlineStatusRepository.findByPoint(_, _) >> List.of(
-                Pair.of("3", 10), Pair.of("2", 20), Pair.of("1", 30)
+                new MemberDistance(3, 10),
+                new MemberDistance(2, 20),
+                new MemberDistance(1, 30),
         )
         def member1 = new Member("member1@email.com", "pwdpwd1", "member1", null)
         def member2 = new Member("member2@email.com", "pwdpwd1", "member2", null)
@@ -168,7 +171,9 @@ class MemberServiceTest extends Specification {
     def "주변 사용자 검색-사용자 본인은 제외되어야 함"() {
         given:
         memberOnlineStatusRepository.findByPoint(_, _) >> List.of(
-                Pair.of("3", 10), Pair.of("2", 20), Pair.of("1", 30)
+                new MemberDistance(3, 10),
+                new MemberDistance(2, 20),
+                new MemberDistance(1, 30),
         )
         def member1 = new Member("member1@email.com", "pwdpwd1", "member1", null)
         def member2 = new Member("member2@email.com", "pwdpwd1", "member2", null)

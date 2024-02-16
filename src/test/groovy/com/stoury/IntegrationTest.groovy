@@ -492,19 +492,22 @@ class IntegrationTest extends Specification {
 
     def "주변 사용자 레디스에서 검색"() {
         given:
-        def member1 = memberRepository.save(new Member("test1@email.com", "encrypted", "member1", null))
-        def member2 = memberRepository.save(new Member("test2@email.com", "encrypted", "member2", null))
-        def member3 = memberRepository.save(new Member("test3@email.com", "encrypted", "member3", null))
-        def member4 = memberRepository.save(new Member("test4@email.com", "encrypted", "member4", null))
-        memberOnlineStatusRepository.save(member1.id, 37.566535, 126.97796919999996)
-        memberOnlineStatusRepository.save(member2.id, 37.4562551, 126.70520693063735)
-        memberOnlineStatusRepository.save(member3.id, 36.3504119, 127.38454750000005)
-        memberOnlineStatusRepository.save(member4.id, 35.1795543, 129.07564160000004)
+        def members = [
+                new Member("test1@email.com", "encrypted", "member1", null),
+                new Member("test2@email.com", "encrypted", "member2", null),
+                new Member("test3@email.com", "encrypted", "member3", null),
+                new Member("test4@email.com", "encrypted", "member4", null)
+        ]
+        def savedMembers = memberRepository.saveAll(members)
+        memberOnlineStatusRepository.save(savedMembers.get(0).id, 37.566535, 126.97796919999996)  // 첫번째 멤버로부터
+        memberOnlineStatusRepository.save(savedMembers.get(1).id, 37.4562551, 126.70520693063735) // 27km
+        memberOnlineStatusRepository.save(savedMembers.get(2).id, 36.3504119, 127.38454750000005) // 139km
+        memberOnlineStatusRepository.save(savedMembers.get(3).id, 35.1795543, 129.07564160000004) // 324km
         when:
-        def aroundMembers = memberService.searchOnlineMembers(member1.id, 37.566535, 126.97796919999996, 200)
+        def aroundMembers = memberService.searchOnlineMembers(savedMembers.get(0).id, 37.566535, 126.97796919999996, 200)
         then:
-        aroundMembers.get(0).memberId() == member2.id
-        aroundMembers.get(1).memberId() == member3.id
+        aroundMembers.get(0).memberId() == savedMembers.get(1).id
+        aroundMembers.get(1).memberId() == savedMembers.get(2).id
     }
 
     def "이전 채팅 불러오기"() {
