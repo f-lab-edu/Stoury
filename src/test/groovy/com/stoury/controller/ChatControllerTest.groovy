@@ -31,7 +31,7 @@ class ChatControllerTest extends AbstractRestDocsTests {
         authorizationHeaderFilter = Spy(new AuthorizationHeaderFilter(jwtUtils))
     }
 
-    def "채팅방 생성"() {
+    def "Create chat room"() {
         given:
         def parameterDescriptor = parameterWithName("receiverId").description("who receive first chat")
         def sender = new AuthenticatedMember(1, "test@email.com", "pwdpwdpwd123")
@@ -46,7 +46,7 @@ class ChatControllerTest extends AbstractRestDocsTests {
         response.andExpect(status().isOk())
     }
 
-    def "채팅방 권한 얻어오기"() {
+    def "Get chatroom authorization"() {
         given:
         mockMvc = MockMvcBuilders.webAppContextSetup(context)
                 .apply(documentationConfiguration(restDocumentation))

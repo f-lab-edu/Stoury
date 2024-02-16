@@ -615,6 +615,20 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <li><a href="#_search_around_online_members_query_parameters">Query parameters</a></li>
 </ul>
 </li>
+<li><a href="#_create_chat_room">Create chat room</a>
+<ul class="sectlevel2">
+<li><a href="#_create_chat_room_http_request">HTTP request</a></li>
+<li><a href="#_create_chat_room_http_response">HTTP response</a></li>
+<li><a href="#_create_chat_room_path_parameters">Path parameters</a></li>
+</ul>
+</li>
+<li><a href="#_get_chat_room_authorization">Get chat room authorization</a>
+<ul class="sectlevel2">
+<li><a href="#_get_chat_room_authorization_http_request">HTTP request</a></li>
+<li><a href="#_get_chat_room_authorization_http_response">HTTP response</a></li>
+<li><a href="#_get_chat_room_authorization_path_parameters">Path parameters</a></li>
+</ul>
+</li>
 </ul>
 </div>
 </div>
@@ -1335,7 +1349,7 @@ Content-Length: 626
   "feedId" : 1,
   "hasNestedComments" : false,
   "textContent" : "First comment",
-  "createdAt" : "2024-02-14T13:23:47.506356"
+  "createdAt" : "2024-02-16T15:31:07.212193"
 }, {
   "id" : 2,
   "writer" : {
@@ -1345,7 +1359,7 @@ Content-Length: 626
   "feedId" : 1,
   "hasNestedComments" : true,
   "textContent" : "This comment was deleted",
-  "createdAt" : "2024-02-14T13:23:47.508535"
+  "createdAt" : "2024-02-16T15:31:07.214048"
 }, {
   "id" : 3,
   "writer" : {
@@ -1355,7 +1369,7 @@ Content-Length: 626
   "feedId" : 1,
   "hasNestedComments" : true,
   "textContent" : "Third comment",
-  "createdAt" : "2024-02-14T13:23:47.508899"
+  "createdAt" : "2024-02-16T15:31:07.214321"
 } ]</code></pre>
 </div>
 </div>
@@ -1433,7 +1447,7 @@ Content-Length: 602
   },
   "parentCommentId" : 1,
   "textContent" : "First child comment",
-  "createdAt" : "2024-02-14T13:23:47.530544"
+  "createdAt" : "2024-02-16T15:31:07.235701"
 }, {
   "id" : 12,
   "writerResponse" : {
@@ -1442,7 +1456,7 @@ Content-Length: 602
   },
   "parentCommentId" : 1,
   "textContent" : "Second child comment",
-  "createdAt" : "2024-02-14T13:23:47.531148"
+  "createdAt" : "2024-02-16T15:31:07.236607"
 }, {
   "id" : 13,
   "writerResponse" : {
@@ -1451,7 +1465,7 @@ Content-Length: 602
   },
   "parentCommentId" : 1,
   "textContent" : "This comment was deleted",
-  "createdAt" : "2024-02-14T13:23:47.531701"
+  "createdAt" : "2024-02-16T15:31:07.236968"
 } ]</code></pre>
 </div>
 </div>
@@ -1574,7 +1588,7 @@ Content-Length: 1760
         "country" : "United States"
       },
       "likes" : 13,
-      "createdAt" : "2024-02-15T13:23:47.564272"
+      "createdAt" : "2024-02-17T15:31:07.264682"
     }, {
       "feedId" : 3,
       "writer" : {
@@ -1591,7 +1605,7 @@ Content-Length: 1760
         "country" : "United States"
       },
       "likes" : 52,
-      "createdAt" : "2024-02-16T13:23:47.564988"
+      "createdAt" : "2024-02-18T15:31:07.265345"
     } ],
     "1" : [ {
       "feedId" : 1,
@@ -1609,11 +1623,11 @@ Content-Length: 1760
         "country" : "United States"
       },
       "likes" : 20,
-      "createdAt" : "2024-02-14T13:23:47.560049"
+      "createdAt" : "2024-02-16T15:31:07.260551"
     } ]
   },
-  "startDate" : "2024-02-14",
-  "endDate" : "2024-02-16",
+  "startDate" : "2024-02-16",
+  "endDate" : "2024-02-18",
   "city" : "Colorado",
   "country" : "United States",
   "likes" : 85
@@ -2271,11 +2285,114 @@ Content-Length: 401
 </div>
 </div>
 </div>
+<div class="sect1">
+<h2 id="_create_chat_room">Create chat room</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_create_chat_room_http_request">HTTP request</h3>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">POST /chats/to/2 HTTP/1.1
+Host: localhost:8080
+Content-Type: application/x-www-form-urlencoded</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_create_chat_room_http_response">HTTP response</h3>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">HTTP/1.1 200 OK
+Content-Type: application/json;charset=UTF-8
+Content-Length: 128
+
+{
+  "id" : 1,
+  "members" : [ {
+    "id" : 1,
+    "username" : "member1"
+  }, {
+    "id" : 2,
+    "username" : "member2"
+  } ]
+}</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_create_chat_room_path_parameters">Path parameters</h3>
+<table class="tableblock frame-all grid-all stretch">
+<caption class="title">Table 1. /chats/to/{receiverId}</caption>
+<colgroup>
+<col style="width: 50%;">
+<col style="width: 50%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Parameter</th>
+<th class="tableblock halign-left valign-top">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>receiverId</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">who receive first chat</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_get_chat_room_authorization">Get chat room authorization</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_get_chat_room_authorization_http_request">HTTP request</h3>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">GET /chatRoom/auth/1 HTTP/1.1
+Host: localhost:8080</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_get_chat_room_authorization_http_response">HTTP response</h3>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">HTTP/1.1 200 OK
+Authorization: eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiIxIiwiY2hhdFJvb21JZCI6MSwiZXhwIjoxNzA4MDgzMDY2fQ.-azw9Lj5EhMEw_nZZUNA0OJxsIriVJF8quFraibhUfIXKfgLfKkHbQmC6ECgohOfUJsqA54EsRddpQNfnu-4Ww</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_get_chat_room_authorization_path_parameters">Path parameters</h3>
+<table class="tableblock frame-all grid-all stretch">
+<caption class="title">Table 1. /chatRoom/auth/{chatRoomId}</caption>
+<colgroup>
+<col style="width: 50%;">
+<col style="width: 50%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Parameter</th>
+<th class="tableblock halign-left valign-top">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>chatRoomId</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">id of chat room</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
 </div>
 <div id="footer">
 <div id="footer-text">
 Version 0.0.1-SNAPSHOT<br>
-Last updated 2024-02-14 13:23:39 +0900
+Last updated 2024-02-16 15:30:57 +0900
 </div>
 </div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.3/highlight.min.js"></script>

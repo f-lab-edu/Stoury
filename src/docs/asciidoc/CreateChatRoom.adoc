@@ -1,0 +1,2 @@
+== Create chat room
+operation::chat-controller-test/Create chat room[snippets="http-request,http-response,path-parameters"]

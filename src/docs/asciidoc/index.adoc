@@ -30,4 +30,6 @@ include::GetMonthlyHotFeeds.adoc[]
 include::SetStatusOnline.adoc[]
 include::SetStatusOffline.adoc[]
 include::SearchOnlineMembers.adoc[]
+include::CreateChatRoom.adoc[]
+include::GetChatRoomAuthorization.adoc[]
 
