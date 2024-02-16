@@ -78,4 +78,13 @@ public class ChatService {
         }
         throw new NotAuthorizedException("You're not a member of the chat room.");
     }
+
+    public void checkIfRoomMember(Long memberId, Long chatRoomId) {
+        Member member = memberRepository.findById(memberId).orElseThrow(MemberSearchException::new);
+        ChatRoom chatRoom = chatRoomRepository.findById(chatRoomId).orElseThrow(ChatRoomSearchException::new);
+        if (chatRoom.hasMember(member)) {
+            return;
+        }
+        throw new NotAuthorizedException("You're not a member of the chat room.");
+    }
 }

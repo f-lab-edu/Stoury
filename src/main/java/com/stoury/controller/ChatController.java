@@ -25,6 +25,12 @@ public class ChatController {
         return chatService.createChatRoom(authenticatedMember.getId(), receiverId);
     }
 
+    @GetMapping("/chatRoom/auth/{chatRoomId}")
+    public void enterChatRoom(@AuthenticationPrincipal AuthenticatedMember authenticatedMember,
+                              @PathVariable Long chatRoomId) {
+        chatService.checkIfRoomMember(authenticatedMember.getId(), chatRoomId);
+    }
+
     @MessageMapping("/chats/{chatRoomId}")
     @SendTo("/sub/chatRoom/{chatRoomId}")
     public ChatMessageResponse sendMessage(Long memberId, @DestinationVariable Long chatRoomId, String textContent) {
