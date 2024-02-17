@@ -5,6 +5,7 @@ import com.stoury.service.MemberService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -42,21 +43,28 @@ public class SecurityConfig {
                         .logoutUrl("/logout")
                         .logoutSuccessHandler(logoutSuccessHandler(memberService)))
                 .authorizeHttpRequests(httpRequest -> httpRequest
-                        .requestMatchers(new AntPathRequestMatcher("/login")).permitAll()
-                        .requestMatchers(new AntPathRequestMatcher("/members", POST.name())).permitAll()
-                        .requestMatchers(new AntPathRequestMatcher("/feeds/member/**", GET.name())).permitAll()
-                        .requestMatchers(new AntPathRequestMatcher("/feeds/tag/**", GET.name())).permitAll()
-                        .requestMatchers(new AntPathRequestMatcher("/feeds/popular/*", GET.name())).permitAll()
-                        .requestMatchers(new AntPathRequestMatcher("/comments/**", GET.name())).permitAll()
-                        .requestMatchers(new AntPathRequestMatcher("/rank/**", GET.name())).permitAll()
-                        .requestMatchers(new AntPathRequestMatcher("/diaries/**", GET.name())).permitAll()
-                        .requestMatchers(new AntPathRequestMatcher("/ws-stomp/**", GET.name())).permitAll()
-                        .requestMatchers(new AntPathRequestMatcher("/ws-stomp/**", POST.name())).permitAll()
+                        .requestMatchers(requestMatcher("/login")).permitAll()
+                        .requestMatchers(requestMatcher("/members", POST)).permitAll()
+                        .requestMatchers(requestMatcher("/feeds/member/**", GET)).permitAll()
+                        .requestMatchers(requestMatcher("/feeds/tag/**", GET)).permitAll()
+                        .requestMatchers(requestMatcher("/feeds/popular/*", GET)).permitAll()
+                        .requestMatchers(requestMatcher("/comments/**", GET)).permitAll()
+                        .requestMatchers(requestMatcher("/rank/**", GET)).permitAll()
+                        .requestMatchers(requestMatcher("/diaries/**", GET)).permitAll()
+                        .requestMatchers(requestMatcher("/ws-stomp/**", GET)).permitAll()
+                        .requestMatchers(requestMatcher("/ws-stomp/**", POST)).permitAll()
                         .anyRequest().authenticated())
                 .exceptionHandling(exHandler -> exHandler
                         .authenticationEntryPoint((request, response, authException) -> response
                                 .sendError(UNAUTHORIZED.value(), "Not authorized.")))
                 .build();
+    }
+
+    public AntPathRequestMatcher requestMatcher(String path, HttpMethod method) {
+        return new AntPathRequestMatcher(path, method.name());
+    }
+    public AntPathRequestMatcher requestMatcher(String path) {
+        return new AntPathRequestMatcher(path);
     }
 
     @Bean
