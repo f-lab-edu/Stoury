@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="generator" content="Asciidoctor 2.0.18">
-<title>Get child comments</title>
+<title>Enter chat room</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
 <style>
 /*! Asciidoctor default stylesheet | MIT License | https://asciidoctor.org */
@@ -441,60 +441,30 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </div>
 <div id="content">
 <div class="sect1">
-<h2 id="_get_child_comments">Get child comments</h2>
+<h2 id="_enter_chat_room">Enter chat room</h2>
 <div class="sectionbody">
 <div class="sect2">
-<h3 id="_get_child_comments_http_request">HTTP request</h3>
+<h3 id="_enter_chat_room_http_request">HTTP request</h3>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight nowrap"><code class="language-http" data-lang="http">GET /comments/comment/1 HTTP/1.1
+<pre class="highlight nowrap"><code class="language-http" data-lang="http">GET /chatRoom/2 HTTP/1.1
+Accept: text/event-stream
 Host: localhost:8080</code></pre>
 </div>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_get_child_comments_http_response">HTTP response</h3>
+<h3 id="_enter_chat_room_http_response">HTTP response</h3>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight nowrap"><code class="language-http" data-lang="http">HTTP/1.1 200 OK
-Content-Type: application/json;charset=UTF-8
-Content-Length: 601
-
-[ {
-  "id" : 11,
-  "writerResponse" : {
-    "id" : 1,
-    "username" : "member1"
-  },
-  "parentCommentId" : 1,
-  "textContent" : "First child comment",
-  "createdAt" : "2024-02-17T20:43:47.138744"
-}, {
-  "id" : 12,
-  "writerResponse" : {
-    "id" : 2,
-    "username" : "member2"
-  },
-  "parentCommentId" : 1,
-  "textContent" : "Second child comment",
-  "createdAt" : "2024-02-17T20:43:47.13935"
-}, {
-  "id" : 13,
-  "writerResponse" : {
-    "id" : 3,
-    "username" : "member3"
-  },
-  "parentCommentId" : 1,
-  "textContent" : "This comment was deleted",
-  "createdAt" : "2024-02-17T20:43:47.139618"
-} ]</code></pre>
+<pre class="highlight nowrap"><code class="language-http" data-lang="http">HTTP/1.1 200 OK</code></pre>
 </div>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_get_child_comments_path_parameters">Path parameters</h3>
+<h3 id="_enter_chat_room_path_parameters">Path parameters</h3>
 <table class="tableblock frame-all grid-all stretch">
-<caption class="title">Table 1. /comments/comment/{commentId}</caption>
+<caption class="title">Table 1. /chatRoom/{chatRoomId}</caption>
 <colgroup>
 <col style="width: 50%;">
 <col style="width: 50%;">
@@ -507,11 +477,26 @@ Content-Length: 601
 </thead>
 <tbody>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>commentId</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">id of comment</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>chatRoomId</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">id of chat room</p></td>
 </tr>
 </tbody>
 </table>
+</div>
+<div class="paragraph">
+<p>API server works with sse emitter.
+You should use EventSource to make the request.</p>
+</div>
+<div class="listingblock">
+<div class="title">Client Code Example</div>
+<div class="content">
+<pre class="highlight"><code class="language-javascript" data-lang="javascript">const sse = new EventSource('http://localhost:8080/chatRoom/22', {withCredentials: true});
+
+sse.addEventListener('ChatMessage', (e) =&gt; {
+    const { data: receivedConnectData } = e;
+    console.log('message: ', receivedConnectData);
+});</code></pre>
+</div>
 </div>
 </div>
 </div>
@@ -519,7 +504,7 @@ Content-Length: 601
 <div id="footer">
 <div id="footer-text">
 Version 0.0.1-SNAPSHOT<br>
-Last updated 2024-02-12 08:50:17 +0900
+Last updated 2024-02-17 20:40:49 +0900
 </div>
 </div>
 </body>
