@@ -32,9 +32,15 @@ public class ChatController {
         return chatService.getPreviousChatMessages(authenticatedMember.getId(), chatRoomId, orderThan);
     }
 
-    @PostMapping(value = "/chats/{chatRoomId}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public SseEmitter sendChatMessage(@AuthenticationPrincipal AuthenticatedMember authenticatedMember,
-                                      @PathVariable Long chatRoomId, String textContent) {
-        return chatService.sendMessage(authenticatedMember.getId(), chatRoomId, textContent);
+    @GetMapping(value = "/chatRoom/{chatRoomId}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public SseEmitter enterChatRoom(@AuthenticationPrincipal AuthenticatedMember authenticatedMember,
+                                    @PathVariable Long chatRoomId) {
+        return chatService.enterChatRoom(authenticatedMember.getId(), chatRoomId);
+    }
+
+    @PostMapping(value = "/chats/{chatRoomId}")
+    public ChatMessageResponse sendChatMessage(@AuthenticationPrincipal AuthenticatedMember authenticatedMember,
+                                      @PathVariable Long chatRoomId, @RequestBody(required = true) String textContent) {
+        return chatService.sendChatMessage(authenticatedMember.getId(), chatRoomId, textContent);
     }
 }

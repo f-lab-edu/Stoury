@@ -136,7 +136,7 @@ class ChatServiceTest extends Specification {
         chatRoomRepository.findById(2) >> Optional.of(chatRoom)
         chatMessageRepository.save(_) >> new ChatMessage(id:3, sender: member, chatRoom: chatRoom, textContent: "Hi")
         when:
-        chatService.sendMessage(1, 2, "Hi!")
+        chatService.sendChatMessage(1, 2, "Hi!")
         then:
         1 * sseEmitters.broadCast(_,_)
     }
@@ -148,7 +148,7 @@ class ChatServiceTest extends Specification {
         memerRepository.findById(1) >> Optional.of(member)
         chatRoomRepository.findById(2) >> Optional.of(chatRoom)
         when:
-        chatService.sendMessage(1, 2, "Hi!")
+        chatService.sendChatMessage(1, 2, "Hi!")
         then:
         thrown(NotAuthorizedException)
     }

@@ -17,7 +17,9 @@ import org.springframework.security.web.authentication.AuthenticationFailureHand
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.web.cors.CorsConfiguration;
 
+import java.util.List;
 import java.util.Optional;
 
 import static org.springframework.http.HttpMethod.GET;
@@ -32,6 +34,18 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http,
                                                    MemberService memberService) throws Exception {
         return http
+                .cors(cors -> cors.configurationSource(request -> {
+                    CorsConfiguration corsConfiguration = new CorsConfiguration();
+                    corsConfiguration.setAllowedOriginPatterns(List.of(
+                            "http://localhost:*",
+                            "https://localhost:*",
+                            "http://127.0.0.1:*",
+                            "https://127.0.0.1:*"));
+                    corsConfiguration.setAllowedMethods(List.of("GET","POST", "PUT", "DELETE", "OPTIONS"));
+                    corsConfiguration.setAllowCredentials(true);
+                    corsConfiguration.setAllowedHeaders(List.of("Authorization", "Cache-Control", "Content-Type"));
+                    return corsConfiguration;
+                }))
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
                 .formLogin(formLogin -> formLogin
@@ -61,6 +75,7 @@ public class SecurityConfig {
     public AntPathRequestMatcher requestMatcher(String path, HttpMethod method) {
         return new AntPathRequestMatcher(path, method.name());
     }
+
     public AntPathRequestMatcher requestMatcher(String path) {
         return new AntPathRequestMatcher(path);
     }

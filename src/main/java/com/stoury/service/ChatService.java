@@ -80,10 +80,11 @@ public class ChatService {
     }
 
     @Transactional
-    public SseEmitter sendMessage(Long memberId, Long chatRoomId, String textContent) {
+    public ChatMessageResponse sendChatMessage(Long memberId, Long chatRoomId, String textContent) {
         checkIfRoomMember(memberId, chatRoomId);
         ChatMessageResponse chatMessage = createChatMessage(memberId, chatRoomId, textContent);
-        return sseEmitters.broadCast(chatRoomId, chatMessage);
+        sseEmitters.broadCast(chatRoomId, chatMessage);
+        return chatMessage;
     }
 
     protected void checkIfRoomMember(Long memberId, Long chatRoomId) {
@@ -93,5 +94,11 @@ public class ChatService {
             return;
         }
         throw new NotAuthorizedException("You're not a member of the chat room.");
+    }
+
+    @Transactional(readOnly = true)
+    public SseEmitter enterChatRoom(Long memberId, Long chatRoomId) {
+        checkIfRoomMember(memberId, chatRoomId);
+        return sseEmitters.get(chatRoomId);
     }
 }

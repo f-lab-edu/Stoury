@@ -1,6 +1,7 @@
 package com.stoury.config.sse;
 
 import com.stoury.dto.chat.ChatMessageResponse;
+import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
@@ -11,14 +12,15 @@ import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Component
+@Slf4j
 public class SseEmitters {
     public static final long TIMEOUT = 60 * 1000L;
-    private Map<Long, SseEmitter> chatRoomEmitters = new ConcurrentHashMap<>();
+    private static final Map<Long, SseEmitter> chatRoomEmitters = new ConcurrentHashMap<>();
 
     public SseEmitter get(Long roomId){
         Long roomIdNotNull = Objects.requireNonNull(roomId, "Room id cannot be null");
 
-        return chatRoomEmitters.putIfAbsent(roomIdNotNull, chatRoomEmitter(roomIdNotNull));
+        return chatRoomEmitters.computeIfAbsent(roomIdNotNull, key -> chatRoomEmitter(roomIdNotNull));
     }
 
     @NotNull
@@ -31,9 +33,10 @@ public class SseEmitters {
         return emitter;
     }
 
-    public SseEmitter broadCast(Long roomId, ChatMessageResponse chatMessage) {
+    public void broadCast(Long roomId, ChatMessageResponse chatMessage) {
         Long roomIdNotNull = Objects.requireNonNull(roomId, "Room id cannot be null");
 
+        log.info("Trying to connect to {}", roomId);
         SseEmitter emitter = get(roomIdNotNull);
         try {
             emitter.send(SseEmitter.event()
@@ -42,6 +45,6 @@ public class SseEmitters {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        return emitter;
+        log.info("Established");
     }
 }
