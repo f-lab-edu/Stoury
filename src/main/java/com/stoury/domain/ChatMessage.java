@@ -4,14 +4,11 @@ import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
 
 @Entity
 @Getter
-@EntityListeners(AuditingEntityListener.class)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "CHAT_MESSAGE")
 public class ChatMessage {
@@ -30,13 +27,13 @@ public class ChatMessage {
     @Column(name = "TEXT_CONTENT", columnDefinition = "text", nullable = false)
     private String textContent;
 
-    @CreatedDate
     @Column(name = "CREATED_AT", nullable = false, columnDefinition = "DATETIME(6)")
     private LocalDateTime createdAt;
 
-    public ChatMessage(Member sender, ChatRoom chatRoom, String textContent) {
+    public ChatMessage(Member sender, ChatRoom chatRoom, String textContent, LocalDateTime createdAt) {
         this.sender = sender;
         this.chatRoom = chatRoom;
         this.textContent = textContent;
+        this.createdAt = createdAt;
     }
 }

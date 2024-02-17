@@ -6,6 +6,7 @@ import com.stoury.domain.ChatRoom;
 import com.stoury.domain.Member;
 import com.stoury.dto.chat.ChatMessageResponse;
 import com.stoury.dto.chat.ChatRoomResponse;
+import com.stoury.event.ChatMessageSaveEvent;
 import com.stoury.exception.ChatRoomSearchException;
 import com.stoury.exception.authentication.NotAuthorizedException;
 import com.stoury.exception.member.MemberSearchException;
@@ -13,6 +14,7 @@ import com.stoury.repository.ChatMessageRepository;
 import com.stoury.repository.ChatRoomRepository;
 import com.stoury.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -32,13 +34,13 @@ public class ChatService {
     private final ChatRoomRepository chatRoomRepository;
     private final ChatMessageRepository chatMessageRepository;
     private final SseEmitters sseEmitters;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Transactional
     public ChatRoomResponse createChatRoom(Long senderId, Long receiverId) {
-        Member sender = memberRepository.findById(senderId).orElseThrow(MemberSearchException::new);
-        Member receiver = memberRepository.findById(receiverId).orElseThrow(MemberSearchException::new);
+        List<Member> members = memberRepository.findAllById(List.of(senderId, receiverId));
 
-        ChatRoom chatRoom = new ChatRoom(List.of(sender, receiver));
+        ChatRoom chatRoom = new ChatRoom(members);
         ChatRoom savedChatRoom = chatRoomRepository.save(chatRoom);
 
         return ChatRoomResponse.from(savedChatRoom);
@@ -53,11 +55,17 @@ public class ChatService {
         }
 
         Member sender = memberRepository.findById(senderIdNotNull).orElseThrow(MemberSearchException::new);
-        ChatRoom chatRoom = chatRoomRepository.findById(chatRoomIdNotNull).orElseThrow(ChatRoomSearchException::new);
-        ChatMessage chatMessage = new ChatMessage(sender, chatRoom, textContent);
-        ChatMessage savedChatMessage = chatMessageRepository.save(chatMessage);
+        LocalDateTime createdAt = LocalDateTime.now();
+        ChatMessageSaveEvent chatMessageSaveEvent = ChatMessageSaveEvent.builder()
+                .source(this)
+                .memberId(senderIdNotNull)
+                .chatRoomId(chatRoomIdNotNull)
+                .textContent(textContent)
+                .createdAt(createdAt)
+                .build();
+        eventPublisher.publishEvent(chatMessageSaveEvent);
 
-        return ChatMessageResponse.from(savedChatMessage);
+        return ChatMessageResponse.from(chatMessageSaveEvent, sender);
     }
 
     @Transactional(readOnly = true)

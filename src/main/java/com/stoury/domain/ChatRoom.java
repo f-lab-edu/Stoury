@@ -24,6 +24,9 @@ public class ChatRoom {
     List<Member> members = new ArrayList<>();
 
     public ChatRoom(List<Member> members) {
+        if (members.size() != 2 || members.get(0).equals(members.get(1))) {
+            throw new IllegalArgumentException("Only one-on-one chat is available." );
+        }
         this.members = members;
     }
 
