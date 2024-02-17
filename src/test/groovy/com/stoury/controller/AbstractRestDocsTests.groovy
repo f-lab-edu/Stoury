@@ -1,7 +1,7 @@
 package com.stoury.controller
 
 import com.stoury.dto.member.AuthenticatedMember
-import com.stoury.utils.JwtUtils
+
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDocs
@@ -29,7 +29,7 @@ import static org.springframework.restdocs.request.RequestDocumentation.queryPar
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print
 
 @ExtendWith(RestDocumentationExtension.class)
-@MockBean([JpaMetamodelMappingContext.class, JwtUtils.class])
+@MockBean([JpaMetamodelMappingContext.class])
 @AutoConfigureRestDocs
 abstract class AbstractRestDocsTests extends Specification {
     @Autowired

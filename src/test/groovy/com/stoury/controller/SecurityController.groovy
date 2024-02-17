@@ -3,7 +3,7 @@ package com.stoury.controller
 import com.stoury.config.security.SecurityConfig
 import com.stoury.dto.member.AuthenticatedMember
 import com.stoury.service.MemberService
-import com.stoury.utils.JwtUtils
+
 import org.junit.jupiter.api.extension.ExtendWith
 import org.spockframework.spring.SpringBean
 import org.springframework.beans.factory.annotation.Autowired
@@ -17,11 +17,8 @@ import org.springframework.restdocs.RestDocumentationContextProvider
 import org.springframework.restdocs.RestDocumentationExtension
 import org.springframework.restdocs.operation.preprocess.Preprocessors
 import org.springframework.restdocs.request.FormParametersSnippet
-import org.springframework.restdocs.request.QueryParametersSnippet
 import org.springframework.restdocs.request.RequestDocumentation
-import org.springframework.restdocs.request.RequestPartsSnippet
 import org.springframework.security.crypto.password.PasswordEncoder
-import org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.setup.MockMvcBuilders
 import org.springframework.web.context.WebApplicationContext
@@ -31,13 +28,12 @@ import spock.lang.Specification
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.documentationConfiguration
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestBuilders.formLogin
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 
 @SpringBootTest(classes = SecurityConfig.class)
-@MockBean([JpaMetamodelMappingContext.class, JwtUtils.class])
+@MockBean([JpaMetamodelMappingContext.class])
 @ExtendWith(RestDocumentationExtension.class)
 @AutoConfigureRestDocs
 @AutoConfigureMockMvc

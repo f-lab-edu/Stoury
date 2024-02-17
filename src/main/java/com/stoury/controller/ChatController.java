@@ -5,9 +5,6 @@ import com.stoury.dto.chat.ChatRoomResponse;
 import com.stoury.dto.member.AuthenticatedMember;
 import com.stoury.service.ChatService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.messaging.handler.annotation.DestinationVariable;
-import org.springframework.messaging.handler.annotation.MessageMapping;
-import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -23,18 +20,6 @@ public class ChatController {
     public ChatRoomResponse openChatRoom(@AuthenticationPrincipal AuthenticatedMember authenticatedMember,
                                          @PathVariable Long receiverId) {
         return chatService.createChatRoom(authenticatedMember.getId(), receiverId);
-    }
-
-    @GetMapping("/chatRoom/auth/{chatRoomId}")
-    public void enterChatRoom(@AuthenticationPrincipal AuthenticatedMember authenticatedMember,
-                              @PathVariable Long chatRoomId) {
-        chatService.checkIfRoomMember(authenticatedMember.getId(), chatRoomId);
-    }
-
-    @MessageMapping("/chats/{chatRoomId}")
-    @SendTo("/sub/chatRoom/{chatRoomId}")
-    public ChatMessageResponse sendMessage(Long memberId, @DestinationVariable Long chatRoomId, String textContent) {
-        return chatService.createChatMessage(memberId, chatRoomId, textContent);
     }
 
     @GetMapping("/chats/{chatRoomId}")
