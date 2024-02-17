@@ -47,23 +47,9 @@ class ChatServiceTest extends Specification {
         memerRepository.findById(sender.id) >> Optional.of(sender)
         chatRoomRepository.findById(chatRoom.id) >> Optional.of(chatRoom)
         when:
-        chatService.createChatMessage(sender.id, chatRoom.id, "Hello, World!")
+        chatService.publishChatMessageSaveEvent(sender.id, chatRoom.id, "Hello, World!")
         then:
         1 * eventPublisher.publishEvent(_ as ChatMessageSaveEvent)
-    }
-
-    def "채팅메시지 생성불가, 메시지 없음"() {
-        given:
-        def sender = new Member("sender@email.com", "pwdpwd123", "sender", null)
-        def chatRoom = new ChatRoom(List.of(sender, Mock(Member)))
-        sender.id = 1
-        chatRoom.id = 1
-        memerRepository.findById(sender.id) >> Optional.of(sender)
-        chatRoomRepository.findById(chatRoom.id) >> Optional.of(chatRoom)
-        when:
-        chatService.createChatMessage(sender.id, chatRoom.id, "")
-        then:
-        thrown(IllegalArgumentException)
     }
 
     def "이전 채팅 불러오기"() {
@@ -155,5 +141,19 @@ class ChatServiceTest extends Specification {
         chatService.sendChatMessage(1, 2, "Hi!")
         then:
         thrown(NotAuthorizedException)
+    }
+
+    def "채팅전송 불가, 메시지 없음"() {
+        given:
+        def sender = new Member("sender@email.com", "pwdpwd123", "sender", null)
+        def chatRoom = new ChatRoom(List.of(sender, Mock(Member)))
+        sender.id = 1
+        chatRoom.id = 1
+        memerRepository.findById(sender.id) >> Optional.of(sender)
+        chatRoomRepository.findById(chatRoom.id) >> Optional.of(chatRoom)
+        when:
+        chatService.sendChatMessage(sender.id, chatRoom.id, "")
+        then:
+        thrown(IllegalArgumentException)
     }
 }

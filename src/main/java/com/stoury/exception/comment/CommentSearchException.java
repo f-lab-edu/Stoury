@@ -1,4 +1,4 @@
-package com.stoury.exception;
+package com.stoury.exception.comment;
 
 public class CommentSearchException extends RuntimeException {
     public CommentSearchException() {

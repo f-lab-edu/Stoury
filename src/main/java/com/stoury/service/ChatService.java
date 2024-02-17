@@ -7,7 +7,7 @@ import com.stoury.domain.Member;
 import com.stoury.dto.chat.ChatMessageResponse;
 import com.stoury.dto.chat.ChatRoomResponse;
 import com.stoury.event.ChatMessageSaveEvent;
-import com.stoury.exception.ChatRoomSearchException;
+import com.stoury.exception.chat.ChatRoomSearchException;
 import com.stoury.exception.authentication.NotAuthorizedException;
 import com.stoury.exception.member.MemberSearchException;
 import com.stoury.repository.ChatMessageRepository;
@@ -46,20 +46,14 @@ public class ChatService {
         return ChatRoomResponse.from(savedChatRoom);
     }
 
-    @Transactional
-    protected ChatMessageResponse createChatMessage(Long senderId, Long chatRoomId, String textContent) {
-        Long senderIdNotNull = Objects.requireNonNull(senderId);
-        Long chatRoomIdNotNull = Objects.requireNonNull(chatRoomId);
-        if (!StringUtils.hasText(textContent)) {
-            throw new IllegalArgumentException("Message content cannot be empty.");
-        }
+    protected ChatMessageResponse publishChatMessageSaveEvent(Long senderId, Long chatRoomId, String textContent) {
+        Member sender = memberRepository.findById(senderId).orElseThrow(MemberSearchException::new);
 
-        Member sender = memberRepository.findById(senderIdNotNull).orElseThrow(MemberSearchException::new);
         LocalDateTime createdAt = LocalDateTime.now();
         ChatMessageSaveEvent chatMessageSaveEvent = ChatMessageSaveEvent.builder()
                 .source(this)
-                .memberId(senderIdNotNull)
-                .chatRoomId(chatRoomIdNotNull)
+                .memberId(senderId)
+                .chatRoomId(chatRoomId)
                 .textContent(textContent)
                 .createdAt(createdAt)
                 .build();
@@ -90,7 +84,11 @@ public class ChatService {
     @Transactional
     public ChatMessageResponse sendChatMessage(Long memberId, Long chatRoomId, String textContent) {
         checkIfRoomMember(memberId, chatRoomId);
-        ChatMessageResponse chatMessage = createChatMessage(memberId, chatRoomId, textContent);
+        if (!StringUtils.hasText(textContent)) {
+            throw new IllegalArgumentException("Message content cannot be empty.");
+        }
+
+        ChatMessageResponse chatMessage = publishChatMessageSaveEvent(memberId, chatRoomId, textContent);
         sseEmitters.broadCast(chatRoomId, chatMessage);
         return chatMessage;
     }

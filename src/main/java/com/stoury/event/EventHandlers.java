@@ -3,7 +3,7 @@ package com.stoury.event;
 import com.stoury.domain.ChatMessage;
 import com.stoury.domain.ChatRoom;
 import com.stoury.domain.Member;
-import com.stoury.exception.ChatRoomSearchException;
+import com.stoury.exception.chat.ChatRoomSearchException;
 import com.stoury.exception.member.MemberSearchException;
 import com.stoury.repository.ChatMessageRepository;
 import com.stoury.repository.ChatRoomRepository;
