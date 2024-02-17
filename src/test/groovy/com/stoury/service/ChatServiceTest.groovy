@@ -1,22 +1,21 @@
 package com.stoury.service
 
+import com.stoury.config.sse.SseEmitters
 import com.stoury.domain.ChatMessage
 import com.stoury.domain.ChatRoom
 import com.stoury.domain.Member
-import com.stoury.dto.chat.ChatMessageResponse
 import com.stoury.exception.authentication.NotAuthorizedException
 import com.stoury.repository.ChatMessageRepository
 import com.stoury.repository.ChatRoomRepository
 import com.stoury.repository.MemberRepository
 import spock.lang.Specification
 
-import java.time.LocalDateTime
-
 class ChatServiceTest extends Specification {
     def memerRepository = Mock(MemberRepository)
     def chatRoomRepository = Mock(ChatRoomRepository)
     def chatMessageRepository = Mock(ChatMessageRepository)
-    def chatService = new ChatService(memerRepository, chatRoomRepository, chatMessageRepository)
+    def sseEmitters = Mock(SseEmitters)
+    def chatService = new ChatService(memerRepository, chatRoomRepository, chatMessageRepository, sseEmitters)
 
     def "채팅방 개설"() {
         given:
@@ -47,20 +46,6 @@ class ChatServiceTest extends Specification {
         chatService.createChatMessage(sender.id, chatRoom.id, "Hello, World!")
         then:
         1 * chatMessageRepository.save(_ as ChatMessage) >> new ChatMessage(sender, chatRoom,  "Hello, World!")
-    }
-
-    def "채팅메시지 생성불가, 내가 참여한 채팅방이 아님"() {
-        given:
-        def sender = new Member("sender@email.com", "pwdpwd123", "sender", null)
-        def chatRoom = new ChatRoom()
-        sender.id = 1
-        chatRoom.id = 1
-        memerRepository.findById(sender.id) >> Optional.of(sender)
-        chatRoomRepository.findById(chatRoom.id) >> Optional.of(chatRoom)
-        when:
-        chatService.createChatMessage(sender.id, chatRoom.id, "Hello, World!")
-        then:
-        thrown(NotAuthorizedException)
     }
 
     def "채팅메시지 생성불가, 메시지 없음"() {
@@ -139,5 +124,32 @@ class ChatServiceTest extends Specification {
         1 * chatMessageRepository.findAllByChatRoomAndCreatedAtBefore(_, _, _) >> chatLogs
         messages.get(1).sender().username() == "UNKNOWN"
         messages.get(3).sender().username() == "UNKNOWN"
+    }
+
+    def "채팅 전송"() {
+        given:
+        Member member = new Member(id: 1)
+        ChatRoom chatRoom = Spy(new ChatRoom(id: 2))
+        chatRoom.hasMember(member) >> true
+
+        memerRepository.findById(1) >> Optional.of(member)
+        chatRoomRepository.findById(2) >> Optional.of(chatRoom)
+        chatMessageRepository.save(_) >> new ChatMessage(id:3, sender: member, chatRoom: chatRoom, textContent: "Hi")
+        when:
+        chatService.sendMessage(1, 2, "Hi!")
+        then:
+        1 * sseEmitters.broadCast(_,_)
+    }
+
+    def "채팅전송 불가, 내가 참여한 채팅방이 아님"() {
+        given:
+        Member member = new Member(id: 1)
+        ChatRoom chatRoom = Spy(new ChatRoom(id: 2))
+        memerRepository.findById(1) >> Optional.of(member)
+        chatRoomRepository.findById(2) >> Optional.of(chatRoom)
+        when:
+        chatService.sendMessage(1, 2, "Hi!")
+        then:
+        thrown(NotAuthorizedException)
     }
 }

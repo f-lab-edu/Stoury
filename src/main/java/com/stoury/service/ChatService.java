@@ -1,5 +1,6 @@
 package com.stoury.service;
 
+import com.stoury.config.sse.SseEmitters;
 import com.stoury.domain.ChatMessage;
 import com.stoury.domain.ChatRoom;
 import com.stoury.domain.Member;
@@ -18,6 +19,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -29,6 +31,7 @@ public class ChatService {
     private final MemberRepository memberRepository;
     private final ChatRoomRepository chatRoomRepository;
     private final ChatMessageRepository chatMessageRepository;
+    private final SseEmitters sseEmitters;
 
     @Transactional
     public ChatRoomResponse createChatRoom(Long senderId, Long receiverId) {
@@ -42,7 +45,7 @@ public class ChatService {
     }
 
     @Transactional
-    public ChatMessageResponse createChatMessage(Long senderId, Long chatRoomId, String textContent) {
+    protected ChatMessageResponse createChatMessage(Long senderId, Long chatRoomId, String textContent) {
         Long senderIdNotNull = Objects.requireNonNull(senderId);
         Long chatRoomIdNotNull = Objects.requireNonNull(chatRoomId);
         if (!StringUtils.hasText(textContent)) {
@@ -51,13 +54,10 @@ public class ChatService {
 
         Member sender = memberRepository.findById(senderIdNotNull).orElseThrow(MemberSearchException::new);
         ChatRoom chatRoom = chatRoomRepository.findById(chatRoomIdNotNull).orElseThrow(ChatRoomSearchException::new);
-        if (chatRoom.hasMember(sender)) {
-            ChatMessage chatMessage = new ChatMessage(sender, chatRoom, textContent);
-            ChatMessage savedChatMessage = chatMessageRepository.save(chatMessage);
+        ChatMessage chatMessage = new ChatMessage(sender, chatRoom, textContent);
+        ChatMessage savedChatMessage = chatMessageRepository.save(chatMessage);
 
-            return ChatMessageResponse.from(savedChatMessage);
-        }
-        throw new NotAuthorizedException("You're not a member of the chat room.");
+        return ChatMessageResponse.from(savedChatMessage);
     }
 
     @Transactional(readOnly = true)
@@ -79,7 +79,14 @@ public class ChatService {
         throw new NotAuthorizedException("You're not a member of the chat room.");
     }
 
-    public void checkIfRoomMember(Long memberId, Long chatRoomId) {
+    @Transactional
+    public SseEmitter sendMessage(Long memberId, Long chatRoomId, String textContent) {
+        checkIfRoomMember(memberId, chatRoomId);
+        ChatMessageResponse chatMessage = createChatMessage(memberId, chatRoomId, textContent);
+        return sseEmitters.broadCast(chatRoomId, chatMessage);
+    }
+
+    protected void checkIfRoomMember(Long memberId, Long chatRoomId) {
         Member member = memberRepository.findById(memberId).orElseThrow(MemberSearchException::new);
         ChatRoom chatRoom = chatRoomRepository.findById(chatRoomId).orElseThrow(ChatRoomSearchException::new);
         if (chatRoom.hasMember(member)) {
