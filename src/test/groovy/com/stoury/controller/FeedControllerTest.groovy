@@ -1,7 +1,7 @@
 package com.stoury.controller
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.stoury.dto.WriterResponse
+import com.stoury.dto.SimpleMemberResponse
 import com.stoury.dto.feed.FeedCreateRequest
 import com.stoury.dto.feed.FeedResponse
 import com.stoury.dto.feed.FeedUpdateRequest
@@ -47,7 +47,7 @@ class FeedControllerTest extends AbstractRestDocsTests {
         when(feedService.createFeed(any(Long.class), any(FeedCreateRequest.class), any(List))).thenReturn(
                 new FeedResponse(
                         1L,
-                        new WriterResponse(writer.getId(), "testWriter"),
+                        new SimpleMemberResponse(writer.getId(), "testWriter"),
                         graphicContents.stream().map(file -> "/" + file.getOriginalFilename()).toList(),
                         feedCreateRequest.textContent(),
                         feedCreateRequest.latitude(),
@@ -79,7 +79,7 @@ class FeedControllerTest extends AbstractRestDocsTests {
         when(feedService.getFeed(1L)).thenReturn(
                 new FeedResponse(
                         1L,
-                        new WriterResponse(1L, "testWriter"),
+                        new SimpleMemberResponse(1L, "testWriter"),
                         List.of("/file1.jpeg", "/file2.mp4", "/file3.jpeg"),
                         "This is content",
                         36.5116,
@@ -110,7 +110,7 @@ class FeedControllerTest extends AbstractRestDocsTests {
         when(feedService.getFeedsByTag(any(), any())).thenReturn(List.of(
                 new FeedResponse(
                         1L,
-                        new WriterResponse(1L, "testWriter"),
+                        new SimpleMemberResponse(1L, "testWriter"),
                         List.of("/file1.jpeg", "/file2.mp4", "/file3.jpeg"),
                         "This is content",
                         36.5116,
@@ -122,7 +122,7 @@ class FeedControllerTest extends AbstractRestDocsTests {
                 ),
                 new FeedResponse(
                         1L,
-                        new WriterResponse(2L, "testWriter"),
+                        new SimpleMemberResponse(2L, "testWriter"),
                         Collections.emptyList(),
                         "This is content2",
                         36.3157,
@@ -152,7 +152,7 @@ class FeedControllerTest extends AbstractRestDocsTests {
         when(feedService.getFeedsOfMemberId(any(), any())).thenReturn(List.of(
                 new FeedResponse(
                         1L,
-                        new WriterResponse(1L, "testWriter"),
+                        new SimpleMemberResponse(1L, "testWriter"),
                         List.of("/file1.jpeg", "/file2.mp4", "/file3.jpeg"),
                         "This is content",
                         36.5116,
@@ -164,7 +164,7 @@ class FeedControllerTest extends AbstractRestDocsTests {
                 ),
                 new FeedResponse(
                         1L,
-                        new WriterResponse(2L, "testWriter"),
+                        new SimpleMemberResponse(2L, "testWriter"),
                         Collections.emptyList(),
                         "This is content2",
                         36.3157,
@@ -195,7 +195,7 @@ class FeedControllerTest extends AbstractRestDocsTests {
         when(feedService.updateFeedIfOwner(any(), any(), any())).thenReturn(
                 new FeedResponse(
                         1L,
-                        new WriterResponse(writer.getId(), "testWriter"),
+                        new SimpleMemberResponse(writer.getId(), "testWriter"),
                         List.of("/file2.jpeg", "/file4.jpeg", "/file5.jpeg"),
                         feedUpdateRequest.textContent(),
                         36.5116,

@@ -16,7 +16,6 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.*;
 import org.springframework.data.geo.Point;
-import org.springframework.data.util.Pair;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -203,17 +202,15 @@ public class MemberService implements UserDetailsService {
         double longitudeNotNull = Objects.requireNonNull(longitude, "Invalid points information.");
 
         return memberOnlineStatusRepository.findByPoint(new Point(longitudeNotNull, latitudeNotNull), radiusKm).stream()
-                .filter(memberDistance -> !memberDistance.getFirst().equals(memberId.toString()))
+                .filter(memberDistance -> !memberDistance.memberId().equals(memberId))
                 .map(this::getOnlineMember)
                 .toList();
     }
 
     @NotNull
-    private OnlineMember getOnlineMember(Pair<String, Integer> memberDistance) {
-        Long id = Long.parseLong(memberDistance.getFirst());
-        Member member = memberRepository.findById(id).orElseThrow(MemberSearchException::new);
-        String username = member.getUsername();
-        String email = member.getEmail();
-        return new OnlineMember(id, username, email, memberDistance.getSecond());
+    private OnlineMember getOnlineMember(MemberDistance memberDistance) {
+        Long memberIdNonNull = Objects.requireNonNull(memberDistance.memberId(), "Member id cannot be null.");
+        Member member = memberRepository.findById(memberIdNonNull).orElseThrow(MemberSearchException::new);
+        return OnlineMember.from(member, memberDistance);
     }
 }

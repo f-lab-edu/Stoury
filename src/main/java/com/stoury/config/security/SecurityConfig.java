@@ -5,6 +5,7 @@ import com.stoury.service.MemberService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -16,8 +17,14 @@ import org.springframework.security.web.authentication.AuthenticationFailureHand
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.web.cors.CorsConfiguration;
 
+import java.util.List;
 import java.util.Optional;
+
+import static org.springframework.http.HttpMethod.GET;
+import static org.springframework.http.HttpMethod.POST;
+import static org.springframework.http.HttpStatus.*;
 
 @Configuration
 @RequiredArgsConstructor
@@ -26,7 +33,20 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http,
                                                    MemberService memberService) throws Exception {
-        return http.csrf(AbstractHttpConfigurer::disable)
+        return http
+                .cors(cors -> cors.configurationSource(request -> {
+                    CorsConfiguration corsConfiguration = new CorsConfiguration();
+                    corsConfiguration.setAllowedOriginPatterns(List.of(
+                            "http://localhost:*",
+                            "https://localhost:*",
+                            "http://127.0.0.1:*",
+                            "https://127.0.0.1:*"));
+                    corsConfiguration.setAllowedMethods(List.of("GET","POST", "PUT", "DELETE", "OPTIONS"));
+                    corsConfiguration.setAllowCredentials(true);
+                    corsConfiguration.setAllowedHeaders(List.of("Authorization", "Cache-Control", "Content-Type"));
+                    return corsConfiguration;
+                }))
+                .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
                 .formLogin(formLogin -> formLogin
                         .loginProcessingUrl("/login")
@@ -37,19 +57,27 @@ public class SecurityConfig {
                         .logoutUrl("/logout")
                         .logoutSuccessHandler(logoutSuccessHandler(memberService)))
                 .authorizeHttpRequests(httpRequest -> httpRequest
-                        .requestMatchers(new AntPathRequestMatcher("/login")).permitAll()
-                        .requestMatchers(new AntPathRequestMatcher("/members", "POST")).permitAll()
-                        .requestMatchers(new AntPathRequestMatcher("/feeds/member/**", "GET")).permitAll()
-                        .requestMatchers(new AntPathRequestMatcher("/feeds/tag/**", "GET")).permitAll()
-                        .requestMatchers(new AntPathRequestMatcher("/feeds/popular/*", "GET")).permitAll()
-                        .requestMatchers(new AntPathRequestMatcher("/comments/**", "GET")).permitAll()
-                        .requestMatchers(new AntPathRequestMatcher("/rank/**", "GET")).permitAll()
-                        .requestMatchers(new AntPathRequestMatcher("/diaries/**", "GET")).permitAll()
+                        .requestMatchers(requestMatcher("/login")).permitAll()
+                        .requestMatchers(requestMatcher("/members", POST)).permitAll()
+                        .requestMatchers(requestMatcher("/feeds/member/**", GET)).permitAll()
+                        .requestMatchers(requestMatcher("/feeds/tag/**", GET)).permitAll()
+                        .requestMatchers(requestMatcher("/feeds/popular/*", GET)).permitAll()
+                        .requestMatchers(requestMatcher("/comments/**", GET)).permitAll()
+                        .requestMatchers(requestMatcher("/rank/**", GET)).permitAll()
+                        .requestMatchers(requestMatcher("/diaries/**", GET)).permitAll()
                         .anyRequest().authenticated())
                 .exceptionHandling(exHandler -> exHandler
                         .authenticationEntryPoint((request, response, authException) -> response
-                                .sendError(401, "Not authorized.")))
+                                .sendError(UNAUTHORIZED.value(), "Not authorized.")))
                 .build();
+    }
+
+    public AntPathRequestMatcher requestMatcher(String path, HttpMethod method) {
+        return new AntPathRequestMatcher(path, method.name());
+    }
+
+    public AntPathRequestMatcher requestMatcher(String path) {
+        return new AntPathRequestMatcher(path);
     }
 
     @Bean
@@ -66,7 +94,7 @@ public class SecurityConfig {
             Double longitude = Optional.ofNullable(request.getParameter("longitude"))
                     .map(Double::parseDouble).orElse(null);
             memberService.setOnline(memberId, latitude, longitude);
-            response.setStatus(200);
+            response.setStatus(OK.value());
         };
     }
 
@@ -75,12 +103,12 @@ public class SecurityConfig {
         return (request, response, authentication) -> {
             Long memberId = ((AuthenticatedMember) authentication.getPrincipal()).getId();
             memberService.setOffline(memberId);
-            response.setStatus(200);
+            response.setStatus(OK.value());
         };
     }
 
     @Bean
     public AuthenticationFailureHandler authenticationFailureHandler() {
-        return (request, response, authentication) -> response.sendError(403);
+        return (request, response, authentication) -> response.sendError(FORBIDDEN.value());
     }
 }

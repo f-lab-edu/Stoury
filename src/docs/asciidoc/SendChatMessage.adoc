@@ -1,0 +1,2 @@
+== Send chat message
+operation::chat-controller-test/Send chat message[snippets="http-request,http-response,path-parameters"]

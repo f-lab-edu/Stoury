@@ -1,7 +1,7 @@
 package com.stoury
 
 import com.stoury.domain.*
-import com.stoury.dto.WriterResponse
+import com.stoury.dto.SimpleMemberResponse
 import com.stoury.dto.feed.FeedCreateRequest
 import com.stoury.dto.feed.SimpleFeedResponse
 import com.stoury.dto.member.AuthenticatedMember
@@ -19,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Slice
+import org.springframework.data.domain.Sort
 import org.springframework.data.redis.core.StringRedisTemplate
 import org.springframework.http.MediaType
 import org.springframework.mock.web.MockHttpServletRequest
@@ -30,6 +31,7 @@ import org.springframework.security.web.authentication.logout.LogoutSuccessHandl
 import org.springframework.test.context.ActiveProfiles
 import spock.lang.Specification
 
+import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
 import java.util.stream.IntStream
 
@@ -62,6 +64,10 @@ class IntegrationTest extends Specification {
     @Autowired
     RankingRepository rankingRepository
     @Autowired
+    ChatRoomRepository chatRoomRepository
+    @Autowired
+    ChatMessageRepository chatMessageRepository
+    @Autowired
     MemberOnlineStatusRepository memberOnlineStatusRepository
     @Autowired
     StringRedisTemplate redisTemplate
@@ -79,6 +85,8 @@ class IntegrationTest extends Specification {
     def member = new Member("aaa@dddd.com", "qwdqwdqwd", "username", null);
 
     def setup() {
+        chatMessageRepository.deleteAll()
+        chatRoomRepository.deleteAll()
         feedRepository.deleteAll()
         memberRepository.deleteAll()
         tagRepository.deleteAll()
@@ -90,6 +98,8 @@ class IntegrationTest extends Specification {
     }
 
     def cleanup() {
+        chatMessageRepository.deleteAll()
+        chatRoomRepository.deleteAll()
         feedRepository.deleteAll()
         memberRepository.deleteAll()
         tagRepository.deleteAll()
@@ -303,7 +313,7 @@ class IntegrationTest extends Specification {
     }
 
     def "인기 피드 랭킹"() {
-        def writer = new WriterResponse(1L, "writer")
+        def writer = new SimpleMemberResponse(1L, "writer")
         given:
         def feeds = [
                 new SimpleFeedResponse(0L, writer, "city0", "country0"),
@@ -483,18 +493,39 @@ class IntegrationTest extends Specification {
 
     def "주변 사용자 레디스에서 검색"() {
         given:
+        def members = [
+                new Member("test1@email.com", "encrypted", "member1", null),
+                new Member("test2@email.com", "encrypted", "member2", null),
+                new Member("test3@email.com", "encrypted", "member3", null),
+                new Member("test4@email.com", "encrypted", "member4", null)
+        ]
+        def savedMembers = memberRepository.saveAll(members)
+        memberOnlineStatusRepository.save(savedMembers.get(0).id, 37.566535, 126.97796919999996)  // 첫번째 멤버로부터
+        memberOnlineStatusRepository.save(savedMembers.get(1).id, 37.4562551, 126.70520693063735) // 27km
+        memberOnlineStatusRepository.save(savedMembers.get(2).id, 36.3504119, 127.38454750000005) // 139km
+        memberOnlineStatusRepository.save(savedMembers.get(3).id, 35.1795543, 129.07564160000004) // 324km
+        when:
+        def aroundMembers = memberService.searchOnlineMembers(savedMembers.get(0).id, 37.566535, 126.97796919999996, 200)
+        then:
+        aroundMembers.get(0).memberId() == savedMembers.get(1).id
+        aroundMembers.get(1).memberId() == savedMembers.get(2).id
+    }
+
+    def "이전 채팅 불러오기"() {
+        given:
         def member1 = memberRepository.save(new Member("test1@email.com", "encrypted", "member1", null))
         def member2 = memberRepository.save(new Member("test2@email.com", "encrypted", "member2", null))
-        def member3 = memberRepository.save(new Member("test3@email.com", "encrypted", "member3", null))
-        def member4 = memberRepository.save(new Member("test4@email.com", "encrypted", "member4", null))
-        memberOnlineStatusRepository.save(member1.id, 37.566535, 126.97796919999996)
-        memberOnlineStatusRepository.save(member2.id, 37.4562551, 126.70520693063735)
-        memberOnlineStatusRepository.save(member3.id, 36.3504119, 127.38454750000005)
-        memberOnlineStatusRepository.save(member4.id, 35.1795543, 129.07564160000004)
+        def chatRoom = chatRoomRepository.save(new ChatRoom(member1, member2))
+        def firstChat = new ChatMessage(member1, chatRoom, "firstChat", LocalDateTime.of(2024,12,31,13,5))
+        def secondChat = new ChatMessage(member2, chatRoom, "secondChat", LocalDateTime.of(2024,12,31,13,10))
+        def thirdChat = new ChatMessage(member1, chatRoom, "thirdChat", LocalDateTime.of(2024,12,31,13,15))
+        def savedChats = chatMessageRepository.saveAll(List.of(firstChat, secondChat, thirdChat))
         when:
-        def aroundMembers = memberService.searchOnlineMembers(member1.id, 37.566535, 126.97796919999996, 200)
+        def prevChats = chatMessageRepository.findAllByChatRoomAndCreatedAtBefore(chatRoom,
+                savedChats.get(2).createdAt,
+                PageRequest.of(0, 10, Sort.by("createdAt").descending()))
         then:
-        aroundMembers.get(0).memberId() == member2.id
-        aroundMembers.get(1).memberId() == member3.id
+        prevChats.get(0).id == savedChats.get(1).id
+        prevChats.get(1).id == savedChats.get(0).id
     }
 }
