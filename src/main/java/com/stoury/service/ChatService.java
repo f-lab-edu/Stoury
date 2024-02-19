@@ -13,6 +13,7 @@ import com.stoury.exception.member.MemberSearchException;
 import com.stoury.repository.ChatMessageRepository;
 import com.stoury.repository.ChatRoomRepository;
 import com.stoury.repository.MemberRepository;
+import com.stoury.service.kafka.KafkaProducer;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.PageRequest;
@@ -35,6 +36,7 @@ public class ChatService {
     private final ChatMessageRepository chatMessageRepository;
     private final SseEmitters sseEmitters;
     private final ApplicationEventPublisher eventPublisher;
+    private final KafkaProducer kafkaProducer;
 
     @Transactional
     public ChatRoomResponse createChatRoom(Long senderId, Long receiverId) {
@@ -89,7 +91,8 @@ public class ChatService {
         }
 
         ChatMessageResponse chatMessage = publishChatMessageSaveEvent(memberId, chatRoomId, textContent);
-        sseEmitters.broadCast(chatRoomId, chatMessage);
+
+        kafkaProducer.produce(chatMessage);
         return chatMessage;
     }
 

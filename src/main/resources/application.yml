@@ -7,6 +7,24 @@ server:
         http-only: true
       timeout: 3600
 spring:
+  application:
+    name: Stoury
+  kafka:
+    topic-name: chats
+    producer:
+      bootstrap-servers: localhost:9092
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+      acks: 1
+    consumer:
+      bootstrap-servers: localhost:9092
+      key-deserializer: org.springframework.kafka.support.serializer.ErrorHandlingDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.ErrorHandlingDeserializer
+      group-id: ${spring.application.name}:${spring.application.instance_id:${random.value}}
+      properties:
+        spring.deserializer.key.delegate.class: org.apache.kafka.common.serialization.StringDeserializer
+        spring.deserializer.value.delegate.class: org.springframework.kafka.support.serializer.JsonDeserializer
+        spring.json.value.default.type: com.stoury.dto.chat.ChatMessageResponse
   data:
     redis:
       port: 8379

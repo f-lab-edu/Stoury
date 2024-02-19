@@ -36,7 +36,7 @@ public class SseEmitters {
         return emitter;
     }
 
-    public void broadCast(Long roomId, ChatMessageResponse chatMessage) {
+    public void broadcast(Long roomId, ChatMessageResponse chatMessage) {
         Long roomIdNotNull = Objects.requireNonNull(roomId, ROOM_ID_NULL_MESSAGE);
 
         SseEmitter emitter = get(roomIdNotNull);
