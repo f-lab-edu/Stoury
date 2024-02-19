@@ -63,6 +63,12 @@ public class LikeRepository {
         return Optional.ofNullable(countStr).map(Long::parseLong).orElse(0L);
     }
 
+    public void initCountSnapshotByFeed(String feedId, ChronoUnit chronoUnit) {
+        String feedIdNonNull = Objects.requireNonNull(feedId);
+        String countSnapshotKey = getCountSnapshotKey(chronoUnit, feedIdNonNull);
+        redisTemplate.delete(countSnapshotKey);
+    }
+
     public Long getLikes(String feedId) {
         return opsForSet.size(getLikersKey(feedId));
     }

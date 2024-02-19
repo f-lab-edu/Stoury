@@ -9,10 +9,12 @@ import com.stoury.dto.member.MemberResponse
 import com.stoury.repository.*
 import com.stoury.service.FeedService
 import com.stoury.service.MemberService
+import com.stoury.utils.cachekeys.FeedLikesCountSnapshotKeys
 import com.stoury.utils.cachekeys.PopularSpotsKey
 import jakarta.persistence.EntityManager
 import jakarta.persistence.PersistenceContext
 import org.springframework.batch.core.Job
+import org.springframework.batch.core.JobExecution
 import org.springframework.batch.test.JobLauncherTestUtils
 import org.springframework.batch.test.context.SpringBatchTest
 import org.springframework.beans.factory.annotation.Autowired
@@ -50,6 +52,8 @@ class IntegrationTest extends Specification {
     @Autowired
     Job updateMonthlyFeedsJob
     @Autowired
+    Job updateYearlyDiariesJob
+    @Autowired
     TagRepository tagRepository
     @Autowired
     FeedRepository feedRepository
@@ -76,24 +80,24 @@ class IntegrationTest extends Specification {
     @Autowired
     LogoutSuccessHandler logoutSuccessHandler
 
-    def member = new Member("aaa@dddd.com", "qwdqwdqwd", "username", null);
+    def member = new Member("aaa@dddd.com", "qwdqwdqwd", "username", null)
 
     def setup() {
         feedRepository.deleteAll()
+        diaryRepository.deleteAll()
         memberRepository.deleteAll()
         tagRepository.deleteAll()
-        diaryRepository.deleteAll()
         memberRepository.save(member)
 
         Set<String> allKeys = redisTemplate.keys("*")
-        redisTemplate.delete(allKeys);
+        redisTemplate.delete(allKeys)
     }
 
     def cleanup() {
         feedRepository.deleteAll()
+        diaryRepository.deleteAll()
         memberRepository.deleteAll()
         tagRepository.deleteAll()
-        diaryRepository.deleteAll()
 
         Set<String> allKeys = redisTemplate.keys("*")
         redisTemplate.delete(allKeys)
@@ -135,6 +139,7 @@ class IntegrationTest extends Specification {
         def jobExecution = jobLauncherTestUtils.launchJob()
         "COMPLETED" == jobExecution.getExitStatus().getExitCode()
         !rankingRepository.getRankedFeeds(DAILY_HOT_FEEDS).isEmpty()
+        likeRepository.getCountSnapshotByFeed(feed.id.toString(), ChronoUnit.DAYS) == 0
     }
 
     def "주간 인기 피드 업데이트 테스트"() {
@@ -154,6 +159,7 @@ class IntegrationTest extends Specification {
         def jobExecution = jobLauncherTestUtils.launchJob()
         "COMPLETED" == jobExecution.getExitStatus().getExitCode()
         !rankingRepository.getRankedFeeds(WEEKLY_HOT_FEEDS).isEmpty()
+        likeRepository.getCountSnapshotByFeed(feed.id.toString(), ChronoUnit.WEEKS) == 0
     }
 
     def "월간 인기 피드 업데이트 테스트"() {
@@ -173,6 +179,84 @@ class IntegrationTest extends Specification {
         def jobExecution = jobLauncherTestUtils.launchJob()
         "COMPLETED" == jobExecution.getExitStatus().getExitCode()
         !rankingRepository.getRankedFeeds(MONTHLY_HOT_FEEDS).isEmpty()
+        likeRepository.getCountSnapshotByFeed(feed.id.toString(), ChronoUnit.MONTHS) == 0
+    }
+
+    def "연간 인기 여행일지 업데이트 테스트"() {
+        given:
+        jobLauncherTestUtils.setJob(updateYearlyDiariesJob)
+        def feeds = feedRepository.saveAll([feed(1), feed(2), feed(3)])
+        def diary = new Diary(member, feeds, "test diary", feeds.get(0).graphicContents.first())
+        diaryRepository.save(diary)
+        feeds.forEach(feed -> likeRepository.save(new Like(member, feed)))
+        expect:
+        def jobExecution = jobLauncherTestUtils.launchJob()
+        "COMPLETED" == jobExecution.getExitStatus().getExitCode()
+        !rankingRepository.getRankedDiaries().isEmpty()
+        feeds.stream().allMatch(feed ->
+                likeRepository.getCountSnapshotByFeed(feed.id.toString(), ChronoUnit.YEARS) == 0)
+    }
+
+    def feed(long num){
+        def feed = Feed.builder()
+                .member(member)
+                .textContent("feed"+num)
+                .latitude(0)
+                .longitude(0)
+                .city("city" + num)
+                .country("country" + num)
+                .build()
+        feed.addGraphicContent(new GraphicContent("/image/" + num + "jpeg", 0))
+        return feed
+    }
+
+    def "일간 좋아요 수 스냅샷 읽으면 0으로 초기화"() {
+        given:
+        jobLauncherTestUtils.setJob(updateDailyFeedsJob)
+        def feedId = feedRepository.save(feed(1)).id.toString()
+        redisTemplate.opsForValue().set(FeedLikesCountSnapshotKeys.getCountSnapshotKey(ChronoUnit.DAYS, feedId), "3")
+        when:
+        jobLauncherTestUtils.launchJob()
+        then:
+        likeRepository.getCountSnapshotByFeed(feedId, ChronoUnit.DAYS) == 0
+    }
+
+    def "주간 좋아요 수 스냅샷 읽으면 0으로 초기화"() {
+        given:
+        jobLauncherTestUtils.setJob(updateWeeklyFeedsJob)
+        def feedId = feedRepository.save(feed(1)).id.toString()
+        redisTemplate.opsForValue().set(FeedLikesCountSnapshotKeys.getCountSnapshotKey(ChronoUnit.WEEKS, feedId), "3")
+        when:
+        jobLauncherTestUtils.launchJob()
+        then:
+        likeRepository.getCountSnapshotByFeed(feedId, ChronoUnit.WEEKS) == 0
+    }
+
+    def "월간 좋아요 수 스냅샷 읽으면 0으로 초기화"() {
+        given:
+        jobLauncherTestUtils.setJob(updateMonthlyFeedsJob)
+        def feedId = feedRepository.save(feed(1)).id.toString()
+        redisTemplate.opsForValue().set(FeedLikesCountSnapshotKeys.getCountSnapshotKey(ChronoUnit.MONTHS, feedId), "3")
+        when:
+        jobLauncherTestUtils.launchJob()
+        then:
+        likeRepository.getCountSnapshotByFeed(feedId, ChronoUnit.MONTHS) == 0
+    }
+
+    def "연간 좋아요 수 스냅샷 읽으면 0으로 초기화"() {
+        given:
+        jobLauncherTestUtils.setJob(updateYearlyDiariesJob)
+        def feeds = feedRepository.saveAll([feed(1), feed(2), feed(3)])
+        def diary = new Diary(member, feeds, "test diary", feeds.get(0).graphicContents.first())
+        diaryRepository.save(diary)
+
+        def feedId = feeds.get(0).id.toString()
+
+        redisTemplate.opsForValue().set(FeedLikesCountSnapshotKeys.getCountSnapshotKey(ChronoUnit.YEARS, feedId), "3")
+        when:
+        jobLauncherTestUtils.launchJob()
+        then:
+        likeRepository.getCountSnapshotByFeed(feedId, ChronoUnit.YEARS) == 0
     }
 
     def "해외에서 10개 인기 여행장소"() {

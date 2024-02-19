@@ -28,7 +28,7 @@ public class Diary {
     private String title;
 
     @JoinColumn(name = "THUMBNAIL_ID")
-    @OneToOne(optional = false)
+    @OneToOne(optional = true, cascade = CascadeType.REMOVE)
     private GraphicContent thumbnail;
 
     public Diary(Member member, List<Feed> feeds, String title, GraphicContent thumbnail) {

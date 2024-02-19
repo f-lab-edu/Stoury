@@ -2,6 +2,7 @@ package com.stoury.repository;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.stoury.dto.diary.SimpleDiaryResponse;
 import com.stoury.dto.feed.SimpleFeedResponse;
 import com.stoury.utils.cachekeys.HotFeedsKeys;
 import com.stoury.utils.cachekeys.PopularSpotsKey;
@@ -47,11 +48,16 @@ public class RankingRepository {
 
     public void saveHotFeed(SimpleFeedResponse simpleFeed, double likeIncrease, ChronoUnit chronoUnit) {
         String key = String.valueOf(getHotFeedsKey(chronoUnit));
-        String simpleFeedJson = getFeedJsonString(simpleFeed);
+        String simpleFeedJson = getJsonString(simpleFeed);
         opsForZset.add(key, simpleFeedJson, likeIncrease);
     }
 
-    private String getFeedJsonString(SimpleFeedResponse simpleFeed) {
+    public void saveHotDiaries(SimpleDiaryResponse simpleDiary, double likeIncrease) {
+        String simpleDiaryJson = getJsonString(simpleDiary);
+        opsForZset.add("HotDiaries", simpleDiaryJson, likeIncrease);
+    }
+
+    private String getJsonString(Object simpleFeed) {
         String simpleFeedJson = null;
         try {
             simpleFeedJson = objectMapper.writeValueAsString(simpleFeed);
@@ -84,5 +90,24 @@ public class RankingRepository {
         Set<String> ids = opsForZset.range(key.toString(), 0, -1);
 
         return ids != null && ids.contains(feedId);
+    }
+
+    public List<SimpleDiaryResponse> getRankedDiaries() {
+        Set<String> rankedSimpleDiaries = opsForZset.reverseRange("HotDiaries", 0, 9);
+        if (rankedSimpleDiaries == null) {
+            return Collections.emptyList();
+        }
+        return rankedSimpleDiaries.stream()
+                .map(this::getDiaryResponse)
+                .filter(Objects::nonNull)
+                .toList();
+    }
+
+    private SimpleDiaryResponse getDiaryResponse(String rawSimpleDiaryJson) {
+        try {
+            return objectMapper.readValue(rawSimpleDiaryJson, SimpleDiaryResponse.class);
+        } catch (JsonProcessingException e) {
+            return null;
+        }
     }
 }
