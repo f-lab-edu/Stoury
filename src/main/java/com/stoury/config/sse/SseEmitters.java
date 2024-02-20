@@ -41,19 +41,20 @@ public class SseEmitters {
 
         SseEmitter emitter = get(roomIdNotNull);
 
-        sendToEmitter(emitter, chatMessage, 0);
+        for (int i = 1; i <= MAX_RETRY; i++) {
+            try {
+                sendToEmitter(emitter, chatMessage);
+            }catch (IOException ex){
+                if (i == MAX_RETRY) {
+                    throw new ChatMessageSendException(ex);
+                }
+            }
+        }
     }
 
-    public void sendToEmitter(SseEmitter emitter, ChatMessageResponse message, int tryCount) {
-        try {
-            emitter.send(SseEmitter.event()
-                    .name("ChatMessage")
-                    .data(message));
-        } catch (IOException e) {
-            if (++tryCount > MAX_RETRY) {
-                throw new ChatMessageSendException(e);
-            }
-            sendToEmitter(emitter, message, tryCount);
-        }
+    public void sendToEmitter(SseEmitter emitter, ChatMessageResponse message) throws IOException {
+        emitter.send(SseEmitter.event()
+                .name("ChatMessage")
+                .data(message));
     }
 }
