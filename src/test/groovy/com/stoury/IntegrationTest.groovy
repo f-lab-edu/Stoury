@@ -528,4 +528,13 @@ class IntegrationTest extends Specification {
         prevChats.get(0).id == savedChats.get(1).id
         prevChats.get(1).id == savedChats.get(0).id
     }
+
+    def "채팅방 중복 확인 쿼리"() {
+        given:
+        def member1 = memberRepository.save(new Member("test1@email.com", "encrypted", "member1", null))
+        def member2 = memberRepository.save(new Member("test2@email.com", "encrypted", "member2", null))
+        chatRoomRepository.save(new ChatRoom(member1, member2))
+        expect:
+        chatRoomRepository.existsByMembers([member1,member2])
+    }
 }

@@ -7,6 +7,7 @@ import com.stoury.domain.Member;
 import com.stoury.dto.chat.ChatMessageResponse;
 import com.stoury.dto.chat.ChatRoomResponse;
 import com.stoury.event.ChatMessageSaveEvent;
+import com.stoury.exception.chat.ChatRoomCreateException;
 import com.stoury.exception.chat.ChatRoomSearchException;
 import com.stoury.exception.authentication.NotAuthorizedException;
 import com.stoury.exception.member.MemberSearchException;
@@ -43,6 +44,9 @@ public class ChatService {
         List<Member> members = memberRepository.findAllById(List.of(senderId, receiverId));
 
         ChatRoom chatRoom = new ChatRoom(members);
+        if (chatRoomRepository.existsByMembers(members)) {
+            throw new ChatRoomCreateException("The chat room is already exists.");
+        }
         ChatRoom savedChatRoom = chatRoomRepository.save(chatRoom);
 
         return ChatRoomResponse.from(savedChatRoom);
