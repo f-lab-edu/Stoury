@@ -1,2 +1,0 @@
-== Load more chats
-operation::chat-controller-test/Load more chats[snippets="http-request,http-response,path-parameters,query-parameters"]
