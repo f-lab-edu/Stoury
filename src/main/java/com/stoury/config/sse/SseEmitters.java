@@ -39,7 +39,10 @@ public class SseEmitters {
     public void broadcast(Long roomId, ChatMessageResponse chatMessage) {
         Long roomIdNotNull = Objects.requireNonNull(roomId, ROOM_ID_NULL_MESSAGE);
 
-        SseEmitter emitter = get(roomIdNotNull);
+        SseEmitter emitter = chatRoomEmitters.get(roomIdNotNull);
+        if (emitter == null) {
+            return;
+        }
 
         for (int i = 1; i <= MAX_RETRY; i++) {
             try {
