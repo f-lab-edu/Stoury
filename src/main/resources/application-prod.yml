@@ -1,0 +1,28 @@
+spring:
+  kafka:
+    consumer:
+      bootstrap-servers: host.docker.internal:9092
+    producer:
+      bootstrap-servers: host.docker.internal:9092
+  jpa:
+    show-sql: false
+  data:
+    redis:
+      port: 6379
+      host: host.docker.internal
+  batch:
+    job:
+      names: ${job.name:NONE}
+  datasource:
+    url: jdbc:mariadb://host.docker.internal:3306/stouryprod?allowPublicKeyRetrieval=true&useSSL=false
+    username: ${db.username}
+    password: ${db.password}
+logging:
+  level:
+    org.hibernate.orm.jdbc.bind: off
+google:
+  geocoding:
+    api-key: ${geocode.apikey:NONE}
+origin: ${origin:NONE}
+token:
+  secret: ${token.secret:NONE}
