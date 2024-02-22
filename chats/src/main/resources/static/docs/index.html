@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="generator" content="Asciidoctor 2.0.18">
-<title>Load more chats</title>
+<title>Stoury Chat API docs</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
 <style>
 /*! Asciidoctor default stylesheet | MIT License | https://asciidoctor.org */
@@ -435,11 +435,168 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 #footer-text{color:rgba(0,0,0,.6);font-size:.9em}}
 @media amzn-kf8{#header,#content,#footnotes,#footer{padding:0}}
 </style>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.3/styles/github.min.css">
 </head>
-<body class="article">
+<body class="book toc2 toc-left">
 <div id="header">
+<h1>Stoury Chat API docs</h1>
+<div class="details">
+<span id="revnumber">version 0.0.1-SNAPSHOT</span>
+</div>
+<div id="toc" class="toc2">
+<div id="toctitle">Table of Contents</div>
+<ul class="sectlevel1">
+<li><a href="#_create_chat_room">Create chat room</a>
+<ul class="sectlevel2">
+<li><a href="#_create_chat_room_http_request">HTTP request</a></li>
+<li><a href="#_create_chat_room_http_response">HTTP response</a></li>
+<li><a href="#_create_chat_room_path_parameters">Path parameters</a></li>
+</ul>
+</li>
+<li><a href="#_enter_chat_room">Enter chat room</a>
+<ul class="sectlevel2">
+<li><a href="#_enter_chat_room_http_request">HTTP request</a></li>
+<li><a href="#_enter_chat_room_http_response">HTTP response</a></li>
+<li><a href="#_enter_chat_room_path_parameters">Path parameters</a></li>
+</ul>
+</li>
+<li><a href="#_load_more_chats">Load more chats</a>
+<ul class="sectlevel2">
+<li><a href="#_load_more_chats_http_request">HTTP request</a></li>
+<li><a href="#_load_more_chats_http_response">HTTP response</a></li>
+<li><a href="#_load_more_chats_path_parameters">Path parameters</a></li>
+<li><a href="#_load_more_chats_query_parameters">Query parameters</a></li>
+</ul>
+</li>
+<li><a href="#_send_chat_message">Send chat message</a>
+<ul class="sectlevel2">
+<li><a href="#_send_chat_message_http_request">HTTP request</a></li>
+<li><a href="#_send_chat_message_http_response">HTTP response</a></li>
+<li><a href="#_send_chat_message_path_parameters">Path parameters</a></li>
+</ul>
+</li>
+</ul>
+</div>
 </div>
 <div id="content">
+<div class="sect1">
+<h2 id="_create_chat_room">Create chat room</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_create_chat_room_http_request">HTTP request</h3>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">POST /chats/to/2 HTTP/1.1
+Host: localhost:8080
+Content-Type: application/x-www-form-urlencoded</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_create_chat_room_http_response">HTTP response</h3>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">HTTP/1.1 200 OK
+Content-Type: application/json;charset=UTF-8
+Content-Length: 128
+
+{
+  "id" : 1,
+  "members" : [ {
+    "id" : 1,
+    "username" : "member1"
+  }, {
+    "id" : 2,
+    "username" : "member2"
+  } ]
+}</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_create_chat_room_path_parameters">Path parameters</h3>
+<table class="tableblock frame-all grid-all stretch">
+<caption class="title">Table 1. /chats/to/{receiverId}</caption>
+<colgroup>
+<col style="width: 50%;">
+<col style="width: 50%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Parameter</th>
+<th class="tableblock halign-left valign-top">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>receiverId</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">who receive first chat</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_enter_chat_room">Enter chat room</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_enter_chat_room_http_request">HTTP request</h3>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">GET /chatRoom/2 HTTP/1.1
+Accept: text/event-stream
+Host: localhost:8080</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_enter_chat_room_http_response">HTTP response</h3>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">HTTP/1.1 200 OK</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_enter_chat_room_path_parameters">Path parameters</h3>
+<table class="tableblock frame-all grid-all stretch">
+<caption class="title">Table 1. /chatRoom/{chatRoomId}</caption>
+<colgroup>
+<col style="width: 50%;">
+<col style="width: 50%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Parameter</th>
+<th class="tableblock halign-left valign-top">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>chatRoomId</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">id of chat room</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="paragraph">
+<p>API server works with sse emitter.
+You should use EventSource to make the request.</p>
+</div>
+<div class="listingblock">
+<div class="title">Client Code Example</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-javascript hljs" data-lang="javascript">const sse = new EventSource('http://localhost:8080/chatRoom/22', {withCredentials: true});
+
+sse.addEventListener('ChatMessage', (e) =&gt; {
+    const { data: receivedConnectData } = e;
+    console.log('message: ', receivedConnectData);
+});</code></pre>
+</div>
+</div>
+</div>
+</div>
 <div class="sect1">
 <h2 id="_load_more_chats">Load more chats</h2>
 <div class="sectionbody">
@@ -447,7 +604,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <h3 id="_load_more_chats_http_request">HTTP request</h3>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight nowrap"><code class="language-http" data-lang="http">GET /chats/2?orderThan=2024-12-31T13:32:00 HTTP/1.1
+<pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">GET /chats/2?orderThan=2024-12-31T13:32:00 HTTP/1.1
 Host: localhost:8080</code></pre>
 </div>
 </div>
@@ -456,7 +613,7 @@ Host: localhost:8080</code></pre>
 <h3 id="_load_more_chats_http_response">HTTP response</h3>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight nowrap"><code class="language-http" data-lang="http">HTTP/1.1 200 OK
+<pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">HTTP/1.1 200 OK
 Content-Type: application/json;charset=UTF-8
 Content-Length: 804
 
@@ -549,12 +706,81 @@ Content-Length: 804
 </div>
 </div>
 </div>
+<div class="sect1">
+<h2 id="_send_chat_message">Send chat message</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_send_chat_message_http_request">HTTP request</h3>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">POST /chats/2 HTTP/1.1
+Content-Type: text/plain;charset=UTF-8
+Content-Length: 13
+Host: localhost:8080
+
+Hello, World!</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_send_chat_message_http_response">HTTP response</h3>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">HTTP/1.1 200 OK
+Content-Type: application/json;charset=UTF-8
+Content-Length: 200
+
+{
+  "id" : 20,
+  "chatRoomId" : 2,
+  "sender" : {
+    "id" : 1,
+    "username" : "sender",
+    "profileImagePath" : null
+  },
+  "textContent" : "Hello, World!",
+  "createdAt" : "2024-12-31T13:30:14"
+}</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_send_chat_message_path_parameters">Path parameters</h3>
+<table class="tableblock frame-all grid-all stretch">
+<caption class="title">Table 1. /chats/{chatRoomId}</caption>
+<colgroup>
+<col style="width: 50%;">
+<col style="width: 50%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Parameter</th>
+<th class="tableblock halign-left valign-top">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>chatRoomId</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">id of chat room</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
 </div>
 <div id="footer">
 <div id="footer-text">
 Version 0.0.1-SNAPSHOT<br>
-Last updated 2024-02-17 20:37:32 +0900
+Last updated 2024-02-21 03:47:30 +0900
 </div>
 </div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.3/highlight.min.js"></script>
+<script>
+if (!hljs.initHighlighting.called) {
+  hljs.initHighlighting.called = true
+  ;[].slice.call(document.querySelectorAll('pre.highlight > code[data-lang]')).forEach(function (el) { hljs.highlightBlock(el) })
+}
+</script>
 </body>
 </html>

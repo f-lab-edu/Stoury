@@ -10,6 +10,7 @@ import com.stoury.service.ChatService
 import org.spockframework.spring.SpringBean
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 import org.springframework.http.MediaType
+import spock.lang.Specification
 
 import java.time.LocalDateTime
 
@@ -32,7 +33,7 @@ class ChatControllerTest extends AbstractRestDocsTests {
                  new SimpleMemberResponse(2, "member2")])
         when:
         def response = mockMvc.perform(post("/chats/to/{receiverId}", "2")
-                .with(authenticatedMember(sender)))
+                .with(AbstractRestDocsTests.authenticatedMember(sender)))
                 .andDo(documentWithPath(parameterDescriptor))
         then:
         response.andExpect(status().isOk())
@@ -44,7 +45,7 @@ class ChatControllerTest extends AbstractRestDocsTests {
         def member = new AuthenticatedMember(1, "test@email.com", "pwdpwdpwd123")
         when:
         def response = mockMvc.perform(get("/chatRoom/{chatRoomId}", "2")
-                .with(authenticatedMember(member))
+                .with(AbstractRestDocsTests.authenticatedMember(member))
                 .accept(MediaType.TEXT_EVENT_STREAM_VALUE))
                 .andDo(documentWithPath(parameterDescriptor))
         then:
@@ -61,7 +62,7 @@ class ChatControllerTest extends AbstractRestDocsTests {
         )
         when:
         def response = mockMvc.perform(post("/chats/{chatRoomId}", "2")
-                .with(authenticatedMember(member))
+                .with(AbstractRestDocsTests.authenticatedMember(member))
                 .contentType(MediaType.TEXT_PLAIN)
                 .content("Hello, World!"))
                 .andDo(documentWithPath(parameterDescriptor))
@@ -74,7 +75,7 @@ class ChatControllerTest extends AbstractRestDocsTests {
         def pathParameterDescriptor = parameterWithName("chatRoomId").description("id of chat room")
         def queryParameterDescriptor = parameterWithName("orderThan").description("Load chat logs order than this value").optional()
         def member = new AuthenticatedMember(1, "test@email.com", "pwdpwdpwd123")
-        chatService.getPreviousChatMessages(1,2,_ as LocalDateTime) >>
+        chatService.getPreviousChatMessages(1,2, Specification._ as LocalDateTime) >>
             [
                     new ChatMessageResponse(3, 2, new SenderResponse(1, "member1", null),
                             "Hi!", LocalDateTime.of(2024, 12,31,13,30,5)),
@@ -87,7 +88,7 @@ class ChatControllerTest extends AbstractRestDocsTests {
             ]
         when:
         def response = mockMvc.perform(get("/chats/{chatRoomId}", "2")
-                .with(authenticatedMember(member))
+                .with(AbstractRestDocsTests.authenticatedMember(member))
                 .queryParam("orderThan", "2024-12-31T13:32:00"))
                 .andDo(documentWithPathAndQuery(pathParameterDescriptor, queryParameterDescriptor))
         then:

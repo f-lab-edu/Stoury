@@ -7,12 +7,14 @@ import com.stoury.domain.Member;
 import com.stoury.dto.chat.ChatMessageResponse;
 import com.stoury.dto.chat.ChatRoomResponse;
 import com.stoury.event.ChatMessageSaveEvent;
+import com.stoury.exception.chat.ChatRoomCreateException;
 import com.stoury.exception.chat.ChatRoomSearchException;
 import com.stoury.exception.authentication.NotAuthorizedException;
 import com.stoury.exception.member.MemberSearchException;
 import com.stoury.repository.ChatMessageRepository;
 import com.stoury.repository.ChatRoomRepository;
 import com.stoury.repository.MemberRepository;
+import com.stoury.service.kafka.KafkaProducer;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.PageRequest;
@@ -35,12 +37,16 @@ public class ChatService {
     private final ChatMessageRepository chatMessageRepository;
     private final SseEmitters sseEmitters;
     private final ApplicationEventPublisher eventPublisher;
+    private final KafkaProducer kafkaProducer;
 
     @Transactional
     public ChatRoomResponse createChatRoom(Long senderId, Long receiverId) {
         List<Member> members = memberRepository.findAllById(List.of(senderId, receiverId));
 
         ChatRoom chatRoom = new ChatRoom(members);
+        if (chatRoomRepository.existsByMembers(members)) {
+            throw new ChatRoomCreateException("The chat room is already exists.");
+        }
         ChatRoom savedChatRoom = chatRoomRepository.save(chatRoom);
 
         return ChatRoomResponse.from(savedChatRoom);
@@ -89,7 +95,8 @@ public class ChatService {
         }
 
         ChatMessageResponse chatMessage = publishChatMessageSaveEvent(memberId, chatRoomId, textContent);
-        sseEmitters.broadCast(chatRoomId, chatMessage);
+
+        kafkaProducer.produce(chatMessage);
         return chatMessage;
     }
 

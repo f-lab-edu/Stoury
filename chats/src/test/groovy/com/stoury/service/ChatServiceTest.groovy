@@ -4,11 +4,14 @@ import com.stoury.config.sse.SseEmitters
 import com.stoury.domain.ChatMessage
 import com.stoury.domain.ChatRoom
 import com.stoury.domain.Member
+import com.stoury.dto.chat.ChatMessageResponse
 import com.stoury.event.ChatMessageSaveEvent
 import com.stoury.exception.authentication.NotAuthorizedException
+import com.stoury.exception.chat.ChatRoomCreateException
 import com.stoury.repository.ChatMessageRepository
 import com.stoury.repository.ChatRoomRepository
 import com.stoury.repository.MemberRepository
+import com.stoury.service.kafka.KafkaProducer
 import org.springframework.context.ApplicationEventPublisher
 import spock.lang.Specification
 
@@ -20,7 +23,8 @@ class ChatServiceTest extends Specification {
     def chatMessageRepository = Mock(ChatMessageRepository)
     def sseEmitters = Mock(SseEmitters)
     def eventPublisher = Mock(ApplicationEventPublisher)
-    def chatService = new ChatService(memerRepository, chatRoomRepository, chatMessageRepository, sseEmitters, eventPublisher)
+    def kafkaProducer = Mock(KafkaProducer)
+    def chatService = new ChatService(memerRepository, chatRoomRepository, chatMessageRepository, sseEmitters, eventPublisher,kafkaProducer)
 
     def "채팅방 개설"() {
         given:
@@ -36,6 +40,21 @@ class ChatServiceTest extends Specification {
         then:
         1 * chatRoomRepository.save(_ as ChatRoom) >> new ChatRoom(List.of(sender, receiver))
         chatRoomResponse.members().size() == 2
+    }
+
+    def "중복 채팅방 개설-실패"() {
+        given:
+        def sender = new Member("sender@email.com", "pwdpwd123", "sender", null)
+        def receiver = new Member("receiver@email.com", "pwdpwd123", "receiver", null)
+        sender.id = 1L;
+        receiver.id = 2L;
+        memerRepository.findAllById([1,2]) >> [sender, receiver]
+        chatRoomRepository.existsByMembers([sender, receiver]) >> true
+        when:
+        chatService.createChatRoom(sender.id, receiver.id)
+
+        then:
+        thrown(ChatRoomCreateException)
     }
 
     def "채팅메시지 생성"() {
@@ -128,7 +147,7 @@ class ChatServiceTest extends Specification {
         when:
         chatService.sendChatMessage(1, 2, "Hi!")
         then:
-        1 * sseEmitters.broadCast(_,_)
+        1 * kafkaProducer.produce(_ as ChatMessageResponse)
     }
 
     def "채팅전송 불가, 내가 참여한 채팅방이 아님"() {

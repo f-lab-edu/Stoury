@@ -19,7 +19,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Slice
-import org.springframework.data.domain.Sort
 import org.springframework.data.redis.core.StringRedisTemplate
 import org.springframework.http.MediaType
 import org.springframework.mock.web.MockHttpServletRequest
@@ -31,7 +30,6 @@ import org.springframework.security.web.authentication.logout.LogoutSuccessHandl
 import org.springframework.test.context.ActiveProfiles
 import spock.lang.Specification
 
-import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
 import java.util.stream.IntStream
 
@@ -64,10 +62,6 @@ class IntegrationTest extends Specification {
     @Autowired
     RankingRepository rankingRepository
     @Autowired
-    ChatRoomRepository chatRoomRepository
-    @Autowired
-    ChatMessageRepository chatMessageRepository
-    @Autowired
     MemberOnlineStatusRepository memberOnlineStatusRepository
     @Autowired
     StringRedisTemplate redisTemplate
@@ -85,8 +79,6 @@ class IntegrationTest extends Specification {
     def member = new Member("aaa@dddd.com", "qwdqwdqwd", "username", null);
 
     def setup() {
-        chatMessageRepository.deleteAll()
-        chatRoomRepository.deleteAll()
         feedRepository.deleteAll()
         memberRepository.deleteAll()
         tagRepository.deleteAll()
@@ -98,8 +90,6 @@ class IntegrationTest extends Specification {
     }
 
     def cleanup() {
-        chatMessageRepository.deleteAll()
-        chatRoomRepository.deleteAll()
         feedRepository.deleteAll()
         memberRepository.deleteAll()
         tagRepository.deleteAll()
@@ -509,23 +499,5 @@ class IntegrationTest extends Specification {
         then:
         aroundMembers.get(0).memberId() == savedMembers.get(1).id
         aroundMembers.get(1).memberId() == savedMembers.get(2).id
-    }
-
-    def "이전 채팅 불러오기"() {
-        given:
-        def member1 = memberRepository.save(new Member("test1@email.com", "encrypted", "member1", null))
-        def member2 = memberRepository.save(new Member("test2@email.com", "encrypted", "member2", null))
-        def chatRoom = chatRoomRepository.save(new ChatRoom(member1, member2))
-        def firstChat = new ChatMessage(member1, chatRoom, "firstChat", LocalDateTime.of(2024,12,31,13,5))
-        def secondChat = new ChatMessage(member2, chatRoom, "secondChat", LocalDateTime.of(2024,12,31,13,10))
-        def thirdChat = new ChatMessage(member1, chatRoom, "thirdChat", LocalDateTime.of(2024,12,31,13,15))
-        def savedChats = chatMessageRepository.saveAll(List.of(firstChat, secondChat, thirdChat))
-        when:
-        def prevChats = chatMessageRepository.findAllByChatRoomAndCreatedAtBefore(chatRoom,
-                savedChats.get(2).createdAt,
-                PageRequest.of(0, 10, Sort.by("createdAt").descending()))
-        then:
-        prevChats.get(0).id == savedChats.get(1).id
-        prevChats.get(1).id == savedChats.get(0).id
     }
 }

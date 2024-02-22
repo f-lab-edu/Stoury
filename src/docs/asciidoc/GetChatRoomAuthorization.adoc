@@ -1,2 +1,0 @@
-== Get chat room authorization
-operation::chat-controller-test/Get chatroom authorization[snippets="http-request,http-response,path-parameters"]
