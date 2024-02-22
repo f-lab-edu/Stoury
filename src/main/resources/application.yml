@@ -75,3 +75,11 @@ google:
 origin: https://temp.stoury.com
 token:
   secret: tokensecret
+management:
+  endpoints:
+    web:
+      exposure:
+        include: prometheus, health, info
+  metrics:
+    tags:
+      application: ${spring.application.name}

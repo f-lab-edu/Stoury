@@ -50,6 +50,9 @@ allprojects {
         testImplementation 'org.spockframework:spock-spring:2.4-M1-groovy-4.0'
         testImplementation('net.bytebuddy:byte-buddy:1.12.19')
 
+        implementation 'org.springframework.boot:spring-boot-starter-actuator'
+        runtimeOnly 'io.micrometer:micrometer-registry-prometheus'
+
         testCompileOnly 'org.projectlombok:lombok'
         testAnnotationProcessor 'org.projectlombok:lombok'
     }

@@ -44,3 +44,27 @@ services:
       - zookeeper
     networks:
       - kafka-net
+  prometheus:
+    image: prom/prometheus
+    volumes:
+      - ./prometheus/config:/etc/prometheus
+      - ./prometheus/volume:/prometheus
+    ports:
+      - '9090:9090'
+    command:
+      - '--web.enable-lifecycle'
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/console'
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    restart: always
+  grafana:
+    image: grafana/grafana
+    ports:
+      - '3000:3000'
+    volumes:
+      - ./grafana/volume:/var/lib/grafana
+    restart: always
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
