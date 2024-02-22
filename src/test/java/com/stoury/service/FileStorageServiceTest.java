@@ -1,6 +1,7 @@
 package com.stoury.service;
 
 import com.stoury.service.storage.FileStorageService;
+import com.stoury.utils.FileUtils;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -15,28 +16,21 @@ import java.nio.file.Paths;
 import java.util.Comparator;
 import java.util.stream.Stream;
 
-public class FileStorageServiceTest {
+class FileStorageServiceTest {
     FileStorageService fileStorageService = new FileStorageService();
 
     final String PATH_PREFIX = "src/test/resources/storagetest";
+    final Path startPath = Paths.get(PATH_PREFIX);
 
-    @AfterEach
     @BeforeEach
     void setup() {
-        Path startPath = Paths.get(PATH_PREFIX);
-        try (Stream<Path> walk = Files.walk(startPath)) {
-            walk.sorted(Comparator.reverseOrder()).forEach(path -> {
-                try {
-                    if (!path.equals(startPath)) {
-                        Files.delete(path);
-                    }
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
-            });
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        FileUtils.deleteRecursivelyDirectory(startPath);
+        FileUtils.createIfAbsentDirectory(startPath);
+    }
+
+    @AfterEach
+    void teardown() {
+        FileUtils.deleteRecursivelyDirectory(startPath);
     }
 
     @Test

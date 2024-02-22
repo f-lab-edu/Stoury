@@ -1,5 +1,6 @@
 package com.stoury.controller;
 
+import com.stoury.dto.diary.SimpleDiaryResponse;
 import com.stoury.dto.feed.SimpleFeedResponse;
 import com.stoury.service.RankingService;
 import lombok.RequiredArgsConstructor;
@@ -37,5 +38,10 @@ public class RankingController {
     @GetMapping("/rank/monthly-hot-feeds")
     public List<SimpleFeedResponse> getMonthlyHotFeeds() {
         return rankingService.getHotFeeds(ChronoUnit.MONTHS);
+    }
+
+    @GetMapping("/rank/yearly-hot-diaries")
+    public List<SimpleDiaryResponse> getYearlyHotDiaries() {
+        return rankingService.getHotDiaries();
     }
 }

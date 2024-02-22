@@ -1,0 +1,2 @@
+== Get yearly hot diaries
+operation::ranking-controller-test/Get yearly popular diaries[snippets="http-request,http-response"]

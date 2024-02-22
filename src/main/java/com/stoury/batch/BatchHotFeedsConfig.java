@@ -37,6 +37,7 @@ public class BatchHotFeedsConfig {
                                    ThreadPoolTaskExecutor taskExecutor, LikeRepository likeRepository) {
         return new JobBuilder("jobDailyFeed", jobRepository)
                 .start(updateDailyFeedsStep(jobRepository, tm, taskExecutor, likeRepository))
+                .next(initDailyLikeCountSnapshot(jobRepository, tm, taskExecutor, likeRepository))
                 .build();
     }
 
@@ -45,6 +46,7 @@ public class BatchHotFeedsConfig {
                                     ThreadPoolTaskExecutor taskExecutor, LikeRepository likeRepository) {
         return new JobBuilder("jobWeeklyFeed", jobRepository)
                 .start(updateWeeklyFeedsStep(jobRepository, tm, taskExecutor, likeRepository))
+                .next(initWeeklyLikeCountSnapshot(jobRepository, tm, taskExecutor, likeRepository))
                 .build();
     }
 
@@ -53,6 +55,7 @@ public class BatchHotFeedsConfig {
                                      ThreadPoolTaskExecutor taskExecutor, LikeRepository likeRepository) {
         return new JobBuilder("jobMonthlyFeed", jobRepository)
                 .start(updateMonthlyFeedsStep(jobRepository, tm, taskExecutor, likeRepository))
+                .next(initMonthlyLikeCountSnapshot(jobRepository, tm, taskExecutor, likeRepository))
                 .build();
     }
 
@@ -93,6 +96,39 @@ public class BatchHotFeedsConfig {
     }
 
 
+    @Bean
+    public Step initDailyLikeCountSnapshot(JobRepository jobRepository, PlatformTransactionManager tm,
+                                           ThreadPoolTaskExecutor taskExecutor, LikeRepository likeRepository) {
+        return new StepBuilder("stepInitLikeCountSnapshot", jobRepository)
+                .<Feed, Feed>chunk(100, tm)
+                .reader(feedsReader())
+                .writer(likeInitializer(likeRepository, ChronoUnit.DAYS))
+                .taskExecutor(taskExecutor)
+                .build();
+    }
+
+    @Bean
+    public Step initWeeklyLikeCountSnapshot(JobRepository jobRepository, PlatformTransactionManager tm,
+                                            ThreadPoolTaskExecutor taskExecutor, LikeRepository likeRepository) {
+        return new StepBuilder("stepInitLikeCountSnapshot", jobRepository)
+                .<Feed, Feed>chunk(100, tm)
+                .reader(feedsReader())
+                .writer(likeInitializer(likeRepository, ChronoUnit.WEEKS))
+                .taskExecutor(taskExecutor)
+                .build();
+    }
+
+    @Bean
+    public Step initMonthlyLikeCountSnapshot(JobRepository jobRepository, PlatformTransactionManager tm,
+                                           ThreadPoolTaskExecutor taskExecutor, LikeRepository likeRepository) {
+        return new StepBuilder("stepInitLikeCountSnapshot", jobRepository)
+                .<Feed, Feed>chunk(100, tm)
+                .reader(feedsReader())
+                .writer(likeInitializer(likeRepository, ChronoUnit.MONTHS))
+                .taskExecutor(taskExecutor)
+                .build();
+    }
+
     public JpaPagingItemReader<Feed> feedsReader() {
         return new JpaPagingItemReaderBuilder<Feed>()
                 .name("feedReader")
@@ -115,6 +151,14 @@ public class BatchHotFeedsConfig {
             SimpleFeedResponse simpleFeed = SimpleFeedResponse.from(feed);
 
             return Pair.of(simpleFeed, currentLikes - prevLikes);
+        };
+    }
+
+    private ItemWriter<Feed> likeInitializer(LikeRepository likeRepository, ChronoUnit chronoUnit) {
+        return list -> {
+            for (Feed feed : list) {
+                likeRepository.initCountSnapshotByFeed(feed.getId().toString(), chronoUnit);
+            }
         };
     }
 
