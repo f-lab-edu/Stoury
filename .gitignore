@@ -42,3 +42,7 @@ out/
 ### asciidoc ###
 asciidoc
 *.adoc
+
+### monitoring ###
+infra/**/volume
+**/*.log

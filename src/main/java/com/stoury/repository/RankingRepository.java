@@ -22,6 +22,7 @@ import static com.stoury.utils.cachekeys.HotFeedsKeys.getHotFeedsKey;
 
 @Repository
 public class RankingRepository {
+    public static final String HOT_DIARIES_KEY = "HotDiaries";
     private final StringRedisTemplate redisTemplate;
     private final ListOperations<String, String> opsForList;
     private final ZSetOperations<String, String> opsForZset;
@@ -54,7 +55,7 @@ public class RankingRepository {
 
     public void saveHotDiaries(SimpleDiaryResponse simpleDiary, double likeIncrease) {
         String simpleDiaryJson = getJsonString(simpleDiary);
-        opsForZset.add("HotDiaries", simpleDiaryJson, likeIncrease);
+        opsForZset.add(HOT_DIARIES_KEY, simpleDiaryJson, likeIncrease);
     }
 
     private String getJsonString(Object simpleFeed) {
@@ -93,7 +94,7 @@ public class RankingRepository {
     }
 
     public List<SimpleDiaryResponse> getRankedDiaries() {
-        Set<String> rankedSimpleDiaries = opsForZset.reverseRange("HotDiaries", 0, 9);
+        Set<String> rankedSimpleDiaries = opsForZset.reverseRange(HOT_DIARIES_KEY, 0, 9);
         if (rankedSimpleDiaries == null) {
             return Collections.emptyList();
         }
