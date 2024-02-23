@@ -3,7 +3,7 @@ plugins {
 }
 
 bootJar {
-    mainClass = 'com.stoury.ChatStouryApplication'
+    mainClass = 'com.stoury.StouryBatchApplication'
 }
 
 group 'com'
