@@ -65,6 +65,7 @@ public class SecurityConfig {
                         .requestMatchers(requestMatcher("/comments/**", GET)).permitAll()
                         .requestMatchers(requestMatcher("/rank/**", GET)).permitAll()
                         .requestMatchers(requestMatcher("/diaries/**", GET)).permitAll()
+                        .requestMatchers(requestMatcher("/actuator/**", GET)).permitAll()
                         .anyRequest().authenticated())
                 .exceptionHandling(exHandler -> exHandler
                         .authenticationEntryPoint((request, response, authException) -> response

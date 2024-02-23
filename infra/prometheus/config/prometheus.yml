@@ -1,0 +1,23 @@
+global:
+  scrape_interval: 15s
+  scrape_timeout: 15s
+  evaluation_interval: 2m
+
+  external_labels:
+    monitor: 'system-monitor'
+  query_log_file: query_log_file.log
+rule_files:
+  - 'rule.yml'
+
+scrape_configs:
+  - job_name: 'prometheus'
+    static_configs:
+      - targets:
+          - 'prometheus:9090'
+  - job_name: 'springboot'
+    metrics_path: '/actuator/prometheus'
+    scheme: http
+    scrape_interval: 5s
+    static_configs:
+      - targets:
+          - 'host.docker.internal:8080'

@@ -37,6 +37,7 @@ public class FileUtils {
     public static void createIfAbsentFile(Path path) {
         if (Files.notExists(path)) {
             try {
+                Files.createDirectories(path.getParent());
                 Files.createFile(path);
             } catch (IOException e) {
                 throw new GraphicContentsException("NIO exception occur while creating file.", e);
@@ -49,16 +50,6 @@ public class FileUtils {
             Files.deleteIfExists(path);
         } catch (IOException e) {
             throw new GraphicContentsException("NIO exception occur while deleting file.", e);
-        }
-    }
-
-    public static void createIfAbsentDirectory(Path path) {
-        if (Files.notExists(path)) {
-            try {
-                Files.createDirectories(path);
-            } catch (IOException e) {
-                throw new RuntimeException("NIO exception occur, while creating directory", e);
-            }
         }
     }
 

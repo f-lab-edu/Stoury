@@ -1,6 +1,5 @@
 package com.stoury.controller
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import com.stoury.dto.SimpleMemberResponse
 import com.stoury.dto.diary.DiaryCreateRequest
 import com.stoury.dto.diary.DiaryPageResponse
@@ -10,6 +9,7 @@ import com.stoury.dto.feed.FeedResponse
 import com.stoury.dto.feed.LocationResponse
 import com.stoury.dto.member.AuthenticatedMember
 import com.stoury.service.DiaryService
+import com.stoury.utils.JsonMapper
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 import org.springframework.boot.test.mock.mockito.MockBean
@@ -20,9 +20,7 @@ import java.time.LocalDateTime
 import static org.mockito.ArgumentMatchers.any
 import static org.mockito.ArgumentMatchers.anyInt
 import static org.mockito.Mockito.when
-import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.delete
-import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get
-import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post
+import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.*
 import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 
@@ -32,7 +30,7 @@ class DiaryControllerTest extends AbstractRestDocsTests {
     DiaryService diaryService
 
     @Autowired
-    ObjectMapper objectMapper
+    JsonMapper jsonMapper
 
     def feed1 = new FeedResponse(1, new SimpleMemberResponse(1, "writer1"),
             List.of("/feed/images/image_1.jpeg"),
@@ -65,7 +63,7 @@ class DiaryControllerTest extends AbstractRestDocsTests {
         when:
         def response = mockMvc.perform(post("/diaries")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(diaryRequest))
+                .content(jsonMapper.getJsonString(diaryRequest))
                 .with(authenticatedMember(writer)))
                 .andDo(document())
         then:
