@@ -1,9 +1,8 @@
 package com.stoury.repository;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.stoury.dto.diary.SimpleDiaryResponse;
 import com.stoury.dto.feed.SimpleFeedResponse;
+import com.stoury.utils.JsonMapper;
 import com.stoury.utils.cachekeys.HotFeedsKeys;
 import com.stoury.utils.cachekeys.PopularSpotsKey;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,13 +25,13 @@ public class RankingRepository {
     private final StringRedisTemplate redisTemplate;
     private final ListOperations<String, String> opsForList;
     private final ZSetOperations<String, String> opsForZset;
-    private final ObjectMapper objectMapper;
+    private final JsonMapper jsonMapper;
 
-    public RankingRepository(StringRedisTemplate redisTemplate, @Autowired ObjectMapper objectMapper) {
+    public RankingRepository(StringRedisTemplate redisTemplate, @Autowired JsonMapper jsonMapper) {
         this.redisTemplate = redisTemplate;
         opsForList = redisTemplate.opsForList();
         opsForZset = redisTemplate.opsForZSet();
-        this.objectMapper = objectMapper;
+        this.jsonMapper = jsonMapper;
     }
 
     public List<String> getRankedLocations(PopularSpotsKey cacheKey) {
@@ -49,23 +48,13 @@ public class RankingRepository {
 
     public void saveHotFeed(SimpleFeedResponse simpleFeed, double likeIncrease, ChronoUnit chronoUnit) {
         String key = String.valueOf(getHotFeedsKey(chronoUnit));
-        String simpleFeedJson = getJsonString(simpleFeed);
+        String simpleFeedJson = jsonMapper.getJsonString(simpleFeed);
         opsForZset.add(key, simpleFeedJson, likeIncrease);
     }
 
     public void saveHotDiaries(SimpleDiaryResponse simpleDiary, double likeIncrease) {
-        String simpleDiaryJson = getJsonString(simpleDiary);
+        String simpleDiaryJson = jsonMapper.getJsonString(simpleDiary);
         opsForZset.add(HOT_DIARIES_KEY, simpleDiaryJson, likeIncrease);
-    }
-
-    private String getJsonString(Object simpleFeed) {
-        String simpleFeedJson = null;
-        try {
-            simpleFeedJson = objectMapper.writeValueAsString(simpleFeed);
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
-        return simpleFeedJson;
     }
 
     public List<SimpleFeedResponse> getRankedFeeds(HotFeedsKeys key) {
@@ -74,17 +63,9 @@ public class RankingRepository {
             return Collections.emptyList();
         }
         return rankedSimpleFeeds.stream()
-                .map(this::getFeedResponse)
+                .map(jsonMapper::getFeedResponse)
                 .filter(Objects::nonNull)
                 .toList();
-    }
-
-    private SimpleFeedResponse getFeedResponse(String rawSimpleFeedJson) {
-        try {
-            return objectMapper.readValue(rawSimpleFeedJson, SimpleFeedResponse.class);
-        } catch (JsonProcessingException e) {
-            return null;
-        }
     }
 
     public boolean contains(HotFeedsKeys key, String feedId) {
@@ -99,16 +80,8 @@ public class RankingRepository {
             return Collections.emptyList();
         }
         return rankedSimpleDiaries.stream()
-                .map(this::getDiaryResponse)
+                .map(jsonMapper::getDiaryResponse)
                 .filter(Objects::nonNull)
                 .toList();
-    }
-
-    private SimpleDiaryResponse getDiaryResponse(String rawSimpleDiaryJson) {
-        try {
-            return objectMapper.readValue(rawSimpleDiaryJson, SimpleDiaryResponse.class);
-        } catch (JsonProcessingException e) {
-            return null;
-        }
     }
 }

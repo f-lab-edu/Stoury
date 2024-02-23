@@ -1,6 +1,5 @@
 package com.stoury.controller
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import com.stoury.dto.SimpleMemberResponse
 import com.stoury.dto.feed.FeedCreateRequest
 import com.stoury.dto.feed.FeedResponse
@@ -8,6 +7,7 @@ import com.stoury.dto.feed.FeedUpdateRequest
 import com.stoury.dto.feed.LocationResponse
 import com.stoury.dto.member.AuthenticatedMember
 import com.stoury.service.FeedService
+import com.stoury.utils.JsonMapper
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 import org.springframework.boot.test.mock.mockito.MockBean
@@ -28,7 +28,7 @@ class FeedControllerTest extends AbstractRestDocsTests {
     @MockBean
     FeedService feedService
     @Autowired
-    ObjectMapper objectMapper
+    JsonMapper jsonMapper
 
     def "Create Feed"() {
         given:
@@ -58,7 +58,7 @@ class FeedControllerTest extends AbstractRestDocsTests {
                         LocalDateTime.of(2024, 12, 31, 13, 30, 20, 14)
                 )
         )
-        MockMultipartFile feedCreateRequestPart = new MockMultipartFile("feedCreateRequest", "", "application/json", objectMapper.writeValueAsBytes(feedCreateRequest));
+        MockMultipartFile feedCreateRequestPart = new MockMultipartFile("feedCreateRequest", "", "application/json", jsonMapper.getJsonBytes(feedCreateRequest));
 
         when:
         def response = mockMvc.perform(multipart("/feeds")
@@ -209,7 +209,7 @@ class FeedControllerTest extends AbstractRestDocsTests {
 
         when:
         def response = mockMvc.perform(put("/feeds/{feedId}", "1")
-                .content(objectMapper.writeValueAsString(feedUpdateRequest))
+                .content(jsonMapper.getJsonString(feedUpdateRequest))
                 .contentType(MediaType.APPLICATION_JSON)
                 .with(authenticatedMember(writer)))
                 .andDo(documentWithPath(parameterDescriptor))
