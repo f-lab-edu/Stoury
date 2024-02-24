@@ -28,8 +28,9 @@ import java.time.temporal.ChronoUnit;
 
 @Configuration
 @RequiredArgsConstructor
-@ConditionalOnExpression("'${spring.batch.job.names}'.contains('updateHotDiariesJob')")
+@ConditionalOnExpression("'${spring.batch.job.names}'.contains('jobYearlyDiaries')")
 public class BatchHotDiariesConfig {
+    private final LogJobExecutionListener logger;
     private final EntityManagerFactory entityManagerFactory;
     private final RankingRepository rankingRepository;
 
@@ -39,6 +40,7 @@ public class BatchHotDiariesConfig {
         return new JobBuilder("jobYearlyDiaries", jobRepository)
                 .start(updateYearlyDiariesStep(jobRepository, tm, taskExecutor, likeRepository))
                 .next(initYearlyLikeCountSnapshot(jobRepository, tm, taskExecutor, likeRepository))
+                .listener(logger)
                 .build();
     }
 

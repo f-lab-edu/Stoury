@@ -26,40 +26,47 @@ import java.time.temporal.ChronoUnit;
 
 @Configuration
 @RequiredArgsConstructor
-@ConditionalOnExpression("'${spring.batch.job.names}'.contains('updateHotFeedsJob')")
 public class BatchHotFeedsConfig {
+    private final LogJobExecutionListener logger;
     private final EntityManagerFactory entityManagerFactory;
 
     private final RankingRepository rankingRepository;
 
     @Bean
+    @ConditionalOnExpression("'${spring.batch.job.names}'.contains('jobDailyFeeds')")
     public Job updateDailyFeedsJob(JobRepository jobRepository, PlatformTransactionManager tm,
                                    ThreadPoolTaskExecutor taskExecutor, LikeRepository likeRepository) {
-        return new JobBuilder("jobDailyFeed", jobRepository)
+        return new JobBuilder("jobDailyFeeds", jobRepository)
                 .start(updateDailyFeedsStep(jobRepository, tm, taskExecutor, likeRepository))
                 .next(initDailyLikeCountSnapshot(jobRepository, tm, taskExecutor, likeRepository))
+                .listener(logger)
                 .build();
     }
 
     @Bean
+    @ConditionalOnExpression("'${spring.batch.job.names}'.contains('jobWeeklyFeeds')")
     public Job updateWeeklyFeedsJob(JobRepository jobRepository, PlatformTransactionManager tm,
                                     ThreadPoolTaskExecutor taskExecutor, LikeRepository likeRepository) {
-        return new JobBuilder("jobWeeklyFeed", jobRepository)
+        return new JobBuilder("jobWeeklyFeeds", jobRepository)
                 .start(updateWeeklyFeedsStep(jobRepository, tm, taskExecutor, likeRepository))
                 .next(initWeeklyLikeCountSnapshot(jobRepository, tm, taskExecutor, likeRepository))
+                .listener(logger)
                 .build();
     }
 
     @Bean
+    @ConditionalOnExpression("'${spring.batch.job.names}'.contains('jobMonthlyFeeds')")
     public Job updateMonthlyFeedsJob(JobRepository jobRepository, PlatformTransactionManager tm,
                                      ThreadPoolTaskExecutor taskExecutor, LikeRepository likeRepository) {
-        return new JobBuilder("jobMonthlyFeed", jobRepository)
+        return new JobBuilder("jobMonthlyFeeds", jobRepository)
                 .start(updateMonthlyFeedsStep(jobRepository, tm, taskExecutor, likeRepository))
                 .next(initMonthlyLikeCountSnapshot(jobRepository, tm, taskExecutor, likeRepository))
+                .listener(logger)
                 .build();
     }
 
     @Bean
+    @ConditionalOnExpression("'${spring.batch.job.names}'.contains('jobDailyFeeds')")
     public Step updateDailyFeedsStep(JobRepository jobRepository, PlatformTransactionManager tm,
                                      ThreadPoolTaskExecutor taskExecutor, LikeRepository likeRepository) {
         return new StepBuilder("stepDailyFeed", jobRepository)
@@ -72,6 +79,7 @@ public class BatchHotFeedsConfig {
     }
 
     @Bean
+    @ConditionalOnExpression("'${spring.batch.job.names}'.contains('jobWeeklyFeeds')")
     public Step updateWeeklyFeedsStep(JobRepository jobRepository, PlatformTransactionManager tm,
                                       ThreadPoolTaskExecutor taskExecutor, LikeRepository likeRepository) {
         return new StepBuilder("stepWeeklyFeed", jobRepository)
@@ -84,6 +92,7 @@ public class BatchHotFeedsConfig {
     }
 
     @Bean
+    @ConditionalOnExpression("'${spring.batch.job.names}'.contains('jobMonthlyFeeds')")
     public Step updateMonthlyFeedsStep(JobRepository jobRepository, PlatformTransactionManager tm,
                                        ThreadPoolTaskExecutor taskExecutor, LikeRepository likeRepository) {
         return new StepBuilder("stepMonthlyFeed", jobRepository)
@@ -97,9 +106,10 @@ public class BatchHotFeedsConfig {
 
 
     @Bean
+    @ConditionalOnExpression("'${spring.batch.job.names}'.contains('jobDailyFeeds')")
     public Step initDailyLikeCountSnapshot(JobRepository jobRepository, PlatformTransactionManager tm,
                                            ThreadPoolTaskExecutor taskExecutor, LikeRepository likeRepository) {
-        return new StepBuilder("stepInitLikeCountSnapshot", jobRepository)
+        return new StepBuilder("stepInitDailyLikeCountSnapshot", jobRepository)
                 .<Feed, Feed>chunk(100, tm)
                 .reader(feedsReader())
                 .writer(likeInitializer(likeRepository, ChronoUnit.DAYS))
@@ -108,9 +118,10 @@ public class BatchHotFeedsConfig {
     }
 
     @Bean
+    @ConditionalOnExpression("'${spring.batch.job.names}'.contains('jobWeeklyFeeds')")
     public Step initWeeklyLikeCountSnapshot(JobRepository jobRepository, PlatformTransactionManager tm,
                                             ThreadPoolTaskExecutor taskExecutor, LikeRepository likeRepository) {
-        return new StepBuilder("stepInitLikeCountSnapshot", jobRepository)
+        return new StepBuilder("stepInitWeeklyLikeCountSnapshot", jobRepository)
                 .<Feed, Feed>chunk(100, tm)
                 .reader(feedsReader())
                 .writer(likeInitializer(likeRepository, ChronoUnit.WEEKS))
@@ -119,9 +130,10 @@ public class BatchHotFeedsConfig {
     }
 
     @Bean
+    @ConditionalOnExpression("'${spring.batch.job.names}'.contains('jobMonthlyFeeds')")
     public Step initMonthlyLikeCountSnapshot(JobRepository jobRepository, PlatformTransactionManager tm,
                                            ThreadPoolTaskExecutor taskExecutor, LikeRepository likeRepository) {
-        return new StepBuilder("stepInitLikeCountSnapshot", jobRepository)
+        return new StepBuilder("stepInitMonthlyLikeCountSnapshot", jobRepository)
                 .<Feed, Feed>chunk(100, tm)
                 .reader(feedsReader())
                 .writer(likeInitializer(likeRepository, ChronoUnit.MONTHS))

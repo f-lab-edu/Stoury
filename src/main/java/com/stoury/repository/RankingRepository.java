@@ -63,7 +63,7 @@ public class RankingRepository {
             return Collections.emptyList();
         }
         return rankedSimpleFeeds.stream()
-                .map(jsonMapper::getFeedResponse)
+                .map(json -> jsonMapper.stringJsonToObject(json, SimpleFeedResponse.class))
                 .filter(Objects::nonNull)
                 .toList();
     }
@@ -80,7 +80,7 @@ public class RankingRepository {
             return Collections.emptyList();
         }
         return rankedSimpleDiaries.stream()
-                .map(jsonMapper::getDiaryResponse)
+                .map(json -> jsonMapper.stringJsonToObject(json, SimpleDiaryResponse.class))
                 .filter(Objects::nonNull)
                 .toList();
     }

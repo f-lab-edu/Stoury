@@ -24,8 +24,9 @@ import java.util.List;
 
 @Configuration
 @RequiredArgsConstructor
-@ConditionalOnExpression("'${spring.batch.job.names}'.contains('updatePopularSpotsJob')")
+@ConditionalOnExpression("'${spring.batch.job.names}'.contains('jobPopularSpots')")
 public class BatchPopularSpotsConfig {
+    private final LogJobExecutionListener logger;
     Pageable pageable = PageRequest.of(0, 10);
     private final FeedRepository feedRepository;
     private final RankingRepository rankingRepository;
@@ -63,11 +64,12 @@ public class BatchPopularSpotsConfig {
                 .start(updatePopularDomesticCitiesStep(jobRepository, tm))
                 .build();
 
-        return new JobBuilder("updatePopularSpots", jobRepository)
+        return new JobBuilder("jobPopularSpots", jobRepository)
                 .start(flowUpdatePopularAbroadCities)
                 .split(taskExecutor)
                 .add(flowUpdatePopularDomesticCities)
                 .end()
+                .listener(logger)
                 .build();
     }
 }

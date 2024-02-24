@@ -29,19 +29,11 @@ public class JsonMapper {
         }
     }
 
-    public SimpleDiaryResponse getDiaryResponse(String rawSimpleDiaryJson) {
+    public <T> T stringJsonToObject(String rawJson, Class<T> clazz) {
         try {
-            return objectMapper.readValue(rawSimpleDiaryJson, SimpleDiaryResponse.class);
+            return objectMapper.readValue(rawJson, clazz);
         } catch (JsonProcessingException e) {
-            throw new JsonConvertException(rawSimpleDiaryJson, e);
-        }
-    }
-
-    public SimpleFeedResponse getFeedResponse(String rawSimpleFeedJson) {
-        try {
-            return objectMapper.readValue(rawSimpleFeedJson, SimpleFeedResponse.class);
-        } catch (JsonProcessingException e) {
-            throw new JsonConvertException(rawSimpleFeedJson, e);
+            throw new JsonConvertException(rawJson, e);
         }
     }
 }
