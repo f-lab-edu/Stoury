@@ -101,14 +101,14 @@ allprojects {
     }
 }
 
-project(':chats') {
+project(':Stoury-chats') {
     dependencies {
         implementation 'org.springframework.kafka:spring-kafka'
         testImplementation 'org.springframework.kafka:spring-kafka-test'
     }
 }
 
-project(':batch') {
+project(':Stoury-batch') {
     dependencies {
         implementation 'org.springframework.boot:spring-boot-starter-batch'
         testImplementation 'org.springframework.batch:spring-batch-test'

@@ -1,4 +1,4 @@
 rootProject.name = 'Stoury'
-include 'chats'
-include 'batch'
+include 'Stoury-chats'
+include 'Stoury-batch'
 
