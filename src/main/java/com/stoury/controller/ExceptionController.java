@@ -12,11 +12,13 @@ import com.stoury.exception.member.MemberCreateException;
 import com.stoury.exception.member.MemberDeleteException;
 import com.stoury.exception.member.MemberSearchException;
 import com.stoury.exception.member.MemberUpdateException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+@Slf4j
 @RestControllerAdvice
 public class ExceptionController {
     @ExceptionHandler(value = {
@@ -26,16 +28,19 @@ public class ExceptionController {
             DiaryCreateException.class,
             MemberCreateException.class, MemberDeleteException.class, MemberUpdateException.class})
     public ResponseEntity<ErrorResponse> handle400(RuntimeException ex) {
+        log.error(ex.getMessage());
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ErrorResponse.of(ex.getMessage()));
     }
 
     @ExceptionHandler(value = {FeedSearchException.class, MemberSearchException.class, DiarySearchException.class})
     public ResponseEntity<ErrorResponse> handle404(RuntimeException ex) {
+        log.error(ex.getMessage());
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ErrorResponse.of(ex.getMessage()));
     }
 
     @ExceptionHandler(value = {GeocodeApiException.class})
     public ResponseEntity<ErrorResponse> handle500(RuntimeException ex) {
+        log.error(ex.getMessage());
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ErrorResponse.of(ex.getMessage()));
     }
 }

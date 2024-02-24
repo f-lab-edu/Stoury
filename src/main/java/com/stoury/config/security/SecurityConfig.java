@@ -59,6 +59,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(httpRequest -> httpRequest
                         .requestMatchers(requestMatcher("/login")).permitAll()
                         .requestMatchers(requestMatcher("/members", POST)).permitAll()
+                        .requestMatchers(requestMatcher("/", GET)).permitAll()
                         .requestMatchers(requestMatcher("/feeds/member/**", GET)).permitAll()
                         .requestMatchers(requestMatcher("/feeds/tag/**", GET)).permitAll()
                         .requestMatchers(requestMatcher("/feeds/popular/*", GET)).permitAll()
