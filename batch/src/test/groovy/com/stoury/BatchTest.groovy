@@ -112,8 +112,9 @@ class BatchTest extends Specification {
                 .build()
         def savedFeed = feedRepository.saveAndFlush(feed)
         likeRepository.save(new Like(member, savedFeed))
-        expect:
+        when:
         def jobExecution = jobLauncherTestUtils.launchJob()
+        then:
         "COMPLETED" == jobExecution.getExitStatus().getExitCode()
         !rankingRepository.getRankedFeeds(DAILY_HOT_FEEDS).isEmpty()
         likeRepository.getCountSnapshotByFeed(feed.id.toString(), ChronoUnit.DAYS) == 0
@@ -132,8 +133,9 @@ class BatchTest extends Specification {
                 .build()
         def savedFeed = feedRepository.saveAndFlush(feed)
         likeRepository.save(new Like(member, savedFeed))
-        expect:
+        when:
         def jobExecution = jobLauncherTestUtils.launchJob()
+        then:
         "COMPLETED" == jobExecution.getExitStatus().getExitCode()
         !rankingRepository.getRankedFeeds(WEEKLY_HOT_FEEDS).isEmpty()
         likeRepository.getCountSnapshotByFeed(feed.id.toString(), ChronoUnit.WEEKS) == 0
@@ -152,8 +154,9 @@ class BatchTest extends Specification {
                 .build()
         def savedFeed = feedRepository.saveAndFlush(feed)
         likeRepository.save(new Like(member, savedFeed))
-        expect:
+        when:
         def jobExecution = jobLauncherTestUtils.launchJob()
+        then:
         "COMPLETED" == jobExecution.getExitStatus().getExitCode()
         !rankingRepository.getRankedFeeds(MONTHLY_HOT_FEEDS).isEmpty()
         likeRepository.getCountSnapshotByFeed(feed.id.toString(), ChronoUnit.MONTHS) == 0
@@ -166,8 +169,9 @@ class BatchTest extends Specification {
         def diary = new Diary(member, feeds, "test diary", feeds.get(0).graphicContents.first())
         diaryRepository.save(diary)
         feeds.forEach(feed -> likeRepository.save(new Like(member, feed)))
-        expect:
+        when:
         def jobExecution = jobLauncherTestUtils.launchJob()
+        then:
         "COMPLETED" == jobExecution.getExitStatus().getExitCode()
         !rankingRepository.getRankedDiaries().isEmpty()
         feeds.stream().allMatch(feed ->
