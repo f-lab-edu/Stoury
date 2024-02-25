@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 public class HomeController {
-    @RequestMapping(value = "/", produces = MediaType.TEXT_HTML_VALUE)
+    @RequestMapping(value = "/", produces = MediaType.TEXT_HTML_VALUE) // NOSONAR
     public Resource lobby() {
         return new ClassPathResource("static/docs/index.html");
     }
