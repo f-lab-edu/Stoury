@@ -82,4 +82,5 @@ management:
         include: prometheus, health, info
   metrics:
     tags:
+      instance_id: ${HOSTNAME}
       application: ${spring.application.name}
