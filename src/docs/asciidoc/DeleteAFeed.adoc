@@ -1,2 +1,2 @@
-== Get a feed
+== Delete a feed
 operation::feed-controller-test/Delete a feed[snippets="http-request,http-response,path-parameters"]
