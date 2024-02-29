@@ -1,2 +1,2 @@
-== Like a feed
+== Cancel Like
 operation::like-controller-test/Cancel like[snippets="http-request,http-response,path-parameters"]
