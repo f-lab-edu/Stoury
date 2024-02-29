@@ -8,6 +8,7 @@ import com.stoury.dto.feed.LocationResponse
 import com.stoury.dto.feed.FeedCreateRequest
 import com.stoury.dto.feed.FeedUpdateRequest
 import com.stoury.event.GraphicDeleteEvent
+import com.stoury.exception.authentication.NotAuthorizedException
 import com.stoury.exception.feed.FeedCreateException
 import com.stoury.repository.FeedRepository
 import com.stoury.repository.LikeRepository
@@ -107,5 +108,26 @@ class FeedServiceTest extends Specification {
         2 * eventPublisher.publishEvent(_ as GraphicDeleteEvent)
         feed.textContent == "updated"
         feed.tags.isEmpty()
+    }
+
+    def "피드 삭제 실패 - 소유권없음"() {
+        given:
+        def feed = Mock(Feed)
+        feedRepository.findById(_) >> Optional.of(feed)
+        when:
+        feedService.deleteFeedIfOwner(1,1)
+        then:
+        thrown(NotAuthorizedException)
+    }
+
+    def "피드 삭제 성공"() {
+        given:
+        def writer = new Member(id:1)
+        def feed = new Feed(id:1, member: writer)
+        feedRepository.findById(_) >> Optional.of(feed)
+        when:
+        feedService.deleteFeedIfOwner(feed.id,writer.id)
+        then:
+        1 * feedRepository.delete(_)
     }
 }

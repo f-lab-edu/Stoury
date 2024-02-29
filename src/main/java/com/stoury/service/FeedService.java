@@ -192,6 +192,7 @@ public class FeedService {
 
         if (feed.isOwnedBy(memberId)) {
             deleteFeed(feedId);
+            return;
         }
         throw new NotAuthorizedException();
     }
