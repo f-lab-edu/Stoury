@@ -60,7 +60,8 @@ class DiaryControllerTest extends AbstractRestDocsTests {
                 feed1.createdAt().toLocalDate(),
                 feed3.createdAt().toLocalDate(),
                 feed1.location().city(), feed1.location().country(),
-                feed1.likes() + feed2.likes() + feed3.likes()
+                feed1.likes() + feed2.likes() + feed3.likes(),
+                LocalDateTime.of(2024, 12, 31, 13, 0, 0)
         )
         when:
         def response = mockMvc.perform(post("/diaries")
@@ -78,9 +79,22 @@ class DiaryControllerTest extends AbstractRestDocsTests {
         def queryParameterDescriptor = parameterWithName("pageNo").description("page number of diaries").optional()
         diaryService.getMemberDiaries(_, _) >> new DiaryPageResponse(
                 List.of(
-                        new SimpleDiaryResponse(1, "/feed/images/image_14.jpeg", "My Stoury", 1),
-                        new SimpleDiaryResponse(2, "/feed/images/image_16.jpeg", "South Korea, Seoul, 2023-12-01~2024-01-12", 1),
-                        new SimpleDiaryResponse(3, "/feed/images/image_120.jpeg", "Turkiye travel with family", 1),
+                        new SimpleDiaryResponse(
+                                1,
+                                "/feed/images/image_14.jpeg",
+                                "My Stoury",
+                                1,
+                                LocalDateTime.of(2024, 12, 31, 13, 0, 0)),
+                        new SimpleDiaryResponse(2,
+                                "/feed/images/image_16.jpeg",
+                                "South Korea, Seoul, 2023-12-01~2024-01-12",
+                                1,
+                                LocalDateTime.of(2024, 12, 31, 13, 0, 0)),
+                        new SimpleDiaryResponse(3,
+                                "/feed/images/image_120.jpeg",
+                                "Turkiye travel with family",
+                                1,
+                                LocalDateTime.of(2024, 12, 31, 13, 0, 0)),
                 ),
                 1,
                 false

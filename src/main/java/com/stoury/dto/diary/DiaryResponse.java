@@ -4,12 +4,13 @@ import com.stoury.domain.Diary;
 import com.stoury.dto.feed.FeedResponse;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 
 public record DiaryResponse(Long id, Long memberId, String title, String thumbnailPath, Map<Long, List<FeedResponse>> feeds,
                             LocalDate startDate, LocalDate endDate,
-                            String city, String country, long likes) {
+                            String city, String country, long likes, LocalDateTime createdAt) {
 
     public static DiaryResponse from(Diary diary,  List<FeedResponse> feeds) {
         List<FeedResponse> sortedFeeds = feeds.stream().sorted(Comparator.comparing(FeedResponse::createdAt)).toList();
@@ -35,7 +36,8 @@ public record DiaryResponse(Long id, Long memberId, String title, String thumbna
                 lastFeed.createdAt().toLocalDate(),
                 firstFeed.location().city(),
                 firstFeed.location().country(),
-                likesSum
+                likesSum,
+                diary.getCreatedAt()
         );
     }
 

@@ -8,6 +8,7 @@ import org.spockframework.spring.SpringBean
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 import org.springframework.boot.test.mock.mockito.MockBean
 
+import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
 
 import static org.mockito.ArgumentMatchers.any
@@ -34,15 +35,15 @@ class RankingControllerTest extends AbstractRestDocsTests {
     ]
 
     def simpleDiaries = [
-            new SimpleDiaryResponse(2, "/image1.jpeg", "Travel of Chung", 1),
-            new SimpleDiaryResponse(4, "/image2.jpeg", "Healing in japan", 3),
-            new SimpleDiaryResponse(1, "/image3.jpeg", "Trip africa", 1),
-            new SimpleDiaryResponse(5, "/image4.jpeg", "Amazing paris", 2),
-            new SimpleDiaryResponse(99, "/image55.jpeg", "Tragedy of warsaw", 66),
-            new SimpleDiaryResponse(123, "/image10.jpeg", "5 days in pallujah", 123),
-            new SimpleDiaryResponse(23425, "/image14.jpeg", "Best or Worst? Canda", 45),
-            new SimpleDiaryResponse(32, "/image102.jpeg", "Hiking alps", 132),
-            new SimpleDiaryResponse(414, "/image67.jpeg", "The most modern city, milano", 12),
+            new SimpleDiaryResponse(2, "/image1.jpeg", "Travel of Chung", 1, LocalDateTime.of(2024, 12, 31, 13, 0, 0)),
+            new SimpleDiaryResponse(4, "/image2.jpeg", "Healing in japan", 3, LocalDateTime.of(2024, 12, 31, 13, 0, 0)),
+            new SimpleDiaryResponse(1, "/image3.jpeg", "Trip africa", 1, LocalDateTime.of(2024, 12, 31, 13, 0, 0)),
+            new SimpleDiaryResponse(5, "/image4.jpeg", "Amazing paris", 2, LocalDateTime.of(2024, 12, 31, 13, 0, 0)),
+            new SimpleDiaryResponse(99, "/image55.jpeg", "Tragedy of warsaw", 66, LocalDateTime.of(2024, 12, 31, 13, 0, 0)),
+            new SimpleDiaryResponse(123, "/image10.jpeg", "5 days in pallujah", 123, LocalDateTime.of(2024, 12, 31, 13, 0, 0)),
+            new SimpleDiaryResponse(23425, "/image14.jpeg", "Best or Worst? Canda", 45, LocalDateTime.of(2024, 12, 31, 13, 0, 0)),
+            new SimpleDiaryResponse(32, "/image102.jpeg", "Hiking alps", 132, LocalDateTime.of(2024, 12, 31, 13, 0, 0)),
+            new SimpleDiaryResponse(414, "/image67.jpeg", "The most modern city, milano", 12, LocalDateTime.of(2024, 12, 31, 13, 0, 0)),
     ]
 
     def setup() {
