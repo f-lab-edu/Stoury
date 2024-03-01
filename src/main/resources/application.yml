@@ -81,5 +81,9 @@ management:
       exposure:
         include: prometheus, health, info
   metrics:
+    distribution:
+      percentiles-histogram:
+        http.server.requests: true
     tags:
+      instance_id: ${HOSTNAME}
       application: ${spring.application.name}

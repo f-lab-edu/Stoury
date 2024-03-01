@@ -480,18 +480,18 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <li><a href="#_get_feeds_of_member_path_parameters">Path parameters</a></li>
 </ul>
 </li>
-<li><a href="#_get_a_feed_2">Get a feed</a>
+<li><a href="#_update_a_feed">Update a feed</a>
 <ul class="sectlevel2">
-<li><a href="#_get_a_feed_2_http_request">HTTP request</a></li>
-<li><a href="#_get_a_feed_2_http_response">HTTP response</a></li>
-<li><a href="#_get_a_feed_2_path_parameters">Path parameters</a></li>
+<li><a href="#_update_a_feed_http_request">HTTP request</a></li>
+<li><a href="#_update_a_feed_http_response">HTTP response</a></li>
+<li><a href="#_update_a_feed_path_parameters">Path parameters</a></li>
 </ul>
 </li>
-<li><a href="#_get_a_feed_3">Get a feed</a>
+<li><a href="#_delete_a_feed">Delete a feed</a>
 <ul class="sectlevel2">
-<li><a href="#_get_a_feed_3_http_request">HTTP request</a></li>
-<li><a href="#_get_a_feed_3_http_response">HTTP response</a></li>
-<li><a href="#_get_a_feed_3_path_parameters">Path parameters</a></li>
+<li><a href="#_delete_a_feed_http_request">HTTP request</a></li>
+<li><a href="#_delete_a_feed_http_response">HTTP response</a></li>
+<li><a href="#_delete_a_feed_path_parameters">Path parameters</a></li>
 </ul>
 </li>
 <li><a href="#_like_a_feed">Like a feed</a>
@@ -501,11 +501,11 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <li><a href="#_like_a_feed_path_parameters">Path parameters</a></li>
 </ul>
 </li>
-<li><a href="#_like_a_feed_2">Like a feed</a>
+<li><a href="#_cancel_like">Cancel Like</a>
 <ul class="sectlevel2">
-<li><a href="#_like_a_feed_2_http_request">HTTP request</a></li>
-<li><a href="#_like_a_feed_2_http_response">HTTP response</a></li>
-<li><a href="#_like_a_feed_2_path_parameters">Path parameters</a></li>
+<li><a href="#_cancel_like_http_request">HTTP request</a></li>
+<li><a href="#_cancel_like_http_response">HTTP response</a></li>
+<li><a href="#_cancel_like_path_parameters">Path parameters</a></li>
 </ul>
 </li>
 <li><a href="#_create_a_comment">Create a comment</a>
@@ -593,6 +593,12 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <ul class="sectlevel2">
 <li><a href="#_get_monthly_hot_feeds_http_request">HTTP request</a></li>
 <li><a href="#_get_monthly_hot_feeds_http_response">HTTP response</a></li>
+</ul>
+</li>
+<li><a href="#_get_yearly_hot_diaries">Get yearly hot diaries</a>
+<ul class="sectlevel2">
+<li><a href="#_get_yearly_hot_diaries_http_request">HTTP request</a></li>
+<li><a href="#_get_yearly_hot_diaries_http_response">HTTP response</a></li>
 </ul>
 </li>
 <li><a href="#_set_status_online">Set status online</a>
@@ -702,7 +708,7 @@ Content-Type: application/json
 <div class="content">
 <pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">HTTP/1.1 200 OK
 Content-Type: application/json;charset=UTF-8
-Content-Length: 429
+Content-Length: 529
 
 {
   "feedId" : 1,
@@ -710,10 +716,19 @@ Content-Length: 429
     "id" : 1,
     "username" : "testWriter"
   },
-  "graphicContentsPaths" : [ "/file1.jpeg", "/file2.mp4", "/file3.jpeg" ],
+  "graphicContentsPaths" : [ {
+    "id" : 1,
+    "path" : "/file1.jpeg"
+  }, {
+    "id" : 2,
+    "path" : "/file2.mp4"
+  }, {
+    "id" : 3,
+    "path" : "/file3.jpeg"
+  } ],
   "textContent" : "This is content",
   "latitude" : 36.5116,
-  "lonitude" : 127.2359,
+  "longitude" : 127.2359,
   "tagNames" : [ "korea", "travel" ],
   "location" : {
     "city" : "sejong-si",
@@ -745,7 +760,7 @@ Host: localhost:8080</code></pre>
 <div class="content">
 <pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">HTTP/1.1 200 OK
 Content-Type: application/json;charset=UTF-8
-Content-Length: 429
+Content-Length: 530
 
 {
   "feedId" : 1,
@@ -753,10 +768,19 @@ Content-Length: 429
     "id" : 1,
     "username" : "testWriter"
   },
-  "graphicContentsPaths" : [ "/file1.jpeg", "/file2.mp4", "/file3.jpeg" ],
+  "graphicContentsPaths" : [ {
+    "id" : 1,
+    "path" : "/file1.jpeg"
+  }, {
+    "id" : 2,
+    "path" : "/file2.jpeg"
+  }, {
+    "id" : 3,
+    "path" : "/file3.jpeg"
+  } ],
   "textContent" : "This is content",
   "latitude" : 36.5116,
-  "lonitude" : 127.2359,
+  "longitude" : 127.2359,
   "tagNames" : [ "korea", "travel" ],
   "location" : {
     "city" : "sejong-si",
@@ -810,7 +834,7 @@ Host: localhost:8080</code></pre>
 <div class="content">
 <pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">HTTP/1.1 200 OK
 Content-Type: application/json;charset=UTF-8
-Content-Length: 825
+Content-Length: 927
 
 [ {
   "feedId" : 1,
@@ -818,10 +842,19 @@ Content-Length: 825
     "id" : 1,
     "username" : "testWriter"
   },
-  "graphicContentsPaths" : [ "/file1.jpeg", "/file2.mp4", "/file3.jpeg" ],
+  "graphicContentsPaths" : [ {
+    "id" : 1,
+    "path" : "/file1.jpeg"
+  }, {
+    "id" : 2,
+    "path" : "/file2.jpeg"
+  }, {
+    "id" : 3,
+    "path" : "/file3.jpeg"
+  } ],
   "textContent" : "This is content",
   "latitude" : 36.5116,
-  "lonitude" : 127.2359,
+  "longitude" : 127.2359,
   "tagNames" : [ "korea", "travel" ],
   "location" : {
     "city" : "sejong-si",
@@ -838,7 +871,7 @@ Content-Length: 825
   "graphicContentsPaths" : [ ],
   "textContent" : "This is content2",
   "latitude" : 36.3157,
-  "lonitude" : 127.3913,
+  "longitude" : 127.3913,
   "tagNames" : [ "daejeon", "travel" ],
   "location" : {
     "city" : "daejeon-si",
@@ -913,7 +946,7 @@ Host: localhost:8080</code></pre>
 <div class="content">
 <pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">HTTP/1.1 200 OK
 Content-Type: application/json;charset=UTF-8
-Content-Length: 825
+Content-Length: 927
 
 [ {
   "feedId" : 1,
@@ -921,10 +954,19 @@ Content-Length: 825
     "id" : 1,
     "username" : "testWriter"
   },
-  "graphicContentsPaths" : [ "/file1.jpeg", "/file2.mp4", "/file3.jpeg" ],
+  "graphicContentsPaths" : [ {
+    "id" : 1,
+    "path" : "/file1.jpeg"
+  }, {
+    "id" : 2,
+    "path" : "/file2.jpeg"
+  }, {
+    "id" : 3,
+    "path" : "/file3.jpeg"
+  } ],
   "textContent" : "This is content",
   "latitude" : 36.5116,
-  "lonitude" : 127.2359,
+  "longitude" : 127.2359,
   "tagNames" : [ "korea", "travel" ],
   "location" : {
     "city" : "sejong-si",
@@ -941,7 +983,7 @@ Content-Length: 825
   "graphicContentsPaths" : [ ],
   "textContent" : "This is content2",
   "latitude" : 36.3157,
-  "lonitude" : 127.3913,
+  "longitude" : 127.3913,
   "tagNames" : [ "daejeon", "travel" ],
   "location" : {
     "city" : "daejeon-si",
@@ -978,10 +1020,10 @@ Content-Length: 825
 </div>
 </div>
 <div class="sect1">
-<h2 id="_get_a_feed_2">Get a feed</h2>
+<h2 id="_update_a_feed">Update a feed</h2>
 <div class="sectionbody">
 <div class="sect2">
-<h3 id="_get_a_feed_2_http_request">HTTP request</h3>
+<h3 id="_update_a_feed_http_request">HTTP request</h3>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">PUT /feeds/1 HTTP/1.1
@@ -998,12 +1040,12 @@ Host: localhost:8080
 </div>
 </div>
 <div class="sect2">
-<h3 id="_get_a_feed_2_http_response">HTTP response</h3>
+<h3 id="_update_a_feed_http_response">HTTP response</h3>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">HTTP/1.1 200 OK
 Content-Type: application/json;charset=UTF-8
-Content-Length: 430
+Content-Length: 530
 
 {
   "feedId" : 1,
@@ -1011,10 +1053,19 @@ Content-Length: 430
     "id" : 1,
     "username" : "testWriter"
   },
-  "graphicContentsPaths" : [ "/file2.jpeg", "/file4.jpeg", "/file5.jpeg" ],
+  "graphicContentsPaths" : [ {
+    "id" : 2,
+    "path" : "/file2.jpeg"
+  }, {
+    "id" : 4,
+    "path" : "/file4.jpeg"
+  }, {
+    "id" : 5,
+    "path" : "/file5.jpeg"
+  } ],
   "textContent" : "Updated content",
   "latitude" : 36.5116,
-  "lonitude" : 127.2359,
+  "longitude" : 127.2359,
   "tagNames" : [ "New", "Updated" ],
   "location" : {
     "city" : "daejeon-si",
@@ -1027,7 +1078,7 @@ Content-Length: 430
 </div>
 </div>
 <div class="sect2">
-<h3 id="_get_a_feed_2_path_parameters">Path parameters</h3>
+<h3 id="_update_a_feed_path_parameters">Path parameters</h3>
 <table class="tableblock frame-all grid-all stretch">
 <caption class="title">Table 1. /feeds/{feedId}</caption>
 <colgroup>
@@ -1051,10 +1102,10 @@ Content-Length: 430
 </div>
 </div>
 <div class="sect1">
-<h2 id="_get_a_feed_3">Get a feed</h2>
+<h2 id="_delete_a_feed">Delete a feed</h2>
 <div class="sectionbody">
 <div class="sect2">
-<h3 id="_get_a_feed_3_http_request">HTTP request</h3>
+<h3 id="_delete_a_feed_http_request">HTTP request</h3>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">DELETE /feeds/1 HTTP/1.1
@@ -1063,7 +1114,7 @@ Host: localhost:8080</code></pre>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_get_a_feed_3_http_response">HTTP response</h3>
+<h3 id="_delete_a_feed_http_response">HTTP response</h3>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">HTTP/1.1 200 OK</code></pre>
@@ -1071,7 +1122,7 @@ Host: localhost:8080</code></pre>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_get_a_feed_3_path_parameters">Path parameters</h3>
+<h3 id="_delete_a_feed_path_parameters">Path parameters</h3>
 <table class="tableblock frame-all grid-all stretch">
 <caption class="title">Table 1. /feeds/{feedId}</caption>
 <colgroup>
@@ -1140,10 +1191,10 @@ Content-Type: application/x-www-form-urlencoded</code></pre>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_like_a_feed_2">Like a feed</h2>
+<h2 id="_cancel_like">Cancel Like</h2>
 <div class="sectionbody">
 <div class="sect2">
-<h3 id="_like_a_feed_2_http_request">HTTP request</h3>
+<h3 id="_cancel_like_http_request">HTTP request</h3>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">DELETE /like/feed/1 HTTP/1.1
@@ -1152,7 +1203,7 @@ Host: localhost:8080</code></pre>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_like_a_feed_2_http_response">HTTP response</h3>
+<h3 id="_cancel_like_http_response">HTTP response</h3>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">HTTP/1.1 200 OK</code></pre>
@@ -1160,7 +1211,7 @@ Host: localhost:8080</code></pre>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_like_a_feed_2_path_parameters">Path parameters</h3>
+<h3 id="_cancel_like_path_parameters">Path parameters</h3>
 <table class="tableblock frame-all grid-all stretch">
 <caption class="title">Table 1. /like/feed/{feedId}</caption>
 <colgroup>
@@ -1324,7 +1375,7 @@ Host: localhost:8080</code></pre>
 <div class="content">
 <pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">HTTP/1.1 200 OK
 Content-Type: application/json;charset=UTF-8
-Content-Length: 625
+Content-Length: 626
 
 [ {
   "id" : 1,
@@ -1335,7 +1386,7 @@ Content-Length: 625
   "feedId" : 1,
   "hasNestedComments" : false,
   "textContent" : "First comment",
-  "createdAt" : "2024-02-21T03:47:46.79679"
+  "createdAt" : "2024-03-01T13:39:22.492343"
 }, {
   "id" : 2,
   "writer" : {
@@ -1345,7 +1396,7 @@ Content-Length: 625
   "feedId" : 1,
   "hasNestedComments" : true,
   "textContent" : "This comment was deleted",
-  "createdAt" : "2024-02-21T03:47:46.798777"
+  "createdAt" : "2024-03-01T13:39:22.494826"
 }, {
   "id" : 3,
   "writer" : {
@@ -1355,7 +1406,7 @@ Content-Length: 625
   "feedId" : 1,
   "hasNestedComments" : true,
   "textContent" : "Third comment",
-  "createdAt" : "2024-02-21T03:47:46.799121"
+  "createdAt" : "2024-03-01T13:39:22.495313"
 } ]</code></pre>
 </div>
 </div>
@@ -1423,7 +1474,7 @@ Host: localhost:8080</code></pre>
 <div class="content">
 <pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">HTTP/1.1 200 OK
 Content-Type: application/json;charset=UTF-8
-Content-Length: 601
+Content-Length: 602
 
 [ {
   "id" : 11,
@@ -1433,7 +1484,7 @@ Content-Length: 601
   },
   "parentCommentId" : 1,
   "textContent" : "First child comment",
-  "createdAt" : "2024-02-21T03:47:46.817523"
+  "createdAt" : "2024-03-01T13:39:22.519697"
 }, {
   "id" : 12,
   "writerResponse" : {
@@ -1442,7 +1493,7 @@ Content-Length: 601
   },
   "parentCommentId" : 1,
   "textContent" : "Second child comment",
-  "createdAt" : "2024-02-21T03:47:46.81863"
+  "createdAt" : "2024-03-01T13:39:22.520435"
 }, {
   "id" : 13,
   "writerResponse" : {
@@ -1451,7 +1502,7 @@ Content-Length: 601
   },
   "parentCommentId" : 1,
   "textContent" : "This comment was deleted",
-  "createdAt" : "2024-02-21T03:47:46.819096"
+  "createdAt" : "2024-03-01T13:39:22.520788"
 } ]</code></pre>
 </div>
 </div>
@@ -1550,7 +1601,7 @@ Host: localhost:8080
 <div class="content">
 <pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">HTTP/1.1 200 OK
 Content-Type: application/json;charset=UTF-8
-Content-Length: 1760
+Content-Length: 2027
 
 {
   "id" : 1,
@@ -1558,65 +1609,81 @@ Content-Length: 1760
   "title" : "My Stoury",
   "thumbnailPath" : "/feed/images/image_1.jpeg",
   "feeds" : {
-    "2" : [ {
-      "feedId" : 2,
-      "writer" : {
-        "id" : 1,
-        "username" : "writer1"
-      },
-      "graphicContentsPaths" : [ "/feed/images/image_2.jpeg", "/feed/images/image_3.jpeg" ],
-      "textContent" : "This is feed2",
-      "latitude" : 39.0484,
-      "lonitude" : -110.8451,
-      "tagNames" : [ "America", "Utah", "Tavel" ],
-      "location" : {
-        "city" : "Utah",
-        "country" : "United States"
-      },
-      "likes" : 13,
-      "createdAt" : "2024-02-22T03:47:46.851098"
-    }, {
-      "feedId" : 3,
-      "writer" : {
-        "id" : 1,
-        "username" : "writer1"
-      },
-      "graphicContentsPaths" : [ "/feed/images/image_4.jpeg", "/feed/images/image_5.jpeg" ],
-      "textContent" : "This is feed3",
-      "latitude" : 38.5269,
-      "lonitude" : -115.3801,
-      "tagNames" : [ "Nevada", "UFO" ],
-      "location" : {
-        "city" : "Nevada",
-        "country" : "United States"
-      },
-      "likes" : 52,
-      "createdAt" : "2024-02-23T03:47:46.851835"
-    } ],
     "1" : [ {
       "feedId" : 1,
       "writer" : {
         "id" : 1,
         "username" : "writer1"
       },
-      "graphicContentsPaths" : [ "/feed/images/image_1.jpeg" ],
+      "graphicContentsPaths" : [ {
+        "id" : 1,
+        "path" : "/feed/images/image_1.jpeg"
+      } ],
       "textContent" : "This is feed1",
       "latitude" : 40.0627,
-      "lonitude" : -105.1779,
+      "longitude" : -105.1779,
       "tagNames" : [ "America", "denver" ],
       "location" : {
         "city" : "Colorado",
         "country" : "United States"
       },
       "likes" : 20,
-      "createdAt" : "2024-02-21T03:47:46.846735"
+      "createdAt" : "2024-03-01T13:39:22.600021"
+    } ],
+    "2" : [ {
+      "feedId" : 2,
+      "writer" : {
+        "id" : 1,
+        "username" : "writer1"
+      },
+      "graphicContentsPaths" : [ {
+        "id" : 2,
+        "path" : "/feed/images/image_2.jpeg"
+      }, {
+        "id" : 3,
+        "path" : "/feed/images/image_3.jpeg"
+      } ],
+      "textContent" : "This is feed2",
+      "latitude" : 39.0484,
+      "longitude" : -110.8451,
+      "tagNames" : [ "America", "Utah", "Tavel" ],
+      "location" : {
+        "city" : "Utah",
+        "country" : "United States"
+      },
+      "likes" : 13,
+      "createdAt" : "2024-03-02T13:39:22.605838"
+    }, {
+      "feedId" : 3,
+      "writer" : {
+        "id" : 1,
+        "username" : "writer1"
+      },
+      "graphicContentsPaths" : [ {
+        "id" : 4,
+        "path" : "/feed/images/image_4.jpeg"
+      }, {
+        "id" : 5,
+        "path" : "/feed/images/image_5.jpeg"
+      } ],
+      "textContent" : "This is feed3",
+      "latitude" : 38.5269,
+      "longitude" : -115.3801,
+      "tagNames" : [ "Nevada", "UFO" ],
+      "location" : {
+        "city" : "Nevada",
+        "country" : "United States"
+      },
+      "likes" : 52,
+      "createdAt" : "2024-03-03T13:39:22.607407"
     } ]
   },
-  "startDate" : "2024-02-21",
-  "endDate" : "2024-02-23",
+  "startDate" : "2024-03-01",
+  "endDate" : "2024-03-03",
   "city" : "Colorado",
   "country" : "United States",
-  "likes" : 85
+  "likes" : 85,
+  "createdAt" : "2024-12-31T13:00:00"
 }</code></pre>
 </div>
 </div>
@@ -1641,24 +1708,27 @@ Host: localhost:8080</code></pre>
 <div class="content">
 <pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">HTTP/1.1 200 OK
 Content-Type: application/json;charset=UTF-8
-Content-Length: 452
+Content-Length: 575
 
 {
   "diaries" : [ {
     "id" : 1,
     "thumbnail" : "/feed/images/image_14.jpeg",
     "title" : "My Stoury",
-    "memberId" : 1
+    "memberId" : 1,
+    "createdAt" : "2024-12-31T13:00:00"
   }, {
     "id" : 2,
     "thumbnail" : "/feed/images/image_16.jpeg",
     "title" : "South Korea, Seoul, 2023-12-01~2024-01-12",
-    "memberId" : 1
+    "memberId" : 1,
+    "createdAt" : "2024-12-31T13:00:00"
   }, {
     "id" : 3,
     "thumbnail" : "/feed/images/image_120.jpeg",
     "title" : "Turkiye travel with family",
-    "memberId" : 1
+    "memberId" : 1,
+    "createdAt" : "2024-12-31T13:00:00"
   } ],
   "pageNo" : 1,
   "hasNext" : false
@@ -2126,6 +2196,86 @@ Content-Length: 1245
 </div>
 </div>
 <div class="sect1">
+<h2 id="_get_yearly_hot_diaries">Get yearly hot diaries</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_get_yearly_hot_diaries_http_request">HTTP request</h3>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">GET /rank/yearly-hot-diaries HTTP/1.1
+Host: localhost:8080</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_get_yearly_hot_diaries_http_response">HTTP response</h3>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">HTTP/1.1 200 OK
+Content-Type: application/json;charset=UTF-8
+Content-Length: 1263
+
+[ {
+  "id" : 2,
+  "thumbnail" : "/image1.jpeg",
+  "title" : "Travel of Chung",
+  "memberId" : 1,
+  "createdAt" : "2024-12-31T13:00:00"
+}, {
+  "id" : 4,
+  "thumbnail" : "/image2.jpeg",
+  "title" : "Healing in japan",
+  "memberId" : 3,
+  "createdAt" : "2024-12-31T13:00:00"
+}, {
+  "id" : 1,
+  "thumbnail" : "/image3.jpeg",
+  "title" : "Trip africa",
+  "memberId" : 1,
+  "createdAt" : "2024-12-31T13:00:00"
+}, {
+  "id" : 5,
+  "thumbnail" : "/image4.jpeg",
+  "title" : "Amazing paris",
+  "memberId" : 2,
+  "createdAt" : "2024-12-31T13:00:00"
+}, {
+  "id" : 99,
+  "thumbnail" : "/image55.jpeg",
+  "title" : "Tragedy of warsaw",
+  "memberId" : 66,
+  "createdAt" : "2024-12-31T13:00:00"
+}, {
+  "id" : 123,
+  "thumbnail" : "/image10.jpeg",
+  "title" : "5 days in pallujah",
+  "memberId" : 123,
+  "createdAt" : "2024-12-31T13:00:00"
+}, {
+  "id" : 23425,
+  "thumbnail" : "/image14.jpeg",
+  "title" : "Best or Worst? Canda",
+  "memberId" : 45,
+  "createdAt" : "2024-12-31T13:00:00"
+}, {
+  "id" : 32,
+  "thumbnail" : "/image102.jpeg",
+  "title" : "Hiking alps",
+  "memberId" : 132,
+  "createdAt" : "2024-12-31T13:00:00"
+}, {
+  "id" : 414,
+  "thumbnail" : "/image67.jpeg",
+  "title" : "The most modern city, milano",
+  "memberId" : 12,
+  "createdAt" : "2024-12-31T13:00:00"
+} ]</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
 <h2 id="_set_status_online">Set status online</h2>
 <div class="sectionbody">
 <div class="sect2">
@@ -2275,7 +2425,7 @@ Content-Length: 401
 <div id="footer">
 <div id="footer-text">
 Version 0.0.1-SNAPSHOT<br>
-Last updated 2024-02-21 03:47:36 +0900
+Last updated 2024-02-23 01:52:04 +0900
 </div>
 </div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.3/highlight.min.js"></script>

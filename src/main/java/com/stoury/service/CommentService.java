@@ -99,6 +99,7 @@ public class CommentService {
                 .orElseThrow(CommentSearchException::new);
         if (comment.isOwnedBy(memberId)) {
             deleteComment(commentId);
+            return;
         }
         throw new NotAuthorizedException();
     }

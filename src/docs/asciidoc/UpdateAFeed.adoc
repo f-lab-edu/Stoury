@@ -1,2 +1,2 @@
-== Get a feed
+== Update a feed
 operation::feed-controller-test/Update a feed[snippets="http-request,http-response,path-parameters"]

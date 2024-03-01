@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="generator" content="Asciidoctor 2.0.18">
-<title>Get a feed</title>
+<title>Update a feed</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
 <style>
 /*! Asciidoctor default stylesheet | MIT License | https://asciidoctor.org */
@@ -441,10 +441,10 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </div>
 <div id="content">
 <div class="sect1">
-<h2 id="_get_a_feed">Get a feed</h2>
+<h2 id="_update_a_feed">Update a feed</h2>
 <div class="sectionbody">
 <div class="sect2">
-<h3 id="_get_a_feed_http_request">HTTP request</h3>
+<h3 id="_update_a_feed_http_request">HTTP request</h3>
 <div class="listingblock">
 <div class="content">
 <pre class="highlight nowrap"><code class="language-http" data-lang="http">PUT /feeds/1 HTTP/1.1
@@ -461,12 +461,12 @@ Host: localhost:8080
 </div>
 </div>
 <div class="sect2">
-<h3 id="_get_a_feed_http_response">HTTP response</h3>
+<h3 id="_update_a_feed_http_response">HTTP response</h3>
 <div class="listingblock">
 <div class="content">
 <pre class="highlight nowrap"><code class="language-http" data-lang="http">HTTP/1.1 200 OK
 Content-Type: application/json;charset=UTF-8
-Content-Length: 430
+Content-Length: 530
 
 {
   "feedId" : 1,
@@ -474,10 +474,19 @@ Content-Length: 430
     "id" : 1,
     "username" : "testWriter"
   },
-  "graphicContentsPaths" : [ "/file2.jpeg", "/file4.jpeg", "/file5.jpeg" ],
+  "graphicContentsPaths" : [ {
+    "id" : 2,
+    "path" : "/file2.jpeg"
+  }, {
+    "id" : 4,
+    "path" : "/file4.jpeg"
+  }, {
+    "id" : 5,
+    "path" : "/file5.jpeg"
+  } ],
   "textContent" : "Updated content",
   "latitude" : 36.5116,
-  "lonitude" : 127.2359,
+  "longitude" : 127.2359,
   "tagNames" : [ "New", "Updated" ],
   "location" : {
     "city" : "daejeon-si",
@@ -490,7 +499,7 @@ Content-Length: 430
 </div>
 </div>
 <div class="sect2">
-<h3 id="_get_a_feed_path_parameters">Path parameters</h3>
+<h3 id="_update_a_feed_path_parameters">Path parameters</h3>
 <table class="tableblock frame-all grid-all stretch">
 <caption class="title">Table 1. /feeds/{feedId}</caption>
 <colgroup>
@@ -517,7 +526,7 @@ Content-Length: 430
 <div id="footer">
 <div id="footer-text">
 Version 0.0.1-SNAPSHOT<br>
-Last updated 2024-02-21 03:44:03 +0900
+Last updated 2024-02-29 18:54:09 +0900
 </div>
 </div>
 </body>

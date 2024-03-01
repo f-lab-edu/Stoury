@@ -2,6 +2,7 @@ package com.stoury.controller;
 
 import com.stoury.dto.ErrorResponse;
 import com.stoury.exception.AlreadyLikedFeedException;
+import com.stoury.exception.authentication.NotAuthorizedException;
 import com.stoury.exception.diary.DiaryCreateException;
 import com.stoury.exception.diary.DiarySearchException;
 import com.stoury.exception.feed.FeedCreateException;
@@ -42,5 +43,11 @@ public class ExceptionController {
     public ResponseEntity<ErrorResponse> handle500(RuntimeException ex) {
         log.error(ex.getMessage());
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ErrorResponse.of(ex.getMessage()));
+    }
+
+    @ExceptionHandler(value = {NotAuthorizedException.class})
+    public ResponseEntity<ErrorResponse> handle403(RuntimeException ex) {
+        log.error(ex.getMessage());
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ErrorResponse.of(ex.getMessage()));
     }
 }

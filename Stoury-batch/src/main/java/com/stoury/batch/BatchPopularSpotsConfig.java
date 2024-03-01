@@ -40,6 +40,7 @@ public class BatchPopularSpotsConfig {
                     rankingRepository.update(PopularSpotsKey.POPULAR_DOMESTIC_SPOTS, rankedDomesticCities);
                     return RepeatStatus.FINISHED;
                 }, tm)
+                .allowStartIfComplete(true)
                 .build();
     }
 
@@ -51,6 +52,7 @@ public class BatchPopularSpotsConfig {
                     rankingRepository.update(PopularSpotsKey.POPULAR_ABROAD_SPOTS, rankedCountries);
                     return RepeatStatus.FINISHED;
                 }, tm)
+                .allowStartIfComplete(true)
                 .build();
     }
 

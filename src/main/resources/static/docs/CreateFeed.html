@@ -481,7 +481,7 @@ Content-Type: application/json
 <div class="content">
 <pre class="highlight nowrap"><code class="language-http" data-lang="http">HTTP/1.1 200 OK
 Content-Type: application/json;charset=UTF-8
-Content-Length: 429
+Content-Length: 529
 
 {
   "feedId" : 1,
@@ -489,10 +489,19 @@ Content-Length: 429
     "id" : 1,
     "username" : "testWriter"
   },
-  "graphicContentsPaths" : [ "/file1.jpeg", "/file2.mp4", "/file3.jpeg" ],
+  "graphicContentsPaths" : [ {
+    "id" : 1,
+    "path" : "/file1.jpeg"
+  }, {
+    "id" : 2,
+    "path" : "/file2.mp4"
+  }, {
+    "id" : 3,
+    "path" : "/file3.jpeg"
+  } ],
   "textContent" : "This is content",
   "latitude" : 36.5116,
-  "lonitude" : 127.2359,
+  "longitude" : 127.2359,
   "tagNames" : [ "korea", "travel" ],
   "location" : {
     "city" : "sejong-si",
