@@ -4,6 +4,7 @@ import com.stoury.dto.SimpleMemberResponse
 import com.stoury.dto.feed.FeedCreateRequest
 import com.stoury.dto.feed.FeedResponse
 import com.stoury.dto.feed.FeedUpdateRequest
+import com.stoury.dto.feed.GraphicContentResponse
 import com.stoury.dto.feed.LocationResponse
 import com.stoury.dto.member.AuthenticatedMember
 import com.stoury.service.FeedService
@@ -48,7 +49,7 @@ class FeedControllerTest extends AbstractRestDocsTests {
                 new FeedResponse(
                         1L,
                         new SimpleMemberResponse(writer.getId(), "testWriter"),
-                        graphicContents.stream().map(file -> "/" + file.getOriginalFilename()).toList(),
+                        graphicContents.stream().map(file -> new GraphicContentResponse(1, "/" + file.getOriginalFilename())).toList(),
                         feedCreateRequest.textContent(),
                         feedCreateRequest.latitude(),
                         feedCreateRequest.longitude(),
@@ -80,7 +81,11 @@ class FeedControllerTest extends AbstractRestDocsTests {
                 new FeedResponse(
                         1L,
                         new SimpleMemberResponse(1L, "testWriter"),
-                        List.of("/file1.jpeg", "/file2.mp4", "/file3.jpeg"),
+                        [
+                                new GraphicContentResponse(1, "/file1.jpeg"),
+                                new GraphicContentResponse(2, "/file2.jpeg"),
+                                new GraphicContentResponse(3, "/file3.jpeg"),
+                        ],
                         "This is content",
                         36.5116,
                         127.2359,
@@ -111,7 +116,11 @@ class FeedControllerTest extends AbstractRestDocsTests {
                 new FeedResponse(
                         1L,
                         new SimpleMemberResponse(1L, "testWriter"),
-                        List.of("/file1.jpeg", "/file2.mp4", "/file3.jpeg"),
+                        [
+                                new GraphicContentResponse(1, "/file1.jpeg"),
+                                new GraphicContentResponse(2, "/file2.jpeg"),
+                                new GraphicContentResponse(3, "/file3.jpeg"),
+                        ],
                         "This is content",
                         36.5116,
                         127.2359,
@@ -153,7 +162,11 @@ class FeedControllerTest extends AbstractRestDocsTests {
                 new FeedResponse(
                         1L,
                         new SimpleMemberResponse(1L, "testWriter"),
-                        List.of("/file1.jpeg", "/file2.mp4", "/file3.jpeg"),
+                        [
+                                new GraphicContentResponse(1, "/file1.jpeg"),
+                                new GraphicContentResponse(2, "/file2.jpeg"),
+                                new GraphicContentResponse(3, "/file3.jpeg"),
+                        ],
                         "This is content",
                         36.5116,
                         127.2359,
@@ -196,7 +209,11 @@ class FeedControllerTest extends AbstractRestDocsTests {
                 new FeedResponse(
                         1L,
                         new SimpleMemberResponse(writer.getId(), "testWriter"),
-                        List.of("/file2.jpeg", "/file4.jpeg", "/file5.jpeg"),
+                        [
+                                new GraphicContentResponse(2, "/file2.jpeg"),
+                                new GraphicContentResponse(4, "/file4.jpeg"),
+                                new GraphicContentResponse(5, "/file5.jpeg"),
+                        ],
                         feedUpdateRequest.textContent(),
                         36.5116,
                         127.2359,

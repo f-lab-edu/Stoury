@@ -1,7 +1,6 @@
 package com.stoury.dto.feed;
 
 import com.stoury.domain.Feed;
-import com.stoury.domain.GraphicContent;
 import com.stoury.domain.Tag;
 import com.stoury.dto.SimpleMemberResponse;
 
@@ -10,10 +9,10 @@ import java.util.List;
 
 public record FeedResponse(Long feedId,
                            SimpleMemberResponse writer,
-                           List<String> graphicContentsPaths,
+                           List<GraphicContentResponse> graphicContentsPaths,
                            String textContent,
                            Double latitude,
-                           Double lonitude,
+                           Double longitude,
                            List<String> tagNames,
                            LocationResponse location,
                            long likes,
@@ -22,7 +21,7 @@ public record FeedResponse(Long feedId,
         return new FeedResponse(
                 feed.getId(),
                 SimpleMemberResponse.from(feed.getMember()),
-                feed.getGraphicContents().stream().map(GraphicContent::getPath).toList(),
+                feed.getGraphicContents().stream().map(GraphicContentResponse::from).toList(),
                 feed.getTextContent(),
                 feed.getLatitude(),
                 feed.getLongitude(),
