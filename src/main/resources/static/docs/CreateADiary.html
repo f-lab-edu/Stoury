@@ -466,7 +466,7 @@ Host: localhost:8080
 <div class="content">
 <pre class="highlight nowrap"><code class="language-http" data-lang="http">HTTP/1.1 200 OK
 Content-Type: application/json;charset=UTF-8
-Content-Length: 1760
+Content-Length: 1988
 
 {
   "id" : 1,
@@ -480,17 +480,20 @@ Content-Length: 1760
         "id" : 1,
         "username" : "writer1"
       },
-      "graphicContentsPaths" : [ "/feed/images/image_1.jpeg" ],
+      "graphicContentsPaths" : [ {
+        "id" : 1,
+        "path" : "/feed/images/image_1.jpeg"
+      } ],
       "textContent" : "This is feed1",
       "latitude" : 40.0627,
-      "lonitude" : -105.1779,
+      "longitude" : -105.1779,
       "tagNames" : [ "America", "denver" ],
       "location" : {
         "city" : "Colorado",
         "country" : "United States"
       },
       "likes" : 20,
-      "createdAt" : "2024-02-29T22:05:37.065823"
+      "createdAt" : "2024-03-01T13:03:26.580312"
     } ],
     "2" : [ {
       "feedId" : 2,
@@ -498,38 +501,50 @@ Content-Length: 1760
         "id" : 1,
         "username" : "writer1"
       },
-      "graphicContentsPaths" : [ "/feed/images/image_2.jpeg", "/feed/images/image_3.jpeg" ],
+      "graphicContentsPaths" : [ {
+        "id" : 2,
+        "path" : "/feed/images/image_2.jpeg"
+      }, {
+        "id" : 3,
+        "path" : "/feed/images/image_3.jpeg"
+      } ],
       "textContent" : "This is feed2",
       "latitude" : 39.0484,
-      "lonitude" : -110.8451,
+      "longitude" : -110.8451,
       "tagNames" : [ "America", "Utah", "Tavel" ],
       "location" : {
         "city" : "Utah",
         "country" : "United States"
       },
       "likes" : 13,
-      "createdAt" : "2024-03-01T22:05:37.072266"
+      "createdAt" : "2024-03-02T13:03:26.592688"
     }, {
       "feedId" : 3,
       "writer" : {
         "id" : 1,
         "username" : "writer1"
       },
-      "graphicContentsPaths" : [ "/feed/images/image_4.jpeg", "/feed/images/image_5.jpeg" ],
+      "graphicContentsPaths" : [ {
+        "id" : 4,
+        "path" : "/feed/images/image_4.jpeg"
+      }, {
+        "id" : 5,
+        "path" : "/feed/images/image_5.jpeg"
+      } ],
       "textContent" : "This is feed3",
       "latitude" : 38.5269,
-      "lonitude" : -115.3801,
+      "longitude" : -115.3801,
       "tagNames" : [ "Nevada", "UFO" ],
       "location" : {
         "city" : "Nevada",
         "country" : "United States"
       },
       "likes" : 52,
-      "createdAt" : "2024-03-02T22:05:37.074114"
+      "createdAt" : "2024-03-03T13:03:26.594019"
     } ]
   },
-  "startDate" : "2024-02-29",
-  "endDate" : "2024-03-02",
+  "startDate" : "2024-03-01",
+  "endDate" : "2024-03-03",
   "city" : "Colorado",
   "country" : "United States",
   "likes" : 85

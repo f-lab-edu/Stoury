@@ -466,7 +466,7 @@ Host: localhost:8080
 <div class="content">
 <pre class="highlight nowrap"><code class="language-http" data-lang="http">HTTP/1.1 200 OK
 Content-Type: application/json;charset=UTF-8
-Content-Length: 430
+Content-Length: 530
 
 {
   "feedId" : 1,
@@ -474,10 +474,19 @@ Content-Length: 430
     "id" : 1,
     "username" : "testWriter"
   },
-  "graphicContentsPaths" : [ "/file2.jpeg", "/file4.jpeg", "/file5.jpeg" ],
+  "graphicContentsPaths" : [ {
+    "id" : 2,
+    "path" : "/file2.jpeg"
+  }, {
+    "id" : 4,
+    "path" : "/file4.jpeg"
+  }, {
+    "id" : 5,
+    "path" : "/file5.jpeg"
+  } ],
   "textContent" : "Updated content",
   "latitude" : 36.5116,
-  "lonitude" : 127.2359,
+  "longitude" : 127.2359,
   "tagNames" : [ "New", "Updated" ],
   "location" : {
     "city" : "daejeon-si",

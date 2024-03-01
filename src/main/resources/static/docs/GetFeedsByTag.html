@@ -458,7 +458,7 @@ Host: localhost:8080</code></pre>
 <div class="content">
 <pre class="highlight nowrap"><code class="language-http" data-lang="http">HTTP/1.1 200 OK
 Content-Type: application/json;charset=UTF-8
-Content-Length: 825
+Content-Length: 927
 
 [ {
   "feedId" : 1,
@@ -466,10 +466,19 @@ Content-Length: 825
     "id" : 1,
     "username" : "testWriter"
   },
-  "graphicContentsPaths" : [ "/file1.jpeg", "/file2.mp4", "/file3.jpeg" ],
+  "graphicContentsPaths" : [ {
+    "id" : 1,
+    "path" : "/file1.jpeg"
+  }, {
+    "id" : 2,
+    "path" : "/file2.jpeg"
+  }, {
+    "id" : 3,
+    "path" : "/file3.jpeg"
+  } ],
   "textContent" : "This is content",
   "latitude" : 36.5116,
-  "lonitude" : 127.2359,
+  "longitude" : 127.2359,
   "tagNames" : [ "korea", "travel" ],
   "location" : {
     "city" : "sejong-si",
@@ -486,7 +495,7 @@ Content-Length: 825
   "graphicContentsPaths" : [ ],
   "textContent" : "This is content2",
   "latitude" : 36.3157,
-  "lonitude" : 127.3913,
+  "longitude" : 127.3913,
   "tagNames" : [ "daejeon", "travel" ],
   "location" : {
     "city" : "daejeon-si",

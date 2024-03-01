@@ -708,7 +708,7 @@ Content-Type: application/json
 <div class="content">
 <pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">HTTP/1.1 200 OK
 Content-Type: application/json;charset=UTF-8
-Content-Length: 429
+Content-Length: 529
 
 {
   "feedId" : 1,
@@ -716,10 +716,19 @@ Content-Length: 429
     "id" : 1,
     "username" : "testWriter"
   },
-  "graphicContentsPaths" : [ "/file1.jpeg", "/file2.mp4", "/file3.jpeg" ],
+  "graphicContentsPaths" : [ {
+    "id" : 1,
+    "path" : "/file1.jpeg"
+  }, {
+    "id" : 2,
+    "path" : "/file2.mp4"
+  }, {
+    "id" : 3,
+    "path" : "/file3.jpeg"
+  } ],
   "textContent" : "This is content",
   "latitude" : 36.5116,
-  "lonitude" : 127.2359,
+  "longitude" : 127.2359,
   "tagNames" : [ "korea", "travel" ],
   "location" : {
     "city" : "sejong-si",
@@ -751,7 +760,7 @@ Host: localhost:8080</code></pre>
 <div class="content">
 <pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">HTTP/1.1 200 OK
 Content-Type: application/json;charset=UTF-8
-Content-Length: 429
+Content-Length: 530
 
 {
   "feedId" : 1,
@@ -759,10 +768,19 @@ Content-Length: 429
     "id" : 1,
     "username" : "testWriter"
   },
-  "graphicContentsPaths" : [ "/file1.jpeg", "/file2.mp4", "/file3.jpeg" ],
+  "graphicContentsPaths" : [ {
+    "id" : 1,
+    "path" : "/file1.jpeg"
+  }, {
+    "id" : 2,
+    "path" : "/file2.jpeg"
+  }, {
+    "id" : 3,
+    "path" : "/file3.jpeg"
+  } ],
   "textContent" : "This is content",
   "latitude" : 36.5116,
-  "lonitude" : 127.2359,
+  "longitude" : 127.2359,
   "tagNames" : [ "korea", "travel" ],
   "location" : {
     "city" : "sejong-si",
@@ -816,7 +834,7 @@ Host: localhost:8080</code></pre>
 <div class="content">
 <pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">HTTP/1.1 200 OK
 Content-Type: application/json;charset=UTF-8
-Content-Length: 825
+Content-Length: 927
 
 [ {
   "feedId" : 1,
@@ -824,10 +842,19 @@ Content-Length: 825
     "id" : 1,
     "username" : "testWriter"
   },
-  "graphicContentsPaths" : [ "/file1.jpeg", "/file2.mp4", "/file3.jpeg" ],
+  "graphicContentsPaths" : [ {
+    "id" : 1,
+    "path" : "/file1.jpeg"
+  }, {
+    "id" : 2,
+    "path" : "/file2.jpeg"
+  }, {
+    "id" : 3,
+    "path" : "/file3.jpeg"
+  } ],
   "textContent" : "This is content",
   "latitude" : 36.5116,
-  "lonitude" : 127.2359,
+  "longitude" : 127.2359,
   "tagNames" : [ "korea", "travel" ],
   "location" : {
     "city" : "sejong-si",
@@ -844,7 +871,7 @@ Content-Length: 825
   "graphicContentsPaths" : [ ],
   "textContent" : "This is content2",
   "latitude" : 36.3157,
-  "lonitude" : 127.3913,
+  "longitude" : 127.3913,
   "tagNames" : [ "daejeon", "travel" ],
   "location" : {
     "city" : "daejeon-si",
@@ -919,7 +946,7 @@ Host: localhost:8080</code></pre>
 <div class="content">
 <pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">HTTP/1.1 200 OK
 Content-Type: application/json;charset=UTF-8
-Content-Length: 825
+Content-Length: 927
 
 [ {
   "feedId" : 1,
@@ -927,10 +954,19 @@ Content-Length: 825
     "id" : 1,
     "username" : "testWriter"
   },
-  "graphicContentsPaths" : [ "/file1.jpeg", "/file2.mp4", "/file3.jpeg" ],
+  "graphicContentsPaths" : [ {
+    "id" : 1,
+    "path" : "/file1.jpeg"
+  }, {
+    "id" : 2,
+    "path" : "/file2.jpeg"
+  }, {
+    "id" : 3,
+    "path" : "/file3.jpeg"
+  } ],
   "textContent" : "This is content",
   "latitude" : 36.5116,
-  "lonitude" : 127.2359,
+  "longitude" : 127.2359,
   "tagNames" : [ "korea", "travel" ],
   "location" : {
     "city" : "sejong-si",
@@ -947,7 +983,7 @@ Content-Length: 825
   "graphicContentsPaths" : [ ],
   "textContent" : "This is content2",
   "latitude" : 36.3157,
-  "lonitude" : 127.3913,
+  "longitude" : 127.3913,
   "tagNames" : [ "daejeon", "travel" ],
   "location" : {
     "city" : "daejeon-si",
@@ -1009,7 +1045,7 @@ Host: localhost:8080
 <div class="content">
 <pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">HTTP/1.1 200 OK
 Content-Type: application/json;charset=UTF-8
-Content-Length: 430
+Content-Length: 530
 
 {
   "feedId" : 1,
@@ -1017,10 +1053,19 @@ Content-Length: 430
     "id" : 1,
     "username" : "testWriter"
   },
-  "graphicContentsPaths" : [ "/file2.jpeg", "/file4.jpeg", "/file5.jpeg" ],
+  "graphicContentsPaths" : [ {
+    "id" : 2,
+    "path" : "/file2.jpeg"
+  }, {
+    "id" : 4,
+    "path" : "/file4.jpeg"
+  }, {
+    "id" : 5,
+    "path" : "/file5.jpeg"
+  } ],
   "textContent" : "Updated content",
   "latitude" : 36.5116,
-  "lonitude" : 127.2359,
+  "longitude" : 127.2359,
   "tagNames" : [ "New", "Updated" ],
   "location" : {
     "city" : "daejeon-si",
@@ -1330,7 +1375,7 @@ Host: localhost:8080</code></pre>
 <div class="content">
 <pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">HTTP/1.1 200 OK
 Content-Type: application/json;charset=UTF-8
-Content-Length: 626
+Content-Length: 625
 
 [ {
   "id" : 1,
@@ -1341,7 +1386,7 @@ Content-Length: 626
   "feedId" : 1,
   "hasNestedComments" : false,
   "textContent" : "First comment",
-  "createdAt" : "2024-02-29T22:05:36.995865"
+  "createdAt" : "2024-03-01T13:03:26.488909"
 }, {
   "id" : 2,
   "writer" : {
@@ -1351,7 +1396,7 @@ Content-Length: 626
   "feedId" : 1,
   "hasNestedComments" : true,
   "textContent" : "This comment was deleted",
-  "createdAt" : "2024-02-29T22:05:36.998833"
+  "createdAt" : "2024-03-01T13:03:26.49088"
 }, {
   "id" : 3,
   "writer" : {
@@ -1361,7 +1406,7 @@ Content-Length: 626
   "feedId" : 1,
   "hasNestedComments" : true,
   "textContent" : "Third comment",
-  "createdAt" : "2024-02-29T22:05:36.999205"
+  "createdAt" : "2024-03-01T13:03:26.491318"
 } ]</code></pre>
 </div>
 </div>
@@ -1429,7 +1474,7 @@ Host: localhost:8080</code></pre>
 <div class="content">
 <pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">HTTP/1.1 200 OK
 Content-Type: application/json;charset=UTF-8
-Content-Length: 601
+Content-Length: 602
 
 [ {
   "id" : 11,
@@ -1439,7 +1484,7 @@ Content-Length: 601
   },
   "parentCommentId" : 1,
   "textContent" : "First child comment",
-  "createdAt" : "2024-02-29T22:05:37.02582"
+  "createdAt" : "2024-03-01T13:03:26.512986"
 }, {
   "id" : 12,
   "writerResponse" : {
@@ -1448,7 +1493,7 @@ Content-Length: 601
   },
   "parentCommentId" : 1,
   "textContent" : "Second child comment",
-  "createdAt" : "2024-02-29T22:05:37.026496"
+  "createdAt" : "2024-03-01T13:03:26.513864"
 }, {
   "id" : 13,
   "writerResponse" : {
@@ -1457,7 +1502,7 @@ Content-Length: 601
   },
   "parentCommentId" : 1,
   "textContent" : "This comment was deleted",
-  "createdAt" : "2024-02-29T22:05:37.026858"
+  "createdAt" : "2024-03-01T13:03:26.514371"
 } ]</code></pre>
 </div>
 </div>
@@ -1556,7 +1601,7 @@ Host: localhost:8080
 <div class="content">
 <pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">HTTP/1.1 200 OK
 Content-Type: application/json;charset=UTF-8
-Content-Length: 1760
+Content-Length: 1988
 
 {
   "id" : 1,
@@ -1570,17 +1615,20 @@ Content-Length: 1760
         "id" : 1,
         "username" : "writer1"
       },
-      "graphicContentsPaths" : [ "/feed/images/image_1.jpeg" ],
+      "graphicContentsPaths" : [ {
+        "id" : 1,
+        "path" : "/feed/images/image_1.jpeg"
+      } ],
       "textContent" : "This is feed1",
       "latitude" : 40.0627,
-      "lonitude" : -105.1779,
+      "longitude" : -105.1779,
       "tagNames" : [ "America", "denver" ],
       "location" : {
         "city" : "Colorado",
         "country" : "United States"
       },
       "likes" : 20,
-      "createdAt" : "2024-02-29T22:05:37.065823"
+      "createdAt" : "2024-03-01T13:03:26.580312"
     } ],
     "2" : [ {
       "feedId" : 2,
@@ -1588,38 +1636,50 @@ Content-Length: 1760
         "id" : 1,
         "username" : "writer1"
       },
-      "graphicContentsPaths" : [ "/feed/images/image_2.jpeg", "/feed/images/image_3.jpeg" ],
+      "graphicContentsPaths" : [ {
+        "id" : 2,
+        "path" : "/feed/images/image_2.jpeg"
+      }, {
+        "id" : 3,
+        "path" : "/feed/images/image_3.jpeg"
+      } ],
       "textContent" : "This is feed2",
       "latitude" : 39.0484,
-      "lonitude" : -110.8451,
+      "longitude" : -110.8451,
       "tagNames" : [ "America", "Utah", "Tavel" ],
       "location" : {
         "city" : "Utah",
         "country" : "United States"
       },
       "likes" : 13,
-      "createdAt" : "2024-03-01T22:05:37.072266"
+      "createdAt" : "2024-03-02T13:03:26.592688"
     }, {
       "feedId" : 3,
       "writer" : {
         "id" : 1,
         "username" : "writer1"
       },
-      "graphicContentsPaths" : [ "/feed/images/image_4.jpeg", "/feed/images/image_5.jpeg" ],
+      "graphicContentsPaths" : [ {
+        "id" : 4,
+        "path" : "/feed/images/image_4.jpeg"
+      }, {
+        "id" : 5,
+        "path" : "/feed/images/image_5.jpeg"
+      } ],
       "textContent" : "This is feed3",
       "latitude" : 38.5269,
-      "lonitude" : -115.3801,
+      "longitude" : -115.3801,
       "tagNames" : [ "Nevada", "UFO" ],
       "location" : {
         "city" : "Nevada",
         "country" : "United States"
       },
       "likes" : 52,
-      "createdAt" : "2024-03-02T22:05:37.074114"
+      "createdAt" : "2024-03-03T13:03:26.594019"
     } ]
   },
-  "startDate" : "2024-02-29",
-  "endDate" : "2024-03-02",
+  "startDate" : "2024-03-01",
+  "endDate" : "2024-03-03",
   "city" : "Colorado",
   "country" : "United States",
   "likes" : 85
