@@ -130,6 +130,7 @@ public class DiaryService {
         Diary toCancelDiary = diaryRepository.findById(diaryId).orElseThrow(DiarySearchException::new);
         if (toCancelDiary.isOwnedBy(memberId)) {
             cancelDiary(diaryId);
+            return;
         }
         throw new NotAuthorizedException();
     }
