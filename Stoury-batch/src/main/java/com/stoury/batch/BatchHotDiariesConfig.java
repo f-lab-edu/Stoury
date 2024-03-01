@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.job.builder.JobBuilder;
+import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.batch.item.ItemProcessor;
@@ -38,6 +39,7 @@ public class BatchHotDiariesConfig {
     public Job updateYearlyDiariesJob(JobRepository jobRepository, PlatformTransactionManager tm,
                                     ThreadPoolTaskExecutor taskExecutor, LikeRepository likeRepository) {
         return new JobBuilder("jobYearlyDiaries", jobRepository)
+                .incrementer(new RunIdIncrementer())
                 .start(updateYearlyDiariesStep(jobRepository, tm, taskExecutor, likeRepository))
                 .next(initYearlyLikeCountSnapshot(jobRepository, tm, taskExecutor, likeRepository))
                 .listener(logger)
@@ -52,6 +54,7 @@ public class BatchHotDiariesConfig {
                 .processor(diaryProcessor(likeRepository))
                 .writer(diaryWriter())
                 .taskExecutor(taskExecutor)
+                .allowStartIfComplete(true)
                 .build();
     }
 
@@ -63,6 +66,7 @@ public class BatchHotDiariesConfig {
                 .reader(diaryReader())
                 .writer(likeInitializer(likeRepository))
                 .taskExecutor(taskExecutor)
+                .allowStartIfComplete(true)
                 .build();
     }
 

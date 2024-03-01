@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.job.builder.JobBuilder;
+import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.batch.item.ItemProcessor;
@@ -37,6 +38,7 @@ public class BatchHotFeedsConfig {
     public Job updateDailyFeedsJob(JobRepository jobRepository, PlatformTransactionManager tm,
                                    ThreadPoolTaskExecutor taskExecutor, LikeRepository likeRepository) {
         return new JobBuilder("jobDailyFeeds", jobRepository)
+                .incrementer(new RunIdIncrementer())
                 .start(updateDailyFeedsStep(jobRepository, tm, taskExecutor, likeRepository))
                 .next(initDailyLikeCountSnapshot(jobRepository, tm, taskExecutor, likeRepository))
                 .listener(logger)
@@ -48,6 +50,7 @@ public class BatchHotFeedsConfig {
     public Job updateWeeklyFeedsJob(JobRepository jobRepository, PlatformTransactionManager tm,
                                     ThreadPoolTaskExecutor taskExecutor, LikeRepository likeRepository) {
         return new JobBuilder("jobWeeklyFeeds", jobRepository)
+                .incrementer(new RunIdIncrementer())
                 .start(updateWeeklyFeedsStep(jobRepository, tm, taskExecutor, likeRepository))
                 .next(initWeeklyLikeCountSnapshot(jobRepository, tm, taskExecutor, likeRepository))
                 .listener(logger)
@@ -59,6 +62,7 @@ public class BatchHotFeedsConfig {
     public Job updateMonthlyFeedsJob(JobRepository jobRepository, PlatformTransactionManager tm,
                                      ThreadPoolTaskExecutor taskExecutor, LikeRepository likeRepository) {
         return new JobBuilder("jobMonthlyFeeds", jobRepository)
+                .incrementer(new RunIdIncrementer())
                 .start(updateMonthlyFeedsStep(jobRepository, tm, taskExecutor, likeRepository))
                 .next(initMonthlyLikeCountSnapshot(jobRepository, tm, taskExecutor, likeRepository))
                 .listener(logger)
@@ -75,6 +79,7 @@ public class BatchHotFeedsConfig {
                 .processor(feedsProcessor(likeRepository, ChronoUnit.DAYS))
                 .writer(feedsWriter(ChronoUnit.DAYS))
                 .taskExecutor(taskExecutor)
+                .allowStartIfComplete(true)
                 .build();
     }
 
@@ -88,6 +93,7 @@ public class BatchHotFeedsConfig {
                 .processor(feedsProcessor(likeRepository, ChronoUnit.WEEKS))
                 .writer(feedsWriter(ChronoUnit.WEEKS))
                 .taskExecutor(taskExecutor)
+                .allowStartIfComplete(true)
                 .build();
     }
 
@@ -101,6 +107,7 @@ public class BatchHotFeedsConfig {
                 .processor(feedsProcessor(likeRepository, ChronoUnit.MONTHS))
                 .writer(feedsWriter(ChronoUnit.MONTHS))
                 .taskExecutor(taskExecutor)
+                .allowStartIfComplete(true)
                 .build();
     }
 
@@ -114,6 +121,7 @@ public class BatchHotFeedsConfig {
                 .reader(feedsReader())
                 .writer(likeInitializer(likeRepository, ChronoUnit.DAYS))
                 .taskExecutor(taskExecutor)
+                .allowStartIfComplete(true)
                 .build();
     }
 
@@ -126,6 +134,7 @@ public class BatchHotFeedsConfig {
                 .reader(feedsReader())
                 .writer(likeInitializer(likeRepository, ChronoUnit.WEEKS))
                 .taskExecutor(taskExecutor)
+                .allowStartIfComplete(true)
                 .build();
     }
 
@@ -138,6 +147,7 @@ public class BatchHotFeedsConfig {
                 .reader(feedsReader())
                 .writer(likeInitializer(likeRepository, ChronoUnit.MONTHS))
                 .taskExecutor(taskExecutor)
+                .allowStartIfComplete(true)
                 .build();
     }
 
