@@ -37,4 +37,16 @@ class LikeControllerTest extends AbstractRestDocsTests {
         then:
         response.andExpect(status().isOk())
     }
+
+    def "Check like or not"() {
+        given:
+        def parameterDescriptor = parameterWithName("feedId").description("id of feed")
+        def liker = new AuthenticatedMember(1L, "test@email.com", "pwdpwdpwd123")
+        when:
+        def response = mockMvc.perform(get("/like/feed/{feedId}", "1")
+                .with(authenticatedMember(liker)))
+                .andDo(documentWithPath(parameterDescriptor))
+        then:
+        response.andExpect(status().isOk())
+    }
 }

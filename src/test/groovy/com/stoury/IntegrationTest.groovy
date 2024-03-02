@@ -198,10 +198,10 @@ class IntegrationTest extends Specification {
         Member member6 = Member.builder().email("mem6@aaaa.com").encryptedPassword("pwdpwdpwdpwd").username("member6").build();
         Member member7 = Member.builder().email("mem7@aaaa.com").encryptedPassword("pwdpwdpwdpwd").username("member7").build();
         Member member8 = Member.builder().email("mem8@aaaa.com").encryptedPassword("pwdpwdpwdpwd").username("member8").build();
-        memberRepository.saveAll(List.of(member1, member2, member3, member4, member5, member6, member7, member8));
+        memberRepository.saveAll([member1, member2, member3, member4, member5, member6, member7, member8])
 
         when:
-        Slice<MemberResponse> slice = memberService.searchMembers("mem");
+        Slice<MemberResponse> slice = memberService.searchMembers("mem")
         List<MemberResponse> foundMembers = slice.getContent();
 
         then:
