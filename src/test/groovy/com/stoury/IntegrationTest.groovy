@@ -6,6 +6,7 @@ import com.stoury.dto.feed.FeedCreateRequest
 import com.stoury.dto.feed.SimpleFeedResponse
 import com.stoury.dto.member.AuthenticatedMember
 import com.stoury.dto.member.MemberResponse
+import com.stoury.dto.member.OnlineMember
 import com.stoury.repository.*
 import com.stoury.service.FeedService
 import com.stoury.service.MemberService
@@ -330,8 +331,13 @@ class IntegrationTest extends Specification {
         memberOnlineStatusRepository.save(savedMembers.get(3).id, 35.1795543, 129.07564160000004) // 324km
         when:
         def aroundMembers = memberService.searchOnlineMembers(savedMembers.get(0).id, 37.566535, 126.97796919999996, 200)
+        def member2 = aroundMembers.get(0)
+        def member3 = aroundMembers.get(1)
         then:
-        aroundMembers.get(0).memberId() == savedMembers.get(1).id
-        aroundMembers.get(1).memberId() == savedMembers.get(2).id
+        member2.username() == "member2"
+        member3.username() == "member3"
+        // 거리 오차는 +- 1km 이내여야함
+        26 <= member2.distance() && member2.distance() <= 28
+        138 <= member3.distance() && member3.distance() <= 140
     }
 }
