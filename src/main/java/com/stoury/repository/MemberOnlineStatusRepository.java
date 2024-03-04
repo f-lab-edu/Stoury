@@ -58,7 +58,7 @@ public class MemberOnlineStatusRepository {
 
     private MemberDistance memberDistances(GeoResult<RedisGeoCommands.GeoLocation<String>> geoResult) {
         String memberId = geoResult.getContent().getName();
-        double distance = geoResult.getDistance().in(Metrics.KILOMETERS).getNormalizedValue();
+        double distance = geoResult.getDistance().in(Metrics.KILOMETERS).getValue();
 
         return new MemberDistance(Long.parseLong(memberId), (int)distance);
     }
