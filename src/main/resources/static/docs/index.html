@@ -494,6 +494,13 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <li><a href="#_delete_a_feed_path_parameters">Path parameters</a></li>
 </ul>
 </li>
+<li><a href="#_check_liked_or_not">Check liked or not</a>
+<ul class="sectlevel2">
+<li><a href="#_check_liked_or_not_http_request">HTTP request</a></li>
+<li><a href="#_check_liked_or_not_http_response">HTTP response</a></li>
+<li><a href="#_check_liked_or_not_path_parameters">Path parameters</a></li>
+</ul>
+</li>
 <li><a href="#_like_a_feed">Like a feed</a>
 <ul class="sectlevel2">
 <li><a href="#_like_a_feed_http_request">HTTP request</a></li>
@@ -1146,6 +1153,54 @@ Host: localhost:8080</code></pre>
 </div>
 </div>
 <div class="sect1">
+<h2 id="_check_liked_or_not">Check liked or not</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_check_liked_or_not_http_request">HTTP request</h3>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">GET /like/feed/1 HTTP/1.1
+Host: localhost:8080</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_check_liked_or_not_http_response">HTTP response</h3>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">HTTP/1.1 200 OK
+Content-Type: application/json;charset=UTF-8
+Content-Length: 5
+
+false</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_check_liked_or_not_path_parameters">Path parameters</h3>
+<table class="tableblock frame-all grid-all stretch">
+<caption class="title">Table 1. /like/feed/{feedId}</caption>
+<colgroup>
+<col style="width: 50%;">
+<col style="width: 50%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Parameter</th>
+<th class="tableblock halign-left valign-top">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>feedId</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">id of feed</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div class="sect1">
 <h2 id="_like_a_feed">Like a feed</h2>
 <div class="sectionbody">
 <div class="sect2">
@@ -1386,7 +1441,7 @@ Content-Length: 626
   "feedId" : 1,
   "hasNestedComments" : false,
   "textContent" : "First comment",
-  "createdAt" : "2024-03-01T13:39:22.492343"
+  "createdAt" : "2024-03-02T15:16:42.352416"
 }, {
   "id" : 2,
   "writer" : {
@@ -1396,7 +1451,7 @@ Content-Length: 626
   "feedId" : 1,
   "hasNestedComments" : true,
   "textContent" : "This comment was deleted",
-  "createdAt" : "2024-03-01T13:39:22.494826"
+  "createdAt" : "2024-03-02T15:16:42.356162"
 }, {
   "id" : 3,
   "writer" : {
@@ -1406,7 +1461,7 @@ Content-Length: 626
   "feedId" : 1,
   "hasNestedComments" : true,
   "textContent" : "Third comment",
-  "createdAt" : "2024-03-01T13:39:22.495313"
+  "createdAt" : "2024-03-02T15:16:42.357798"
 } ]</code></pre>
 </div>
 </div>
@@ -1484,7 +1539,7 @@ Content-Length: 602
   },
   "parentCommentId" : 1,
   "textContent" : "First child comment",
-  "createdAt" : "2024-03-01T13:39:22.519697"
+  "createdAt" : "2024-03-02T15:16:42.388803"
 }, {
   "id" : 12,
   "writerResponse" : {
@@ -1493,7 +1548,7 @@ Content-Length: 602
   },
   "parentCommentId" : 1,
   "textContent" : "Second child comment",
-  "createdAt" : "2024-03-01T13:39:22.520435"
+  "createdAt" : "2024-03-02T15:16:42.389608"
 }, {
   "id" : 13,
   "writerResponse" : {
@@ -1502,7 +1557,7 @@ Content-Length: 602
   },
   "parentCommentId" : 1,
   "textContent" : "This comment was deleted",
-  "createdAt" : "2024-03-01T13:39:22.520788"
+  "createdAt" : "2024-03-02T15:16:42.390015"
 } ]</code></pre>
 </div>
 </div>
@@ -1601,7 +1656,7 @@ Host: localhost:8080
 <div class="content">
 <pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">HTTP/1.1 200 OK
 Content-Type: application/json;charset=UTF-8
-Content-Length: 2027
+Content-Length: 2026
 
 {
   "id" : 1,
@@ -1628,7 +1683,7 @@ Content-Length: 2027
         "country" : "United States"
       },
       "likes" : 20,
-      "createdAt" : "2024-03-01T13:39:22.600021"
+      "createdAt" : "2024-03-02T15:16:42.466954"
     } ],
     "2" : [ {
       "feedId" : 2,
@@ -1652,7 +1707,7 @@ Content-Length: 2027
         "country" : "United States"
       },
       "likes" : 13,
-      "createdAt" : "2024-03-02T13:39:22.605838"
+      "createdAt" : "2024-03-03T15:16:42.472115"
     }, {
       "feedId" : 3,
       "writer" : {
@@ -1675,11 +1730,11 @@ Content-Length: 2027
         "country" : "United States"
       },
       "likes" : 52,
-      "createdAt" : "2024-03-03T13:39:22.607407"
+      "createdAt" : "2024-03-04T15:16:42.47335"
     } ]
   },
-  "startDate" : "2024-03-01",
-  "endDate" : "2024-03-03",
+  "startDate" : "2024-03-02",
+  "endDate" : "2024-03-04",
   "city" : "Colorado",
   "country" : "United States",
   "likes" : 85,
@@ -2425,7 +2480,7 @@ Content-Length: 401
 <div id="footer">
 <div id="footer-text">
 Version 0.0.1-SNAPSHOT<br>
-Last updated 2024-02-23 01:52:04 +0900
+Last updated 2024-03-02 15:16:03 +0900
 </div>
 </div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.3/highlight.min.js"></script>

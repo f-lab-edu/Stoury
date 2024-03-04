@@ -77,4 +77,14 @@ class LikeServiceTest extends Specification {
         then:
         likes == 5
     }
+
+    def "좋아요 했는지 안했는지 테스트"() {
+        given:
+        memberRepository.findById(_) >> Optional.of(Mock(Member))
+        feedRepository.findById(_) >> Optional.of(Mock(Feed))
+        when:
+        likeService.checkWhetherLiked(1,1)
+        then:
+        1 * likeRepository.existsByMemberAndFeed(_, _)
+    }
 }

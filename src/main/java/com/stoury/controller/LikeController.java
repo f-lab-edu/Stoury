@@ -4,10 +4,7 @@ import com.stoury.dto.member.AuthenticatedMember;
 import com.stoury.service.LikeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -24,5 +21,11 @@ public class LikeController {
     public void cancelLikeFeed(@AuthenticationPrincipal AuthenticatedMember authenticatedMember,
                                @PathVariable Long feedId) {
         likeService.likeCancel(authenticatedMember.getId(), feedId);
+    }
+
+    @GetMapping("/like/feed/{feedId}")
+    public boolean checkWhetherLiked(@AuthenticationPrincipal AuthenticatedMember authenticatedMember,
+                                     @PathVariable Long feedId){
+        return likeService.checkWhetherLiked(authenticatedMember.getId(), feedId);
     }
 }

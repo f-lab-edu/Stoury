@@ -44,4 +44,13 @@ public class LikeService {
     public long getLikesOfFeed(Long feedId) {
         return likeRepository.getCountByFeedId(feedId.toString());
     }
+
+    public boolean checkWhetherLiked(Long memberId, Long feedId) {
+        Member member = memberRepository.findById(Objects.requireNonNull(memberId))
+                .orElseThrow(MemberSearchException::new);
+        Feed feed = feedRepository.findById(Objects.requireNonNull(feedId))
+                .orElseThrow(FeedSearchException::new);
+
+        return likeRepository.existsByMemberAndFeed(member, feed);
+    }
 }
