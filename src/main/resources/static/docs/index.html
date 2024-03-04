@@ -551,6 +551,13 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <li><a href="#_delete_a_comment_path_parameters">Path parameters</a></li>
 </ul>
 </li>
+<li><a href="#_get_a_diary">Get a diary</a>
+<ul class="sectlevel2">
+<li><a href="#_get_a_diary_http_request">HTTP request</a></li>
+<li><a href="#_get_a_diary_http_response">HTTP response</a></li>
+<li><a href="#_get_a_diary_path_parameters">Path parameters</a></li>
+</ul>
+</li>
 <li><a href="#_create_a_diary">Create a diary</a>
 <ul class="sectlevel2">
 <li><a href="#_create_a_diary_http_request">HTTP request</a></li>
@@ -1441,7 +1448,7 @@ Content-Length: 626
   "feedId" : 1,
   "hasNestedComments" : false,
   "textContent" : "First comment",
-  "createdAt" : "2024-03-02T15:16:42.352416"
+  "createdAt" : "2024-03-04T20:32:17.548424"
 }, {
   "id" : 2,
   "writer" : {
@@ -1451,7 +1458,7 @@ Content-Length: 626
   "feedId" : 1,
   "hasNestedComments" : true,
   "textContent" : "This comment was deleted",
-  "createdAt" : "2024-03-02T15:16:42.356162"
+  "createdAt" : "2024-03-04T20:32:17.551022"
 }, {
   "id" : 3,
   "writer" : {
@@ -1461,7 +1468,7 @@ Content-Length: 626
   "feedId" : 1,
   "hasNestedComments" : true,
   "textContent" : "Third comment",
-  "createdAt" : "2024-03-02T15:16:42.357798"
+  "createdAt" : "2024-03-04T20:32:17.551505"
 } ]</code></pre>
 </div>
 </div>
@@ -1539,7 +1546,7 @@ Content-Length: 602
   },
   "parentCommentId" : 1,
   "textContent" : "First child comment",
-  "createdAt" : "2024-03-02T15:16:42.388803"
+  "createdAt" : "2024-03-04T20:32:17.573354"
 }, {
   "id" : 12,
   "writerResponse" : {
@@ -1548,7 +1555,7 @@ Content-Length: 602
   },
   "parentCommentId" : 1,
   "textContent" : "Second child comment",
-  "createdAt" : "2024-03-02T15:16:42.389608"
+  "createdAt" : "2024-03-04T20:32:17.574054"
 }, {
   "id" : 13,
   "writerResponse" : {
@@ -1557,7 +1564,7 @@ Content-Length: 602
   },
   "parentCommentId" : 1,
   "textContent" : "This comment was deleted",
-  "createdAt" : "2024-03-02T15:16:42.390015"
+  "createdAt" : "2024-03-04T20:32:17.574444"
 } ]</code></pre>
 </div>
 </div>
@@ -1631,6 +1638,88 @@ Host: localhost:8080</code></pre>
 </div>
 </div>
 <div class="sect1">
+<h2 id="_get_a_diary">Get a diary</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_get_a_diary_http_request">HTTP request</h3>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">GET /diaries/1 HTTP/1.1
+Host: localhost:8080</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_get_a_diary_http_response">HTTP response</h3>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">HTTP/1.1 200 OK
+Content-Type: application/json;charset=UTF-8
+Content-Length: 786
+
+{
+  "id" : 1,
+  "memberId" : 2,
+  "title" : "Test diary",
+  "thumbnailPath" : "/stoury/images/image.jpeg",
+  "feeds" : {
+    "1" : [ {
+      "feedId" : 23,
+      "writer" : {
+        "id" : 2,
+        "username" : "testuser"
+      },
+      "graphicContentsPaths" : [ {
+        "id" : 3,
+        "path" : "/stoury/images/image.jpeg"
+      } ],
+      "textContent" : "First day",
+      "latitude" : 36.125,
+      "longitude" : 127.123,
+      "tagNames" : [ "OneDayTrip" ],
+      "location" : {
+        "city" : "city",
+        "country" : "country"
+      },
+      "likes" : 2,
+      "createdAt" : "2024-12-31T13:30:00"
+    } ]
+  },
+  "startDate" : "2024-12-31",
+  "endDate" : "2024-12-31",
+  "city" : "city",
+  "country" : "country",
+  "likes" : 2,
+  "createdAt" : "2025-01-31T13:30:00"
+}</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_get_a_diary_path_parameters">Path parameters</h3>
+<table class="tableblock frame-all grid-all stretch">
+<caption class="title">Table 1. /diaries/{diaryId}</caption>
+<colgroup>
+<col style="width: 50%;">
+<col style="width: 50%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Parameter</th>
+<th class="tableblock halign-left valign-top">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>diaryId</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">id of diary</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div class="sect1">
 <h2 id="_create_a_diary">Create a diary</h2>
 <div class="sectionbody">
 <div class="sect2">
@@ -1656,7 +1745,7 @@ Host: localhost:8080
 <div class="content">
 <pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">HTTP/1.1 200 OK
 Content-Type: application/json;charset=UTF-8
-Content-Length: 2026
+Content-Length: 2027
 
 {
   "id" : 1,
@@ -1683,7 +1772,7 @@ Content-Length: 2026
         "country" : "United States"
       },
       "likes" : 20,
-      "createdAt" : "2024-03-02T15:16:42.466954"
+      "createdAt" : "2024-03-04T20:32:17.644327"
     } ],
     "2" : [ {
       "feedId" : 2,
@@ -1707,7 +1796,7 @@ Content-Length: 2026
         "country" : "United States"
       },
       "likes" : 13,
-      "createdAt" : "2024-03-03T15:16:42.472115"
+      "createdAt" : "2024-03-05T20:32:17.650591"
     }, {
       "feedId" : 3,
       "writer" : {
@@ -1730,11 +1819,11 @@ Content-Length: 2026
         "country" : "United States"
       },
       "likes" : 52,
-      "createdAt" : "2024-03-04T15:16:42.47335"
+      "createdAt" : "2024-03-06T20:32:17.651758"
     } ]
   },
-  "startDate" : "2024-03-02",
-  "endDate" : "2024-03-04",
+  "startDate" : "2024-03-04",
+  "endDate" : "2024-03-06",
   "city" : "Colorado",
   "country" : "United States",
   "likes" : 85,
@@ -2480,7 +2569,7 @@ Content-Length: 401
 <div id="footer">
 <div id="footer-text">
 Version 0.0.1-SNAPSHOT<br>
-Last updated 2024-03-02 15:16:03 +0900
+Last updated 2024-03-04 20:32:07 +0900
 </div>
 </div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.3/highlight.min.js"></script>

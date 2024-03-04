@@ -164,10 +164,11 @@ public class FeedService {
         Feed feed = feedRepository.findById(Objects.requireNonNull(feedId))
                 .orElseThrow(FeedSearchException::new);
 
-        if (feed.isOwnedBy(memberId)) {
-            return updateFeed(feedId, feedUpdateRequest);
+        if (feed.notOwnedBy(memberId)) {
+            throw new NotAuthorizedException();
         }
-        throw new NotAuthorizedException();
+
+        return updateFeed(feedId, feedUpdateRequest);
     }
 
     private void publishDeleteFileEvents(List<GraphicContent> beforeDeleteGraphicContents,
@@ -190,11 +191,11 @@ public class FeedService {
         Feed feed = feedRepository.findById(Objects.requireNonNull(feedId))
                 .orElseThrow(FeedSearchException::new);
 
-        if (feed.isOwnedBy(memberId)) {
-            deleteFeed(feedId);
-            return;
+        if (feed.notOwnedBy(memberId)) {
+            throw new NotAuthorizedException();
         }
-        throw new NotAuthorizedException();
+
+        deleteFeed(feedId);
     }
 
     @Transactional(readOnly = true)

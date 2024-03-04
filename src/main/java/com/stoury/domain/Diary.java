@@ -32,7 +32,7 @@ public class Diary {
     private String title;
 
     @JoinColumn(name = "THUMBNAIL_ID")
-    @OneToOne(optional = true, cascade = CascadeType.REMOVE)
+    @OneToOne(optional = true)
     private GraphicContent thumbnail;
 
     @CreatedDate
@@ -48,5 +48,9 @@ public class Diary {
 
     public boolean isOwnedBy(Long memberId) {
         return this.member.getId().equals(memberId);
+    }
+
+    public boolean notOwnedBy(Long memberId) {
+        return !isOwnedBy(memberId);
     }
 }

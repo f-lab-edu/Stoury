@@ -97,10 +97,10 @@ public class CommentService {
     public void deleteCommentIfOwner(Long commentId, Long memberId) {
         Comment comment = commentRepository.findById(Objects.requireNonNull(commentId))
                 .orElseThrow(CommentSearchException::new);
-        if (comment.isOwnedBy(memberId)) {
-            deleteComment(commentId);
-            return;
+
+        if (comment.notOwnedBy(memberId)) {
+            throw new NotAuthorizedException();
         }
-        throw new NotAuthorizedException();
+        deleteComment(commentId);
     }
 }

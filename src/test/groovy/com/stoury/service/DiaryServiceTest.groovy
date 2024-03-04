@@ -29,7 +29,7 @@ class DiaryServiceTest extends Specification {
     }
 
     Feed createFeed(long feedId, LocalDateTime localDateTime, int likes) {
-        def feed = new Feed(writer, "feed#" + feedId, 0,0, Collections.emptyList(), "city", "country")
+        def feed = new Feed(writer, "feed#" + feedId, 0, 0, Collections.emptyList(), "city", "country")
         feed.id = feedId
         feed.createdAt = localDateTime
         feedRepository.findById(feedId) >> Optional.of(feed)
@@ -72,7 +72,7 @@ class DiaryServiceTest extends Specification {
         feed3.country = "testCountry"
 
         expect:
-        diaryService.getDefaultTitle(List.of(feed3,feed1,feed2,feed4)) ==
+        diaryService.getDefaultTitle(List.of(feed3, feed1, feed2, feed4)) ==
                 feed3.country + ", " + feed3.city + ", " + feed3.createdAt.toLocalDate() + "~" + feed4.createdAt.toLocalDate()
     }
 
@@ -81,5 +81,33 @@ class DiaryServiceTest extends Specification {
         diaryService.getMemberDiaries(1L, 0)
         then:
         1 * diaryRepository.findByMember(_ as Member, _) >> Page.empty()
+    }
+
+    def "단일 여행일지 조회"() {
+        given:
+        def member = new Member(id: 3)
+        Diary diary = new Diary(
+                id: 1,
+                feeds: [
+                        new Feed(id: 1, member: member, createdAt: LocalDateTime.of(2024, 1, 1, 13, 0)),
+                        new Feed(id: 2, member: member, createdAt: LocalDateTime.of(2024, 1, 2, 13, 0)),
+                        new Feed(id: 3, member: member, createdAt: LocalDateTime.of(2024, 1, 4, 13, 0))
+                ],
+                title: "Test stoury",
+                thumbnail: new GraphicContent("/path", 1),
+                member: member
+        )
+        diaryRepository.findById(1) >> Optional.of(diary)
+        likeRepository.getLikes("1") >> 3
+        likeRepository.getLikes("2") >> 4
+        likeRepository.getLikes("3") >> 5
+        when:
+        def diaryResponse = diaryService.getDiary(1)
+        then:
+        diaryResponse.id() == 1
+        diaryResponse.title() == "Test stoury"
+        diaryResponse.feeds().size() == 3
+        diaryResponse.memberId() == 3
+        diaryResponse.likes() == 12
     }
 }

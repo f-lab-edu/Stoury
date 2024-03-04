@@ -20,6 +20,11 @@ public class DiaryController {
         return diaryService.createDiary(diaryCreateRequest, authenticatedMember.getId());
     }
 
+    @GetMapping("/diaries/{diaryId}")
+    public DiaryResponse getDiary(@PathVariable Long diaryId) {
+        return diaryService.getDiary(diaryId);
+    }
+
     @GetMapping("/diaries/member/{memberId}")
     public DiaryPageResponse getMemberDiaries(@PathVariable Long memberId,
                                               @RequestParam(required = false, defaultValue = "0") int pageNo) {

@@ -17,6 +17,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.http.MediaType
 
+import java.time.LocalDate
 import java.time.LocalDateTime
 
 import static org.mockito.ArgumentMatchers.any
@@ -114,6 +115,41 @@ class DiaryControllerTest extends AbstractRestDocsTests {
         expect:
         mockMvc.perform(delete("/diaries/{diaryId}", "1")
                 .with(authenticatedMember(writer)))
+                .andDo(documentWithPath(pathParameterDescriptor))
+                .andExpect(status().isOk())
+    }
+
+    def "Get a diary"() {
+        given:
+        def pathParameterDescriptor = parameterWithName("diaryId").description("id of diary")
+        diaryService.getDiary(1) >> new DiaryResponse(
+                1L,
+                2L,
+                "Test diary",
+                "/stoury/images/image.jpeg",
+                [
+                        1L: [new FeedResponse(
+                                23L,
+                                new SimpleMemberResponse(2L, "testuser"),
+                                [new GraphicContentResponse(3L, "/stoury/images/image.jpeg")],
+                                "First day",
+                                36.125,
+                                127.123,
+                                ["OneDayTrip"],
+                                new LocationResponse("city", "country"),
+                                2L,
+                                LocalDateTime.of(2024, 12, 31, 13, 30)
+                        )]
+                ],
+                LocalDate.of(2024, 12, 31),
+                LocalDate.of(2024, 12, 31),
+                "city",
+                "country",
+                2L,
+                LocalDateTime.of(2025, 1, 31, 13, 30)
+        )
+        expect:
+        mockMvc.perform(get("/diaries/{diaryId}", "1"))
                 .andDo(documentWithPath(pathParameterDescriptor))
                 .andExpect(status().isOk())
     }

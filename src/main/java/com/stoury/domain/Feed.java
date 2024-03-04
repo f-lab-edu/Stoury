@@ -117,4 +117,8 @@ public class Feed {
     public boolean isOwnedBy(Long memberId) {
         return this.member.getId().equals(memberId);
     }
+
+    public boolean notOwnedBy(Long memberId) {
+        return !isOwnedBy(memberId);
+    }
 }

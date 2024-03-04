@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="generator" content="Asciidoctor 2.0.18">
-<title>Get child comments</title>
+<title>Get a diary</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
 <style>
 /*! Asciidoctor default stylesheet | MIT License | https://asciidoctor.org */
@@ -441,60 +441,67 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </div>
 <div id="content">
 <div class="sect1">
-<h2 id="_get_child_comments">Get child comments</h2>
+<h2 id="_get_a_diary">Get a diary</h2>
 <div class="sectionbody">
 <div class="sect2">
-<h3 id="_get_child_comments_http_request">HTTP request</h3>
+<h3 id="_get_a_diary_http_request">HTTP request</h3>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight nowrap"><code class="language-http" data-lang="http">GET /comments/comment/1 HTTP/1.1
+<pre class="highlight nowrap"><code class="language-http" data-lang="http">GET /diaries/1 HTTP/1.1
 Host: localhost:8080</code></pre>
 </div>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_get_child_comments_http_response">HTTP response</h3>
+<h3 id="_get_a_diary_http_response">HTTP response</h3>
 <div class="listingblock">
 <div class="content">
 <pre class="highlight nowrap"><code class="language-http" data-lang="http">HTTP/1.1 200 OK
 Content-Type: application/json;charset=UTF-8
-Content-Length: 602
+Content-Length: 786
 
-[ {
-  "id" : 11,
-  "writerResponse" : {
-    "id" : 1,
-    "username" : "member1"
+{
+  "id" : 1,
+  "memberId" : 2,
+  "title" : "Test diary",
+  "thumbnailPath" : "/stoury/images/image.jpeg",
+  "feeds" : {
+    "1" : [ {
+      "feedId" : 23,
+      "writer" : {
+        "id" : 2,
+        "username" : "testuser"
+      },
+      "graphicContentsPaths" : [ {
+        "id" : 3,
+        "path" : "/stoury/images/image.jpeg"
+      } ],
+      "textContent" : "First day",
+      "latitude" : 36.125,
+      "longitude" : 127.123,
+      "tagNames" : [ "OneDayTrip" ],
+      "location" : {
+        "city" : "city",
+        "country" : "country"
+      },
+      "likes" : 2,
+      "createdAt" : "2024-12-31T13:30:00"
+    } ]
   },
-  "parentCommentId" : 1,
-  "textContent" : "First child comment",
-  "createdAt" : "2024-03-04T20:32:17.573354"
-}, {
-  "id" : 12,
-  "writerResponse" : {
-    "id" : 2,
-    "username" : "member2"
-  },
-  "parentCommentId" : 1,
-  "textContent" : "Second child comment",
-  "createdAt" : "2024-03-04T20:32:17.574054"
-}, {
-  "id" : 13,
-  "writerResponse" : {
-    "id" : 3,
-    "username" : "member3"
-  },
-  "parentCommentId" : 1,
-  "textContent" : "This comment was deleted",
-  "createdAt" : "2024-03-04T20:32:17.574444"
-} ]</code></pre>
+  "startDate" : "2024-12-31",
+  "endDate" : "2024-12-31",
+  "city" : "city",
+  "country" : "country",
+  "likes" : 2,
+  "createdAt" : "2025-01-31T13:30:00"
+}</code></pre>
 </div>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_get_child_comments_path_parameters">Path parameters</h3>
+<h3 id="_get_a_diary_path_parameters">Path parameters</h3>
 <table class="tableblock frame-all grid-all stretch">
-<caption class="title">Table 1. /comments/comment/{commentId}</caption>
+<caption class="title">Table 1. /diaries/{diaryId}</caption>
 <colgroup>
 <col style="width: 50%;">
 <col style="width: 50%;">
@@ -507,8 +514,8 @@ Content-Length: 602
 </thead>
 <tbody>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>commentId</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">id of comment</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>diaryId</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">id of diary</p></td>
 </tr>
 </tbody>
 </table>
@@ -519,7 +526,7 @@ Content-Length: 602
 <div id="footer">
 <div id="footer-text">
 Version 0.0.1-SNAPSHOT<br>
-Last updated 2024-02-21 03:44:03 +0900
+Last updated 2024-03-04 20:29:51 +0900
 </div>
 </div>
 </body>
