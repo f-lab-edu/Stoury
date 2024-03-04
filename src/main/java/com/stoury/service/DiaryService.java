@@ -68,13 +68,17 @@ public class DiaryService {
         String title = getTitle(diaryCreateRequest, feeds);
 
         Diary diary = new Diary(member, feeds, title, thumbnail);
-        Diary savedDiary = diaryRepository.save(diary);
 
-        List<FeedResponse> feedResponses = feeds.stream()
+        Diary savedDiary = diaryRepository.save(diary);
+        return getDiaryResponse(savedDiary);
+    }
+
+    private DiaryResponse getDiaryResponse(Diary diary) {
+        List<FeedResponse> feedResponses = diary.getFeeds().stream()
                 .map(feed -> FeedResponse.from(feed, likeRepository.getLikes(feed.getId().toString())))
                 .toList();
 
-        return DiaryResponse.from(savedDiary, feedResponses);
+        return DiaryResponse.from(diary, feedResponses);
     }
 
     @NotNull
@@ -133,5 +137,14 @@ public class DiaryService {
             return;
         }
         throw new NotAuthorizedException();
+    }
+
+    @Transactional(readOnly = true)
+    public DiaryResponse getDiary(Long diaryId) {
+        Long diaryIdNotNull = Objects.requireNonNull(diaryId, "Diary id cannot be null");
+
+        return diaryRepository.findById(diaryIdNotNull)
+                .map(this::getDiaryResponse)
+                .orElseThrow(DiarySearchException::new);
     }
 }
