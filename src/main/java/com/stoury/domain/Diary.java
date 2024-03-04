@@ -32,7 +32,7 @@ public class Diary {
     private String title;
 
     @JoinColumn(name = "THUMBNAIL_ID")
-    @OneToOne(optional = true, cascade = CascadeType.REMOVE)
+    @OneToOne(optional = true)
     private GraphicContent thumbnail;
 
     @CreatedDate
