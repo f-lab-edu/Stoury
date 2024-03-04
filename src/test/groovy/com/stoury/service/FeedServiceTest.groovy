@@ -114,6 +114,7 @@ class FeedServiceTest extends Specification {
         given:
         def feed = Mock(Feed)
         feedRepository.findById(_) >> Optional.of(feed)
+        feed.notOwnedBy(1) >> true
         when:
         feedService.deleteFeedIfOwner(1,1)
         then:

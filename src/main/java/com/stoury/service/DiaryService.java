@@ -132,11 +132,12 @@ public class DiaryService {
     @Transactional
     public void cancelDiaryIfOwner(Long diaryId, Long memberId) {
         Diary toCancelDiary = diaryRepository.findById(diaryId).orElseThrow(DiarySearchException::new);
-        if (toCancelDiary.isOwnedBy(memberId)) {
-            cancelDiary(diaryId);
-            return;
+
+        if (toCancelDiary.notOwnedBy(memberId)) {
+            throw new NotAuthorizedException();
         }
-        throw new NotAuthorizedException();
+
+        cancelDiary(diaryId);
     }
 
     @Transactional(readOnly = true)
