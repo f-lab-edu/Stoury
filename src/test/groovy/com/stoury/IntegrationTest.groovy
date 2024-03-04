@@ -295,25 +295,21 @@ class IntegrationTest extends Specification {
         ))
         def savedFeed = feedRepository.saveAndFlush(feed)
         def feedId = savedFeed.getId()
-        def diary = new Diary(member, List.of(savedFeed), "test diary", savedFeed.graphicContents.get(0))
+        def diary = new Diary(member, [savedFeed], "test diary", savedFeed.graphicContents.get(0))
         def savedDiary = diaryRepository.saveAndFlush(diary)
         when:
         diaryRepository.delete(savedDiary)
         then:
         feedRepository.existsById(feedId)
-
-        def tx
-        try {
-            tx = entityManager.getTransaction()
-            tx.begin()
-            feedRepository.findById(feedId).orElseThrow()
-                    .getGraphicContents().size() == 3
-            tx.commit()
-        } catch (RuntimeException e) {
-            if (tx != null && tx.isActive()) {
-                tx.rollback()
-            }
-        }
+        entityManager.createQuery("""
+            SELECT G 
+            FROM Feed F JOIN FETCH GraphicContent G
+            ON F = G.feed 
+            WHERE F.id = :id"""
+        )
+        .setParameter("id", feedId)
+        .getResultList()
+        .size() == 3
     }
 
     def "주변 사용자 레디스에서 검색"() {
