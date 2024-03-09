@@ -1,6 +1,11 @@
-### 오븐
+### API 명세서
+- [메인 API](https://stoury-app.netlify.app/)
+- [채팅 API](https://stoury-chat.netlify.app/)
 
-https://ovenapp.io/project/Ckt29wbbfP9DgHDEQzQV8HJF6BG0Vc5O#E9c6C
+### 화면
+![image](https://github.com/f-lab-edu/Stoury/assets/105845911/075736d3-3c5e-4a2f-982f-f884a1648651)
+
+
 ### 주요기능
 
 - **피드기능**
