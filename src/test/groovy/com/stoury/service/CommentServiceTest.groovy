@@ -83,7 +83,7 @@ class CommentServiceTest extends Specification {
         then:
         commentRepository.findById(1L) >> Optional.of(comment)
         comment.isDeleted()
-        CommentResponse.from(comment).textContent() == "This comment was deleted"
+        CommentResponse.from(comment, commentRepository::existsByParentComment).textContent() == "This comment was deleted"
     }
 
     def "댓글 삭제 실패 - 내가 쓴 거 아님"() {

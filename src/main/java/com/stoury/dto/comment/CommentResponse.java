@@ -5,23 +5,24 @@ import com.stoury.dto.SimpleMemberResponse;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.function.Predicate;
 
 public record CommentResponse(Long id, SimpleMemberResponse writer, Long feedId,
                               boolean hasNestedComments, String textContent, LocalDateTime createdAt) {
-    public static CommentResponse from(Comment comment) {
+    public static CommentResponse from(Comment comment, Predicate<Comment> hasNestedComments) {
         return new CommentResponse(
                 comment.getId(),
                 SimpleMemberResponse.from(comment.getMember()),
                 comment.getFeed().getId(),
-                comment.hasNestedComments(),
+                hasNestedComments.test(comment),
                 comment.isDeleted() ? Comment.DELETED_CONTENT_TEXT : comment.getTextContent(),
                 comment.getCreatedAt()
         );
     }
 
-    public static List<CommentResponse> from(List<Comment> comments) {
+    public static List<CommentResponse> from(List<Comment> comments, Predicate<Comment> hasNestedComments) {
         return comments.stream()
-                .map(CommentResponse::from)
+                .map(comment -> from(comment, hasNestedComments))
                 .toList();
     }
 }

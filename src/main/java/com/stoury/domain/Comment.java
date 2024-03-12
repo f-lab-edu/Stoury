@@ -62,10 +62,6 @@ public class Comment {
         return parentComment != null;
     }
 
-    public boolean hasNestedComments() {
-        return !childComments.isEmpty();
-    }
-
     public void delete() {
         this.deleted = true;
     }

@@ -12,4 +12,6 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
     List<Comment> findAllByFeedAndCreatedAtBeforeAndParentCommentIsNull(Feed feed, LocalDateTime orderThan, Pageable pageable);
 
     List<Comment> findAllByParentCommentAndCreatedAtBefore(Comment parentComment, LocalDateTime orderThan, Pageable pageable);
+
+    boolean existsByParentComment(Comment parentComment);
 }
