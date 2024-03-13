@@ -62,6 +62,14 @@ public class Comment {
         return parentComment != null;
     }
 
+    /*
+    Comment 리스트를 조회할 땐 이 메서드 사용하지 말 것.
+    PAGE_SIZE만큼 각 댓글의 자식 댓글 존재여부를 찾는 쿼리가 나감
+     */
+    public boolean hasChildren(){
+        return !childComments.isEmpty();
+    }
+
     public void delete() {
         this.deleted = true;
     }

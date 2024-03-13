@@ -42,7 +42,7 @@ public class CommentService {
         Comment comment = new Comment(member, feed,
                 Objects.requireNonNull(commentText, "Comment text can not be empty."));
 
-        return CommentResponse.from(commentRepository.save(comment), commentRepository::existsByParentComment);
+        return CommentResponse.from(commentRepository.save(comment), false);
     }
 
     @Transactional
@@ -68,9 +68,7 @@ public class CommentService {
 
         Pageable pageable = PageRequest.of(0, PAGE_SIZE, Sort.by("createdAt").descending());
 
-        return CommentResponse.from(
-                commentRepository.findAllByFeedAndCreatedAtBeforeAndParentCommentIsNull(feed, orderThan, pageable),
-                commentRepository::existsByParentComment);
+        return commentRepository.findAllByFeedAndCreatedAtBeforeAndParentCommentIsNull(feed, orderThan, pageable);
     }
 
     @Transactional(readOnly = true)
@@ -92,7 +90,7 @@ public class CommentService {
                 .orElseThrow(CommentSearchException::new);
 
         comment.delete();
-        return CommentResponse.from(comment, commentRepository::existsByParentComment);
+        return CommentResponse.from(comment, comment.hasChildren());
     }
 
     @Transactional
