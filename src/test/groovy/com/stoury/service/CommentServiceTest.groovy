@@ -43,6 +43,7 @@ class CommentServiceTest extends Specification {
         commentService.createNestedComment(1L, 1L, "This is nested comment")
         then:
         1 * commentRepository.save(_) >> childComment
+        savedComment.hasChildComments
     }
 
     def "대대댓글 생성 실패"() {
