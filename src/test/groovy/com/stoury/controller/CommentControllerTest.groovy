@@ -54,7 +54,7 @@ class CommentControllerTest extends AbstractRestDocsTests {
         def parameterDescriptor = parameterWithName("commentId").description("id of comment")
         def writer = new AuthenticatedMember(1L, "test@email.com", "pwdpwdpwd123")
         def commentText = "This is comment"
-        when(commentService.createNestedComment(any(), any(), any()))
+        when(commentService.createChildComment(any(), any(), any()))
                 .thenReturn(new ChildCommentResponse(
                         1L,
                         new SimpleMemberResponse(1L, "writer"),

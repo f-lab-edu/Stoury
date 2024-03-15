@@ -46,7 +46,7 @@ public class CommentService {
     }
 
     @Transactional
-    public ChildCommentResponse createNestedComment(Long memberId, Long parentCommentId, String commentText) {
+    public ChildCommentResponse createChildComment(Long memberId, Long parentCommentId, String commentText) {
         Member member = memberRepository.findById(Objects.requireNonNull(memberId))
                 .orElseThrow(MemberSearchException::new);
         Comment parentComment = commentRepository.findById(Objects.requireNonNull(parentCommentId))

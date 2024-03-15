@@ -40,7 +40,7 @@ class CommentServiceTest extends Specification {
 
     def "대댓글 생성 성공"() {
         when:
-        commentService.createNestedComment(1L, 1L, "This is nested comment")
+        commentService.createChildComment(1L, 1L, "This is nested comment")
         then:
         1 * commentRepository.save(_) >> childComment
         savedComment.hasChildComments
@@ -48,7 +48,7 @@ class CommentServiceTest extends Specification {
 
     def "대대댓글 생성 실패"() {
         when:
-        commentService.createNestedComment(1L, 2L, "This is double nested comment")
+        commentService.createChildComment(1L, 2L, "This is double nested comment")
         then:
         commentRepository.findById(2) >> Optional.of(childComment)
         thrown(CommentCreateException.class)
