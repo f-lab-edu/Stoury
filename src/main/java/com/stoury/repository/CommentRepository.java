@@ -11,16 +11,22 @@ import java.util.List;
 
 public interface CommentRepository extends JpaRepository<Comment, Long> {
     @Query("""
-    SELECT C 
-    FROM Comment C JOIN FETCH C.member
-    WHERE C.feed = :feed AND C.createdAt < :orderThan AND C.parentComment IS NULL
+    SELECT c
+    FROM Comment c
+    JOIN FETCH c.member
+    LEFT JOIN c.feed f
+    WHERE c.createdAt < :orderThan
+    AND f = :feed
     """)
     List<Comment> findAllByFeedAndCreatedAtBeforeAndParentCommentIsNull(Feed feed, LocalDateTime orderThan, Pageable pageable);
 
     @Query("""
-    SELECT C 
-    FROM Comment C JOIN FETCH C.member
-    WHERE C.parentComment = :parentComment AND C.createdAt < :orderThan
+    SELECT c
+    FROM Comment c
+    JOIN FETCH c.member
+    LEFT JOIN c.parentComment c2
+    WHERE c.createdAt < :orderThan
+    AND c2 = :parentComment
     """)
     List<Comment> findAllByParentCommentAndCreatedAtBefore(Comment parentComment, LocalDateTime orderThan, Pageable pageable);
 }
