@@ -6,8 +6,11 @@ import com.stoury.dto.SimpleMemberResponse;
 import java.time.LocalDateTime;
 import java.util.List;
 
-public record ChildCommentResponse(Long id, SimpleMemberResponse writerResponse, Long parentCommentId,
-                                   String textContent, LocalDateTime createdAt) {
+public record ChildCommentResponse(Long id,
+                                   SimpleMemberResponse writerResponse,
+                                   Long parentCommentId,
+                                   String textContent,
+                                   LocalDateTime createdAt) {
     public static ChildCommentResponse from(Comment comment) {
         return new ChildCommentResponse(
                 comment.getId(),

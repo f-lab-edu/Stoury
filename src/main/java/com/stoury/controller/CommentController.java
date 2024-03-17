@@ -27,7 +27,7 @@ public class CommentController {
     public ChildCommentResponse createChildComment(@AuthenticationPrincipal AuthenticatedMember authenticatedMember,
                                                    @PathVariable Long commentId,
                                                    @RequestBody String textContent) {
-        return commentService.createNestedComment(authenticatedMember.getId(), commentId, textContent);
+        return commentService.createChildComment(authenticatedMember.getId(), commentId, textContent);
     }
 
     @GetMapping("/comments/feed/{feedId}")

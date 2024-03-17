@@ -13,7 +13,7 @@ public record CommentResponse(Long id, SimpleMemberResponse writer, Long feedId,
                 comment.getId(),
                 SimpleMemberResponse.from(comment.getMember()),
                 comment.getFeed().getId(),
-                comment.hasNestedComments(),
+                comment.hasChildComments(),
                 comment.isDeleted() ? Comment.DELETED_CONTENT_TEXT : comment.getTextContent(),
                 comment.getCreatedAt()
         );
