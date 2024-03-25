@@ -26,8 +26,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.nio.file.Paths;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -201,16 +200,15 @@ public class MemberService implements UserDetailsService {
         double latitudeNotNull = Objects.requireNonNull(latitude, "Invalid points information.");
         double longitudeNotNull = Objects.requireNonNull(longitude, "Invalid points information.");
 
-        return memberOnlineStatusRepository.findByPoint(new Point(longitudeNotNull, latitudeNotNull), radiusKm).stream()
-                .filter(memberDistance -> !memberDistance.memberId().equals(memberId))
-                .map(this::getOnlineMember)
-                .toList();
-    }
+        Map<Long, Integer> memberDistances = memberOnlineStatusRepository
+                .findByPoint(new Point(longitudeNotNull, latitudeNotNull), radiusKm);
+        Set<Long> memberIds = memberDistances
+                .keySet();
 
-    @NotNull
-    private OnlineMember getOnlineMember(MemberDistance memberDistance) {
-        Long memberIdNonNull = Objects.requireNonNull(memberDistance.memberId(), "Member id cannot be null.");
-        Member member = memberRepository.findById(memberIdNonNull).orElseThrow(MemberSearchException::new);
-        return OnlineMember.from(member, memberDistance);
+        return memberRepository.findAllById(memberIds).stream()
+                .map(member -> OnlineMember.from(member, memberDistances.get(member.getId())))
+                .filter(onlineMember -> !onlineMember.memberId().equals(memberId))
+                .sorted(Comparator.comparingInt(OnlineMember::distance))
+                .toList();
     }
 }
