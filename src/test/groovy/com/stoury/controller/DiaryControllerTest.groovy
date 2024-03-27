@@ -37,15 +37,15 @@ class DiaryControllerTest extends AbstractRestDocsTests {
 
     def feed1 = new FeedResponse(1, new SimpleMemberResponse(1, "writer1"),
             [new GraphicContentResponse(1, "/feed/images/image_1.jpeg")],
-            "This is feed1", 40.0627, -105.1779, List.of("America", "denver"),
+            "This is feed1", 40.0627, -105.1779, ["America", "denver"] as Set,
             new LocationResponse("Colorado", "United States"), 20, LocalDateTime.now())
     def feed2 = new FeedResponse(2, new SimpleMemberResponse(1, "writer1"),
             [new GraphicContentResponse(2, "/feed/images/image_2.jpeg"), new GraphicContentResponse(3, "/feed/images/image_3.jpeg")],
-            "This is feed2", 39.0484, -110.8451, List.of("America", "Utah", "Tavel"),
+            "This is feed2", 39.0484, -110.8451, ["America", "Utah", "Tavel"] as Set,
             new LocationResponse("Utah", "United States"), 13, LocalDateTime.now().plusDays(1))
     def feed3 = new FeedResponse(3, new SimpleMemberResponse(1, "writer1"),
             [new GraphicContentResponse(4, "/feed/images/image_4.jpeg"), new GraphicContentResponse(5, "/feed/images/image_5.jpeg")],
-            "This is feed3", 38.5269, -115.3801, List.of("Nevada", "UFO"),
+            "This is feed3", 38.5269, -115.3801, ["Nevada", "UFO"] as Set,
             new LocationResponse("Nevada", "United States"), 52, LocalDateTime.now().plusDays(2))
 
     def "Create a diary"() {
@@ -135,7 +135,7 @@ class DiaryControllerTest extends AbstractRestDocsTests {
                                 "First day",
                                 36.125,
                                 127.123,
-                                ["OneDayTrip"],
+                                ["OneDayTrip"] as Set,
                                 new LocationResponse("city", "country"),
                                 2L,
                                 LocalDateTime.of(2024, 12, 31, 13, 30)
