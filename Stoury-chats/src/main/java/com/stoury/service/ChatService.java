@@ -26,8 +26,10 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -41,10 +43,10 @@ public class ChatService {
 
     @Transactional
     public ChatRoomResponse createChatRoom(Long senderId, Long receiverId) {
-        List<Member> members = memberRepository.findAllById(List.of(senderId, receiverId));
+        Set<Member> members = new HashSet<>(memberRepository.findAllById(List.of(senderId, receiverId)));
 
         ChatRoom chatRoom = new ChatRoom(members);
-        if (chatRoomRepository.existsByMembers(members)) {
+        if (chatRoomRepository.existsBy(members)) {
             throw new ChatRoomCreateException("The chat room is already exists.");
         }
         ChatRoom savedChatRoom = chatRoomRepository.save(chatRoom);
