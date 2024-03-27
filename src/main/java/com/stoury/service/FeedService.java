@@ -35,6 +35,8 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -84,14 +86,14 @@ public class FeedService {
 
     private Feed createFeedEntity(Member writer, FeedCreateRequest feedCreateRequest,
                                   List<GraphicContent> graphicContents, LocationResponse locationResponse) {
-        List<Tag> tags = getOrCreateTags(feedCreateRequest.tagNames());
+        Set<Tag> tags = getOrCreateTags(feedCreateRequest.tagNames());
         return feedCreateRequest.toEntity(writer, graphicContents, tags, locationResponse.city(), locationResponse.country());
     }
 
-    private List<Tag> getOrCreateTags(List<String> tagNames) {
+    private Set<Tag> getOrCreateTags(Set<String> tagNames) {
         return tagNames.stream()
                 .map(tagService::getTagOrElseCreate)
-                .toList();
+                .collect(Collectors.toSet());
     }
 
     private GraphicSaveEvent publishNewFileEvent(MultipartFile file) {
@@ -130,7 +132,7 @@ public class FeedService {
     public List<FeedResponse> getFeedsByTag(String tagName, LocalDateTime orderThan) {
         Pageable page = PageRequest.of(0, PAGE_SIZE, Sort.by("createdAt").descending());
 
-        List<Feed> feeds = feedRepository.findByTagAndCreateAtLessThan(tagName, orderThan, page);
+        List<Feed> feeds = feedRepository.findByTags_TagNameAndCreatedAtLessThan(tagName, orderThan, page);
 
         return feeds.stream()
                 .map(this::toFeedResponse)
