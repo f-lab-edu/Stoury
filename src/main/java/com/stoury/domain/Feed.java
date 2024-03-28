@@ -11,6 +11,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -48,7 +49,7 @@ public class Feed {
             name = "FEED_TAG",
             joinColumns = @JoinColumn(name = "FEED_ID"),
             inverseJoinColumns = @JoinColumn(name = "TAG_ID"))
-    private List<Tag> tags = new ArrayList<>();
+    private Set<Tag> tags = new HashSet<>();
 
     @Column(name = "CITY", length = 35, nullable = false)
     private String city = "UNDEFINED";
@@ -58,7 +59,7 @@ public class Feed {
 
     @Builder
     public Feed(Member member, String textContent, Double latitude, Double longitude,
-                List<Tag> tags, String city, String country) {
+                Set<Tag> tags, String city, String country) {
         this.member = member;
         this.textContent = textContent;
         this.latitude = latitude;
@@ -81,7 +82,7 @@ public class Feed {
         this.textContent = feedUpdateRequest.textContent();
     }
 
-    public void updateTags(List<Tag> tags) {
+    public void updateTags(Set<Tag> tags) {
         this.tags = tags;
     }
 

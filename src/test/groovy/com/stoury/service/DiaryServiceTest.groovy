@@ -29,7 +29,7 @@ class DiaryServiceTest extends Specification {
     }
 
     Feed createFeed(long feedId, LocalDateTime localDateTime, int likes) {
-        def feed = new Feed(writer, "feed#" + feedId, 0, 0, Collections.emptyList(), "city", "country")
+        def feed = new Feed(writer, "feed#" + feedId, 0, 0, [] as Set, "city", "country")
         feed.id = feedId
         feed.createdAt = localDateTime
         feedRepository.findById(feedId) >> Optional.of(feed)

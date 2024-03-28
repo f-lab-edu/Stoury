@@ -50,6 +50,7 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.MySQL8Dialect
         format_sql: true
+        default_batch_fetch_size: 50
       defer-datasource-initialization: false
     open-in-view: false
   sql:

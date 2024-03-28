@@ -38,7 +38,7 @@ class FeedControllerTest extends AbstractRestDocsTests {
                 .textContent("This is content")
                 .latitude(36.5116)
                 .longitude(127.2359)
-                .tagNames(List.of("korea", "travel"))
+                .tagNames(["korea", "travel"] as Set)
                 .build()
         List<MultipartFile> graphicContents = [
                 new MockMultipartFile("images", "file1.jpeg", "image/jpeg", new byte[0]),
@@ -93,7 +93,7 @@ class FeedControllerTest extends AbstractRestDocsTests {
                         "This is content",
                         36.5116,
                         127.2359,
-                        List.of("korea", "travel"),
+                        ["korea", "travel"] as Set,
                         new LocationResponse("sejong-si", "Republic of Korea"),
                         0,
                         LocalDateTime.of(2024, 12, 31, 13, 30, 20, 14)
@@ -128,7 +128,7 @@ class FeedControllerTest extends AbstractRestDocsTests {
                         "This is content",
                         36.5116,
                         127.2359,
-                        List.of("korea", "travel"),
+                        ["korea", "travel"] as Set,
                         new LocationResponse("sejong-si", "Republic of Korea"),
                         0,
                         LocalDateTime.of(2024, 12, 31, 13, 30, 20, 14)
@@ -140,7 +140,7 @@ class FeedControllerTest extends AbstractRestDocsTests {
                         "This is content2",
                         36.3157,
                         127.3913,
-                        List.of("daejeon", "travel"),
+                        ["daejeon", "travel"] as Set,
                         new LocationResponse("daejeon-si", "Republic of Korea"),
                         0,
                         LocalDateTime.of(2024, 12, 31, 13, 30, 20, 14)
@@ -174,7 +174,7 @@ class FeedControllerTest extends AbstractRestDocsTests {
                         "This is content",
                         36.5116,
                         127.2359,
-                        List.of("korea", "travel"),
+                        ["korea", "travel"] as Set,
                         new LocationResponse("sejong-si", "Republic of Korea"),
                         0,
                         LocalDateTime.of(2024, 12, 31, 13, 30, 20, 14)
@@ -186,7 +186,7 @@ class FeedControllerTest extends AbstractRestDocsTests {
                         "This is content2",
                         36.3157,
                         127.3913,
-                        List.of("daejeon", "travel"),
+                        ["daejeon", "travel"] as Set,
                         new LocationResponse("daejeon-si", "Republic of Korea"),
                         0,
                         LocalDateTime.of(2024, 12, 31, 13, 30, 20, 14)
@@ -207,7 +207,7 @@ class FeedControllerTest extends AbstractRestDocsTests {
         def writer = new AuthenticatedMember(1L, "test@email.com", "pwdpwd1111")
         def feedUpdateRequest = new FeedUpdateRequest(
                 "Updated content",
-                List.of("New", "Updated"),
+                ["New", "Updated"] as Set,
                 Set.of(1, 3))
         when(feedService.updateFeedIfOwner(any(), any(), any())).thenReturn(
                 new FeedResponse(

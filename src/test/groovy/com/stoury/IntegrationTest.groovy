@@ -269,7 +269,7 @@ class IntegrationTest extends Specification {
         tagRepository.saveAndFlush(new Tag("tag0"))
         def feedCreateRequest = FeedCreateRequest.builder()
                 .textContent("Feed with tags")
-                .tagNames(List.of("tag0", "tag1", "tag2"))
+                .tagNames(["tag0", "tag1", "tag2"] as Set)
                 .latitude(0)
                 .longitude(0)
                 .build()

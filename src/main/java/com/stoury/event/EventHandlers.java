@@ -2,6 +2,7 @@ package com.stoury.event;
 
 import com.stoury.service.storage.StorageService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
@@ -14,6 +15,7 @@ import java.nio.file.Paths;
 public class EventHandlers {
     private final StorageService storageService;
 
+    @Async
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void onFileSaveEventHandler(GraphicSaveEvent graphicSaveEvent) {
         MultipartFile fileToSave = graphicSaveEvent.getFileToSave();
@@ -21,6 +23,7 @@ public class EventHandlers {
         storageService.saveFileAtPath(fileToSave, Paths.get(path));
     }
 
+    @Async
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void onFileDeleteEventHandler(GraphicDeleteEvent graphicDeleteEvent) {
         String path = graphicDeleteEvent.getPath();
