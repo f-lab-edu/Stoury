@@ -9,6 +9,7 @@ import com.stoury.repository.ChatMessageRepository;
 import com.stoury.repository.ChatRoomRepository;
 import com.stoury.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,6 +27,7 @@ public class ChatEventHandlers {
     private final MemberRepository memberRepository;
     private final ChatRoomRepository chatRoomRepository;
 
+    @Async
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void onChatMessageSaveEventHandler(ChatMessageSaveEvent chatMessageSaveEvent) {

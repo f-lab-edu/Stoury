@@ -89,7 +89,7 @@ public class ChatService {
         throw new NotAuthorizedException("You're not a member of the chat room.");
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public ChatMessageResponse sendChatMessage(Long memberId, Long chatRoomId, String textContent) {
         checkIfRoomMember(memberId, chatRoomId);
         if (!StringUtils.hasText(textContent)) {
