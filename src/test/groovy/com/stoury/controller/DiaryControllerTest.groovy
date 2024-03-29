@@ -77,13 +77,13 @@ class DiaryControllerTest extends AbstractRestDocsTests {
     def "Get diaries of a member"() {
         given:
         def pathParameterDescriptor = parameterWithName("memberId").description("id of member")
-        def queryParameterDescriptor = parameterWithName("pageNo").description("page number of diaries").optional()
+        def queryParameterDescriptor = parameterWithName("cursorId")
+                .description("Results which created order than whose id is cursorId").optional()
         diaryService.getMemberDiaries(_, _) >> new DiaryPageResponse(
-                List.of(
-                        new SimpleDiaryResponse(
-                                1,
-                                "/feed/images/image_14.jpeg",
-                                "My Stoury",
+                [
+                        new SimpleDiaryResponse(3,
+                                "/feed/images/image_120.jpeg",
+                                "Turkiye travel with family",
                                 1,
                                 LocalDateTime.of(2024, 12, 31, 13, 0, 0)),
                         new SimpleDiaryResponse(2,
@@ -91,18 +91,17 @@ class DiaryControllerTest extends AbstractRestDocsTests {
                                 "South Korea, Seoul, 2023-12-01~2024-01-12",
                                 1,
                                 LocalDateTime.of(2024, 12, 31, 13, 0, 0)),
-                        new SimpleDiaryResponse(3,
-                                "/feed/images/image_120.jpeg",
-                                "Turkiye travel with family",
+                        new SimpleDiaryResponse(
+                                1,
+                                "/feed/images/image_14.jpeg",
+                                "My Stoury",
                                 1,
                                 LocalDateTime.of(2024, 12, 31, 13, 0, 0)),
-                ),
-                1,
-                false
+                ]
         )
         when:
-        def response = mockMvc.perform(get("/diaries/member/{memberId}", "1")
-                .param("pageNo", "1"))
+        def response = mockMvc.perform(get("/diaries/member/{memberId}", "4")
+                .param("cursorId", "4"))
                 .andDo(documentWithPathAndQuery(pathParameterDescriptor, queryParameterDescriptor))
         then:
         response.andExpect(status().isOk())

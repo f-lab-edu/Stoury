@@ -9,7 +9,7 @@ spring:
     job:
       names: ${job.name:NONE}
   datasource:
-    url: jdbc:mariadb://${db.host}:3306/stouryprod?allowPublicKeyRetrieval=true&useSSL=false
+    url: jdbc:mariadb://${db.host}:3306/stouryprod?allowPublicKeyRetrieval=true&useSSL=false&sendFractionalSeconds=false
     username: ${db.username}
     password: ${db.password}
 logging:

@@ -21,13 +21,11 @@ import spock.lang.Specification
 class FeedServiceTest extends Specification {
     def memberRepository = Mock(MemberRepository)
     def tagService = Mock(TagService)
-    def rankingServie = Mock(RankingService)
     def feedRepository = Mock(FeedRepository)
     def likeRepository = Mock(LikeRepository)
     def eventPublisher = Mock(ApplicationEventPublisher)
     def locationService = Mock(LocationService)
-    def feedService = new FeedService(feedRepository, memberRepository, likeRepository,
-            tagService, rankingServie, locationService, eventPublisher)
+    def feedService = new FeedService(feedRepository, memberRepository, likeRepository, tagService,  locationService, eventPublisher)
 
     def writer = Mock(Member)
     def feedCreateRequest = FeedCreateRequest.builder()

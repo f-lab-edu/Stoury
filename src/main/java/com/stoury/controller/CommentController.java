@@ -4,11 +4,11 @@ import com.stoury.dto.comment.ChildCommentResponse;
 import com.stoury.dto.comment.CommentResponse;
 import com.stoury.dto.member.AuthenticatedMember;
 import com.stoury.service.CommentService;
+import com.stoury.utils.Values;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -32,16 +32,14 @@ public class CommentController {
 
     @GetMapping("/comments/feed/{feedId}")
     public List<CommentResponse> getComments(@PathVariable Long feedId,
-                                             @RequestParam(required = false, defaultValue = "2100-12-31T00:00:00")
-                                             LocalDateTime orderThan) {
-        return commentService.getCommentsOfFeed(feedId, orderThan);
+                                             @RequestParam(required = false, defaultValue = Values.MAX_LONG) Long cursorId) {
+        return commentService.getCommentsOfFeed(feedId, cursorId);
     }
 
     @GetMapping("/comments/comment/{commentId}")
     public List<ChildCommentResponse> getChildComments(@PathVariable Long commentId,
-                                                       @RequestParam(required = false, defaultValue = "2100-12-31T00:00:00")
-                                                       LocalDateTime orderThan) {
-        return commentService.getChildComments(commentId, orderThan);
+                                                       @RequestParam(required = false, defaultValue = Values.MAX_LONG) Long cursorId) {
+        return commentService.getChildComments(commentId, cursorId);
     }
 
     @DeleteMapping("/comments/{commentId}")

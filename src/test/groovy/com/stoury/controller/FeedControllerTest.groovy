@@ -111,14 +111,12 @@ class FeedControllerTest extends AbstractRestDocsTests {
     def "Get feeds by tag"() {
         given:
         def parameterDescriptor = parameterWithName("tagName").description("name of tag")
-        def queryDescriptor = parameterWithName("orderThan")
-                .description("Results which created orderThan this value are listed")
-                .optional()
-
+        def queryDescriptor = parameterWithName("cursorId")
+                .description("Results which created order than whose id is cursorId").optional()
 
         when(feedService.getFeedsByTag(any(), any())).thenReturn(List.of(
                 new FeedResponse(
-                        1L,
+                        2L,
                         new SimpleMemberResponse(1L, "testWriter"),
                         [
                                 new GraphicContentResponse(1, "/file1.jpeg"),
@@ -148,7 +146,7 @@ class FeedControllerTest extends AbstractRestDocsTests {
         ))
         when:
         def response = mockMvc.perform(get("/feeds/tag/{tagName}", "travel")
-                .param("orderThan", "2024-12-31T15:00:00"))
+                .param("cursorId", "4"))
                 .andDo(documentWithPathAndQuery(parameterDescriptor, queryDescriptor))
         then:
         response.andExpect(status().isOk())
@@ -157,14 +155,12 @@ class FeedControllerTest extends AbstractRestDocsTests {
     def "Get feeds of member"() {
         given:
         def parameterDescriptor = parameterWithName("memberId").description("id of member")
-        def queryDescriptor = parameterWithName("orderThan")
-                .description("Results which created orderThan this value are listed")
-                .optional()
-
+        def queryDescriptor = parameterWithName("cursorId")
+                .description("Results which created order than whose id is cursorId").optional()
 
         when(feedService.getFeedsOfMemberId(any(), any())).thenReturn(List.of(
                 new FeedResponse(
-                        1L,
+                        2L,
                         new SimpleMemberResponse(1L, "testWriter"),
                         [
                                 new GraphicContentResponse(1, "/file1.jpeg"),
@@ -194,7 +190,7 @@ class FeedControllerTest extends AbstractRestDocsTests {
         ))
         when:
         def response = mockMvc.perform(get("/feeds/member/{memberId}", "1")
-                .param("orderThan", "2024-12-31T15:00:00"))
+                .param("cursorId", "4"))
                 .andDo(documentWithPathAndQuery(parameterDescriptor, queryDescriptor))
         then:
         response.andExpect(status().isOk())

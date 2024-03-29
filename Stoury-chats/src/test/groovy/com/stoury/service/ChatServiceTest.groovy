@@ -89,9 +89,9 @@ class ChatServiceTest extends Specification {
         memerRepository.findById(sender1.id) >> Optional.of(sender1)
         chatRoomRepository.findById(chatRoom.id) >> Optional.of(chatRoom)
         when:
-        def messages = chatService.getPreviousChatMessages(sender1.id, chatRoom.id, null)
+        def messages = chatService.getPreviousChatMessages(sender1.id, chatRoom.id, 4L)
         then:
-        1 * chatMessageRepository.findAllByChatRoomAndCreatedAtBefore(_, _, _) >> chatLogs
+        1 * chatMessageRepository.findAllByChatRoomAndIdLessThan(_, _, _) >> chatLogs
         messages.size() == 5
     }
 
@@ -104,7 +104,7 @@ class ChatServiceTest extends Specification {
         memerRepository.findById(sender1.id) >> Optional.of(sender1)
         chatRoomRepository.findById(chatRoom.id) >> Optional.of(chatRoom)
         when:
-        chatService.getPreviousChatMessages(sender1.id, chatRoom.id, null)
+        chatService.getPreviousChatMessages(sender1.id, chatRoom.id, 4L)
         then:
         thrown(NotAuthorizedException)
     }
@@ -128,9 +128,9 @@ class ChatServiceTest extends Specification {
         memerRepository.findById(sender1.id) >> Optional.of(sender1)
         chatRoomRepository.findById(chatRoom.id) >> Optional.of(chatRoom)
         when:
-        def messages = chatService.getPreviousChatMessages(sender1.id, chatRoom.id, null)
+        def messages = chatService.getPreviousChatMessages(sender1.id, chatRoom.id, 4L)
         then:
-        1 * chatMessageRepository.findAllByChatRoomAndCreatedAtBefore(_, _, _) >> chatLogs
+        1 * chatMessageRepository.findAllByChatRoomAndIdLessThan(_, _, _) >> chatLogs
         messages.get(1).sender().username() == "UNKNOWN"
         messages.get(3).sender().username() == "UNKNOWN"
     }
