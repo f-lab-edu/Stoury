@@ -50,12 +50,9 @@ public class MemberOnlineStatusRepository {
         RedisGeoCommands.GeoRadiusCommandArgs args = RedisGeoCommands.GeoRadiusCommandArgs.newGeoRadiusArgs()
                 .includeDistance()
                 .sortAscending();
-        long start = System.currentTimeMillis();
         List<GeoResult<RedisGeoCommands.GeoLocation<String>>> geoResults = Optional.ofNullable(opsForGeo.radius(MEMBER_POS_CACHE_KEY, within, args))
                 .orElseThrow(GetMemberPositionsException::new)
                 .getContent();
-        long end = System.currentTimeMillis();
-        log.debug("geoRadius latency: {}", end - start);
 
         return geoResults.stream()
                 .filter(this::nonNull)
