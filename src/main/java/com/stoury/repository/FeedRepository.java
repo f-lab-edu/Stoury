@@ -11,9 +11,9 @@ import java.util.List;
 
 public interface FeedRepository extends JpaRepository<Feed, Long> {
 
-    List<Feed> findAllByMemberAndCreatedAtIsBefore(Member feedWriter, LocalDateTime orderThan, Pageable page);
+    List<Feed> findAllByMemberAndIdLessThan(Member feedWriter, Long id, Pageable page);
 
-    List<Feed> findByTags_TagNameAndCreatedAtLessThan(String tag, LocalDateTime orderThan, Pageable page);
+    List<Feed> findByTags_TagNameAndIdLessThan(String tag, Long id, Pageable page);
 
     @Query(""" 
             SELECT f.city

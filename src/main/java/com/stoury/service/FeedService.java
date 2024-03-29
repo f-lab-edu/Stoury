@@ -31,7 +31,6 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -48,7 +47,6 @@ public class FeedService {
     private final MemberRepository memberRepository;
     private final LikeRepository likeRepository;
     private final TagService tagService;
-    private final RankingService rankingService;
     private final LocationService locationService;
     private final ApplicationEventPublisher eventPublisher;
 
@@ -116,12 +114,13 @@ public class FeedService {
     }
 
     @Transactional(readOnly = true)
-    public List<FeedResponse> getFeedsOfMemberId(Long memberId, LocalDateTime orderThan) {
+    public List<FeedResponse> getFeedsOfMemberId(Long memberId, Long cursorId) {
         Member feedWriter = memberRepository.findById(Objects.requireNonNull(memberId))
                 .orElseThrow(() -> new FeedCreateException("Cannot find the member."));
+        Long cursorIdNotNull = Objects.requireNonNull(cursorId);
 
         Pageable page = PageRequest.of(0, PAGE_SIZE, Sort.by("createdAt").descending());
-        List<Feed> feeds = feedRepository.findAllByMemberAndCreatedAtIsBefore(feedWriter, orderThan, page);
+        List<Feed> feeds = feedRepository.findAllByMemberAndIdLessThan(feedWriter, cursorIdNotNull, page);
 
         return feeds.stream()
                 .map(this::toFeedResponse)
@@ -129,10 +128,11 @@ public class FeedService {
     }
 
     @Transactional(readOnly = true)
-    public List<FeedResponse> getFeedsByTag(String tagName, LocalDateTime orderThan) {
+    public List<FeedResponse> getFeedsByTag(String tagName, Long cursorId) {
         Pageable page = PageRequest.of(0, PAGE_SIZE, Sort.by("createdAt").descending());
+        Long cursorIdNotNull = Objects.requireNonNull(cursorId);
 
-        List<Feed> feeds = feedRepository.findByTags_TagNameAndCreatedAtLessThan(tagName, orderThan, page);
+        List<Feed> feeds = feedRepository.findByTags_TagNameAndIdLessThan(tagName, cursorIdNotNull, page);
 
         return feeds.stream()
                 .map(this::toFeedResponse)

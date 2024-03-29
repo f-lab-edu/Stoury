@@ -12,8 +12,6 @@ import com.stoury.repository.FeedRepository
 import com.stoury.repository.MemberRepository
 import spock.lang.Specification
 
-import java.time.LocalDateTime
-
 class CommentServiceTest extends Specification {
     def memberRepository = Mock(MemberRepository)
     def feedRepository = Mock(FeedRepository)
@@ -56,21 +54,21 @@ class CommentServiceTest extends Specification {
 
     def "댓글 조회"() {
         when:
-        commentService.getCommentsOfFeed(1L, LocalDateTime.now())
+        commentService.getCommentsOfFeed(1L, Long.MAX_VALUE)
         then:
-        1 * commentRepository.findAllByFeedAndCreatedAtBeforeAndParentCommentIsNull(_, _, _) >> List.of(savedComment)
+        1 * commentRepository.findAllByFeedAndIdLessThanAndParentCommentIsNull(_, _, _) >> List.of(savedComment)
     }
 
     def "대댓글 조회"() {
         when:
-        commentService.getChildComments(1L, LocalDateTime.now())
+        commentService.getChildComments(1L, Long.MAX_VALUE)
         then:
-        1 * commentRepository.findAllByParentCommentAndCreatedAtBefore(_, _, _) >> List.of(childComment)
+        1 * commentRepository.findAllByParentCommentAndIdLessThan(_, _, _) >> List.of(childComment)
     }
 
     def "대댓글 조회 실패 - 대댓글의 대댓글을 조회하려 함"() {
         when:
-        commentService.getChildComments(1L, LocalDateTime.now())
+        commentService.getChildComments(1L, Long.MAX_VALUE)
         then:
         commentRepository.findById(1L) >> Optional.of(childComment)
         thrown(CommentSearchException.class)

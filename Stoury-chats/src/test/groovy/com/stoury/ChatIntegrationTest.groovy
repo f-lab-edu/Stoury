@@ -50,8 +50,8 @@ class ChatIntegrationTest extends Specification {
         def thirdChat = new ChatMessage(member1, chatRoom, "thirdChat", LocalDateTime.of(2024,12,31,13,15))
         def savedChats = chatMessageRepository.saveAll(List.of(firstChat, secondChat, thirdChat))
         when:
-        def prevChats = chatMessageRepository.findAllByChatRoomAndCreatedAtBefore(chatRoom,
-                savedChats.get(2).createdAt,
+        def prevChats = chatMessageRepository.findAllByChatRoomAndIdLessThan(chatRoom,
+                savedChats.get(2).getId(),
                 PageRequest.of(0, 10, Sort.by("createdAt").descending()))
         then:
         prevChats.get(0).id == savedChats.get(1).id

@@ -36,7 +36,7 @@ spring:
     jdbc:
       initialize-schema: always
   datasource:
-    url: jdbc:mariadb://localhost:4306/stourydev?allowPublicKeyRetrieval=true&useSSL=false
+    url: jdbc:mariadb://localhost:4306/stourydev?allowPublicKeyRetrieval=true&useSSL=false&sendFractionalSeconds=false
     username: root
     password:
     driver-class-name: org.mariadb.jdbc.Driver

@@ -4,13 +4,13 @@ import com.stoury.dto.chat.ChatMessageResponse;
 import com.stoury.dto.chat.ChatRoomResponse;
 import com.stoury.dto.member.AuthenticatedMember;
 import com.stoury.service.ChatService;
+import com.stoury.utils.Values;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -27,9 +27,8 @@ public class ChatController {
     @GetMapping("/chats/{chatRoomId}")
     public List<ChatMessageResponse> getChatMessages(@AuthenticationPrincipal AuthenticatedMember authenticatedMember,
                                                      @PathVariable Long chatRoomId,
-                                                     @RequestParam(required = false, defaultValue = "2100-12-31T00:00:00")
-                                                     LocalDateTime orderThan) {
-        return chatService.getPreviousChatMessages(authenticatedMember.getId(), chatRoomId, orderThan);
+                                                     @RequestParam(required = false, defaultValue = Values.MAX_LONG) Long cursorId) {
+        return chatService.getPreviousChatMessages(authenticatedMember.getId(), chatRoomId, cursorId);
     }
 
     @GetMapping(value = "/chatRoom/{chatRoomId}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
