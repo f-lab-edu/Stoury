@@ -837,7 +837,7 @@ Content-Length: 530
 <h3 id="_get_feeds_by_tag_http_request">HTTP request</h3>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">GET /feeds/tag/travel?orderThan=2024-12-31T15%3A00%3A00 HTTP/1.1
+<pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">GET /feeds/tag/travel?cursorId=4 HTTP/1.1
 Host: localhost:8080</code></pre>
 </div>
 </div>
@@ -851,7 +851,7 @@ Content-Type: application/json;charset=UTF-8
 Content-Length: 927
 
 [ {
-  "feedId" : 1,
+  "feedId" : 2,
   "writer" : {
     "id" : 1,
     "username" : "testWriter"
@@ -934,8 +934,8 @@ Content-Length: 927
 </thead>
 <tbody>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>orderThan</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Results which created orderThan this value are listed</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>cursorId</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Results which created order than whose id is cursorId</p></td>
 </tr>
 </tbody>
 </table>
@@ -949,7 +949,7 @@ Content-Length: 927
 <h3 id="_get_feeds_of_member_http_request">HTTP request</h3>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">GET /feeds/member/1?orderThan=2024-12-31T15%3A00%3A00 HTTP/1.1
+<pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">GET /feeds/member/1?cursorId=4 HTTP/1.1
 Host: localhost:8080</code></pre>
 </div>
 </div>
@@ -963,7 +963,7 @@ Content-Type: application/json;charset=UTF-8
 Content-Length: 927
 
 [ {
-  "feedId" : 1,
+  "feedId" : 2,
   "writer" : {
     "id" : 1,
     "username" : "testWriter"
@@ -1437,7 +1437,7 @@ Host: localhost:8080</code></pre>
 <div class="content">
 <pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">HTTP/1.1 200 OK
 Content-Type: application/json;charset=UTF-8
-Content-Length: 626
+Content-Length: 625
 
 [ {
   "id" : 1,
@@ -1448,7 +1448,7 @@ Content-Length: 626
   "feedId" : 1,
   "hasNestedComments" : false,
   "textContent" : "First comment",
-  "createdAt" : "2024-03-04T20:32:17.548424"
+  "createdAt" : "2024-03-29T10:49:15.294126"
 }, {
   "id" : 2,
   "writer" : {
@@ -1458,7 +1458,7 @@ Content-Length: 626
   "feedId" : 1,
   "hasNestedComments" : true,
   "textContent" : "This comment was deleted",
-  "createdAt" : "2024-03-04T20:32:17.551022"
+  "createdAt" : "2024-03-29T10:49:15.29647"
 }, {
   "id" : 3,
   "writer" : {
@@ -1468,7 +1468,7 @@ Content-Length: 626
   "feedId" : 1,
   "hasNestedComments" : true,
   "textContent" : "Third comment",
-  "createdAt" : "2024-03-04T20:32:17.551505"
+  "createdAt" : "2024-03-29T10:49:15.296922"
 } ]</code></pre>
 </div>
 </div>
@@ -1510,8 +1510,8 @@ Content-Length: 626
 </thead>
 <tbody>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>orderThan</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Results which created orderThan this value are listed</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>cursorId</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Results which created order than whose id is cursorId</p></td>
 </tr>
 </tbody>
 </table>
@@ -1536,7 +1536,7 @@ Host: localhost:8080</code></pre>
 <div class="content">
 <pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">HTTP/1.1 200 OK
 Content-Type: application/json;charset=UTF-8
-Content-Length: 602
+Content-Length: 601
 
 [ {
   "id" : 11,
@@ -1546,7 +1546,7 @@ Content-Length: 602
   },
   "parentCommentId" : 1,
   "textContent" : "First child comment",
-  "createdAt" : "2024-03-04T20:32:17.573354"
+  "createdAt" : "2024-03-29T10:49:15.31637"
 }, {
   "id" : 12,
   "writerResponse" : {
@@ -1555,7 +1555,7 @@ Content-Length: 602
   },
   "parentCommentId" : 1,
   "textContent" : "Second child comment",
-  "createdAt" : "2024-03-04T20:32:17.574054"
+  "createdAt" : "2024-03-29T10:49:15.317011"
 }, {
   "id" : 13,
   "writerResponse" : {
@@ -1564,7 +1564,7 @@ Content-Length: 602
   },
   "parentCommentId" : 1,
   "textContent" : "This comment was deleted",
-  "createdAt" : "2024-03-04T20:32:17.574444"
+  "createdAt" : "2024-03-29T10:49:15.317413"
 } ]</code></pre>
 </div>
 </div>
@@ -1772,7 +1772,7 @@ Content-Length: 2027
         "country" : "United States"
       },
       "likes" : 20,
-      "createdAt" : "2024-03-04T20:32:17.644327"
+      "createdAt" : "2024-03-29T10:49:15.376109"
     } ],
     "2" : [ {
       "feedId" : 2,
@@ -1796,7 +1796,7 @@ Content-Length: 2027
         "country" : "United States"
       },
       "likes" : 13,
-      "createdAt" : "2024-03-05T20:32:17.650591"
+      "createdAt" : "2024-03-30T10:49:15.380691"
     }, {
       "feedId" : 3,
       "writer" : {
@@ -1819,11 +1819,11 @@ Content-Length: 2027
         "country" : "United States"
       },
       "likes" : 52,
-      "createdAt" : "2024-03-06T20:32:17.651758"
+      "createdAt" : "2024-03-31T10:49:15.381718"
     } ]
   },
-  "startDate" : "2024-03-04",
-  "endDate" : "2024-03-06",
+  "startDate" : "2024-03-29",
+  "endDate" : "2024-03-31",
   "city" : "Colorado",
   "country" : "United States",
   "likes" : 85,
@@ -1841,7 +1841,7 @@ Content-Length: 2027
 <h3 id="_get_diaries_of_a_member_http_request">HTTP request</h3>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">GET /diaries/member/1?pageNo=1 HTTP/1.1
+<pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">GET /diaries/member/4?cursorId=4 HTTP/1.1
 Host: localhost:8080</code></pre>
 </div>
 </div>
@@ -1852,13 +1852,13 @@ Host: localhost:8080</code></pre>
 <div class="content">
 <pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">HTTP/1.1 200 OK
 Content-Type: application/json;charset=UTF-8
-Content-Length: 575
+Content-Length: 538
 
 {
   "diaries" : [ {
-    "id" : 1,
-    "thumbnail" : "/feed/images/image_14.jpeg",
-    "title" : "My Stoury",
+    "id" : 3,
+    "thumbnail" : "/feed/images/image_120.jpeg",
+    "title" : "Turkiye travel with family",
     "memberId" : 1,
     "createdAt" : "2024-12-31T13:00:00"
   }, {
@@ -1868,14 +1868,12 @@ Content-Length: 575
     "memberId" : 1,
     "createdAt" : "2024-12-31T13:00:00"
   }, {
-    "id" : 3,
-    "thumbnail" : "/feed/images/image_120.jpeg",
-    "title" : "Turkiye travel with family",
+    "id" : 1,
+    "thumbnail" : "/feed/images/image_14.jpeg",
+    "title" : "My Stoury",
     "memberId" : 1,
     "createdAt" : "2024-12-31T13:00:00"
-  } ],
-  "pageNo" : 1,
-  "hasNext" : false
+  } ]
 }</code></pre>
 </div>
 </div>
@@ -1917,8 +1915,8 @@ Content-Length: 575
 </thead>
 <tbody>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>pageNo</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">page number of diaries</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>cursorId</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Results which created order than whose id is cursorId</p></td>
 </tr>
 </tbody>
 </table>
@@ -2569,7 +2567,7 @@ Content-Length: 401
 <div id="footer">
 <div id="footer-text">
 Version 0.0.1-SNAPSHOT<br>
-Last updated 2024-03-04 20:32:07 +0900
+Last updated 2024-03-05 19:46:06 +0900
 </div>
 </div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.3/highlight.min.js"></script>
