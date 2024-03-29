@@ -12,8 +12,8 @@ public interface DiaryRepository extends JpaRepository<Diary, Long> {
     @Query("""
     SELECT D
     FROM Diary D JOIN FETCH D.thumbnail
-    WHERE D.member = :member AND D.id < :id
+    WHERE D.member = :member AND D.id < :offsetId
     """
     )
-    List<Diary> findByMemberAndIdLessThan(Member member, Long id, Pageable page);
+    List<Diary> findByMemberAndIdLessThan(Member member, Long offsetId, Pageable page);
 }

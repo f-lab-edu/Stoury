@@ -14,18 +14,18 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
     FROM Comment c
     JOIN FETCH c.member
     LEFT JOIN c.feed f
-    WHERE c.id < :id
+    WHERE c.id < :offsetId
     AND f = :feed
     """)
-    List<Comment> findAllByFeedAndIdLessThanAndParentCommentIsNull(Feed feed, Long id, Pageable pageable);
+    List<Comment> findAllByFeedAndIdLessThanAndParentCommentIsNull(Feed feed, Long offsetId, Pageable pageable);
 
     @Query("""
     SELECT c
     FROM Comment c
     JOIN FETCH c.member
     LEFT JOIN c.parentComment c2
-    WHERE c.id < :id
+    WHERE c.id < :offsetId
     AND c2 = :parentComment
     """)
-    List<Comment> findAllByParentCommentAndIdLessThan(Comment parentComment, Long id, Pageable pageable);
+    List<Comment> findAllByParentCommentAndIdLessThan(Comment parentComment, Long offsetId, Pageable pageable);
 }
