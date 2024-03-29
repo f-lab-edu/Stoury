@@ -1,7 +1,7 @@
 package com.stoury.repository;
 
-import com.stoury.dto.member.MemberDistance;
 import com.stoury.exception.location.GetMemberPositionsException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.geo.*;
 import org.springframework.data.redis.connection.RedisGeoCommands;
@@ -11,9 +11,12 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
+@Slf4j
 @Repository
 public class MemberOnlineStatusRepository {
     public static final String ONLINE_MEMBER_CACHE_KEY = "online:member:";
@@ -42,7 +45,7 @@ public class MemberOnlineStatusRepository {
         opsForGeo.remove(MEMBER_POS_CACHE_KEY, memberId.toString());
     }
 
-    public List<MemberDistance> findByPoint(Point point, double radiusKm) {
+    public Map<Long, Integer> findByPoint(Point point, double radiusKm) {
         Circle within = new Circle(point, new Distance(radiusKm, Metrics.KILOMETERS));
         RedisGeoCommands.GeoRadiusCommandArgs args = RedisGeoCommands.GeoRadiusCommandArgs.newGeoRadiusArgs()
                 .includeDistance()
@@ -52,14 +55,26 @@ public class MemberOnlineStatusRepository {
                 .getContent();
 
         return geoResults.stream()
-                .map(this::memberDistances)
-                .toList();
+                .filter(this::nonNull)
+                .map(res -> Map.entry(getId(res), getDistance(res)))
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
-    private MemberDistance memberDistances(GeoResult<RedisGeoCommands.GeoLocation<String>> geoResult) {
-        String memberId = geoResult.getContent().getName();
-        double distance = geoResult.getDistance().in(Metrics.KILOMETERS).getValue();
+    private boolean nonNull(GeoResult<RedisGeoCommands.GeoLocation<String>> geoResult){
+        if(geoResult.getContent().getName() == null){
+            log.error("Null member Id is stored. Check the online member redis storage.");
+            return false;
+        }
+        return true;
+    }
 
-        return new MemberDistance(Long.parseLong(memberId), (int)distance);
+    private Long getId(GeoResult<RedisGeoCommands.GeoLocation<String>> geoResult){
+        String memberIdStr = geoResult.getContent().getName();
+        return Long.valueOf(memberIdStr);
+    }
+
+    private Integer getDistance(GeoResult<RedisGeoCommands.GeoLocation<String>> geoResult) {
+        double distance = geoResult.getDistance().in(Metrics.KILOMETERS).getValue();
+        return (int)distance;
     }
 }
