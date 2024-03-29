@@ -447,7 +447,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <h3 id="_get_feeds_by_tag_http_request">HTTP request</h3>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight nowrap"><code class="language-http" data-lang="http">GET /feeds/tag/travel?orderThan=2024-12-31T15%3A00%3A00 HTTP/1.1
+<pre class="highlight nowrap"><code class="language-http" data-lang="http">GET /feeds/tag/travel?cursorId=4 HTTP/1.1
 Host: localhost:8080</code></pre>
 </div>
 </div>
@@ -461,7 +461,7 @@ Content-Type: application/json;charset=UTF-8
 Content-Length: 927
 
 [ {
-  "feedId" : 1,
+  "feedId" : 2,
   "writer" : {
     "id" : 1,
     "username" : "testWriter"
@@ -544,8 +544,8 @@ Content-Length: 927
 </thead>
 <tbody>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>orderThan</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Results which created orderThan this value are listed</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>cursorId</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Results which created order than whose id is cursorId</p></td>
 </tr>
 </tbody>
 </table>
