@@ -148,7 +148,7 @@ class MemberServiceTest extends Specification {
 
     def "주변 사용자 검색"() {
         given:
-        memberOnlineStatusRepository.findByPoint(_, _) >> [3L:10, 2L:20, 1L:30]
+        memberOnlineStatusRepository.findByPoint(_, _, _) >> [3L:10, 2L:20, 1L:30]
 
         def member1 = new Member(id:1L, email:"member1@email.com", encryptedPassword:"pwdpwd1", username:"member1", introduction: null)
         def member2 = new Member(id:2L, email:"member2@email.com", encryptedPassword:"pwdpwd1", username:"member2", introduction: null)
@@ -164,12 +164,11 @@ class MemberServiceTest extends Specification {
 
     def "주변 사용자 검색-사용자 본인은 제외되어야 함"() {
         given:
-        memberOnlineStatusRepository.findByPoint(_, _) >> [3L:10, 2L:20, 1L:30]
+        memberOnlineStatusRepository.findByPoint(_, _, _) >> [3L:10, 1L:30]
 
         def member1 = new Member(id:1L, email:"member1@email.com", encryptedPassword:"pwdpwd1", username:"member1", introduction: null)
-        def member2 = new Member(id:2L, email:"member2@email.com", encryptedPassword:"pwdpwd1", username:"member2", introduction: null)
         def member3 = new Member(id:3L, email:"member3@email.com", encryptedPassword:"pwdpwd1", username:"member3", introduction: null)
-        memberRepository.findAllById(_) >> [member2, member1, member3]
+        memberRepository.findAllById(_) >> [member1, member3]
         when:
         def aroundMembers = memberService.searchOnlineMembers(2, 10.0, 10.0, 50.0)
         then:

@@ -197,17 +197,16 @@ public class MemberService implements UserDetailsService {
 
     @Transactional(readOnly = true)
     public List<OnlineMember> searchOnlineMembers(Long memberId, Double latitude, Double longitude, double radiusKm) {
+        long memberIdNotNull = Objects.requireNonNull(memberId, "Member id cannot be null.");
         double latitudeNotNull = Objects.requireNonNull(latitude, "Invalid points information.");
         double longitudeNotNull = Objects.requireNonNull(longitude, "Invalid points information.");
 
         Map<Long, Integer> memberDistances = memberOnlineStatusRepository
-                .findByPoint(new Point(longitudeNotNull, latitudeNotNull), radiusKm);
-        Set<Long> memberIds = memberDistances
-                .keySet();
+                .findByPoint(memberIdNotNull, new Point(longitudeNotNull, latitudeNotNull), radiusKm);
+        Set<Long> memberIds = memberDistances.keySet();
 
         return memberRepository.findAllById(memberIds).stream()
                 .map(member -> OnlineMember.from(member, memberDistances.get(member.getId())))
-                .filter(onlineMember -> !onlineMember.memberId().equals(memberId))
                 .sorted(Comparator.comparingInt(OnlineMember::distance))
                 .toList();
     }
