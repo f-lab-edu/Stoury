@@ -15,6 +15,8 @@ spring:
 logging:
   level:
     org.hibernate.orm.jdbc.bind: off
+    com.zaxxer.hikari.HikariConfig: off
+    com.zaxxer.hikari: off
 google:
   geocoding:
     api-key: ${geocode.apikey:NONE}

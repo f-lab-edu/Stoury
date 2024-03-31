@@ -40,6 +40,9 @@ spring:
     username: root
     password:
     driver-class-name: org.mariadb.jdbc.Driver
+    hikari:
+      maximum-pool-size: 20
+      minimum-idle: 20
   jpa:
     show-sql: true
     hibernate:
@@ -67,6 +70,8 @@ spring:
 logging:
   level:
     org.hibernate.orm.jdbc.bind: trace
+    com.zaxxer.hikari.HikariConfig: DEBUG
+    com.zaxxer.hikari: TRACE
 path-prefix: /feeds
 profileImage:
   path-prefix: /members/profiles
