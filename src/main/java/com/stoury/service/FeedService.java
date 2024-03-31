@@ -20,6 +20,7 @@ import com.stoury.repository.MemberRepository;
 import com.stoury.service.location.LocationService;
 import com.stoury.utils.FileUtils;
 import com.stoury.utils.SupportedFileType;
+import com.stoury.utils.cachekeys.PageSize;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
@@ -42,7 +43,6 @@ import java.util.stream.Collectors;
 public class FeedService {
     @Value("${path-prefix}")
     public String pathPrefix;
-    public static final int PAGE_SIZE = 10;
     private final FeedRepository feedRepository;
     private final MemberRepository memberRepository;
     private final LikeRepository likeRepository;
@@ -119,7 +119,7 @@ public class FeedService {
                 .orElseThrow(() -> new FeedCreateException("Cannot find the member."));
         Long cursorIdNotNull = Objects.requireNonNull(cursorId);
 
-        Pageable page = PageRequest.of(0, PAGE_SIZE, Sort.by("createdAt").descending());
+        Pageable page = PageRequest.of(0, PageSize.FEED_PAGE_SIZE, Sort.by("createdAt").descending());
         List<Feed> feeds = feedRepository.findAllByMemberAndIdLessThan(feedWriter, cursorIdNotNull, page);
 
         return feeds.stream()
@@ -129,7 +129,7 @@ public class FeedService {
 
     @Transactional(readOnly = true)
     public List<FeedResponse> getFeedsByTag(String tagName, Long cursorId) {
-        Pageable page = PageRequest.of(0, PAGE_SIZE, Sort.by("createdAt").descending());
+        Pageable page = PageRequest.of(0, PageSize.FEED_PAGE_SIZE, Sort.by("createdAt").descending());
         Long cursorIdNotNull = Objects.requireNonNull(cursorId);
 
         List<Feed> feeds = feedRepository.findByTags_TagNameAndIdLessThan(tagName, cursorIdNotNull, page);

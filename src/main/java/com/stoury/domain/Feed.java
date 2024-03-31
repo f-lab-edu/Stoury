@@ -1,11 +1,13 @@
 package com.stoury.domain;
 
 import com.stoury.dto.feed.FeedUpdateRequest;
+import com.stoury.utils.cachekeys.PageSize;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.BatchSize;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
@@ -32,6 +34,7 @@ public class Feed {
     @CreatedDate
     private LocalDateTime createdAt;
 
+    @BatchSize(size = PageSize.FEED_PAGE_SIZE)
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "feed")
     private List<GraphicContent> graphicContents = new ArrayList<>();
 
@@ -44,6 +47,7 @@ public class Feed {
     @Column(name = "LONGITUDE", nullable = false)
     private Double longitude;
 
+    @BatchSize(size = PageSize.FEED_PAGE_SIZE)
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
             name = "FEED_TAG",

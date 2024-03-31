@@ -15,6 +15,7 @@ import com.stoury.repository.ChatMessageRepository;
 import com.stoury.repository.ChatRoomRepository;
 import com.stoury.repository.MemberRepository;
 import com.stoury.service.kafka.KafkaProducer;
+import com.stoury.utils.cachekeys.PageSize;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.PageRequest;
@@ -79,7 +80,7 @@ public class ChatService {
         Member member = memberRepository.findById(senderIdNotNull).orElseThrow(MemberSearchException::new);
         ChatRoom chatRoom = chatRoomRepository.findById(chatRoomIdNotNull).orElseThrow(ChatRoomSearchException::new);
         if (chatRoom.hasMember(member)) {
-            Pageable pageable = PageRequest.of(0, 50, Sort.by("createdAt").descending());
+            Pageable pageable = PageRequest.of(0, PageSize.CHAT_PAGE_SIZE, Sort.by("createdAt").descending());
             List<ChatMessage> chatMessages = chatMessageRepository.findAllByChatRoomAndIdLessThan(chatRoom, cursorIdNotNull, pageable);
 
             return chatMessages.stream().map(ChatMessageResponse::from).toList();

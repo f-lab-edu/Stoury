@@ -13,6 +13,7 @@ import com.stoury.exception.member.MemberSearchException;
 import com.stoury.repository.CommentRepository;
 import com.stoury.repository.FeedRepository;
 import com.stoury.repository.MemberRepository;
+import com.stoury.utils.cachekeys.PageSize;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -26,7 +27,6 @@ import java.util.Objects;
 @Service
 @RequiredArgsConstructor
 public class CommentService {
-    public static final int PAGE_SIZE = 20;
     private final CommentRepository commentRepository;
     private final MemberRepository memberRepository;
     private final FeedRepository feedRepository;
@@ -66,7 +66,7 @@ public class CommentService {
                 .orElseThrow(FeedSearchException::new);
         Long cursorIdNotNull = Objects.requireNonNull(cursorId);
 
-        Pageable pageable = PageRequest.of(0, PAGE_SIZE, Sort.by("createdAt").descending());
+        Pageable pageable = PageRequest.of(0, PageSize.COMMENT_PAGE_SIZE, Sort.by("createdAt").descending());
 
         return CommentResponse.from(commentRepository.findAllByFeedAndIdLessThanAndParentCommentIsNull(feed, cursorIdNotNull, pageable));
     }
@@ -81,7 +81,7 @@ public class CommentService {
             throw new CommentSearchException("Nested comments are allowed in a level.");
         }
 
-        Pageable pageable = PageRequest.of(0, PAGE_SIZE, Sort.by("createdAt").descending());
+        Pageable pageable = PageRequest.of(0, PageSize.COMMENT_PAGE_SIZE, Sort.by("createdAt").descending());
 
         return ChildCommentResponse.from(commentRepository.findAllByParentCommentAndIdLessThan(parentComment,
                 cursorIdNotNull, pageable));

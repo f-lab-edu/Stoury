@@ -11,8 +11,8 @@ import com.stoury.repository.MemberRepository;
 import com.stoury.service.storage.StorageService;
 import com.stoury.utils.FileUtils;
 import com.stoury.utils.SupportedFileType;
+import com.stoury.utils.cachekeys.PageSize;
 import lombok.RequiredArgsConstructor;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.*;
 import org.springframework.data.geo.Point;
@@ -39,7 +39,6 @@ public class MemberService implements UserDetailsService {
     public static final int PASSWORD_LENGTH_MAX = 30;
     public static final int USERNAME_LENGTH_MAX = 10;
     public static final int EMAIL_LENGTH_MAX = 25;
-    public static final int PAGE_SIZE = 5;
     @Value("${profileImage.path-prefix}")
     public String profileImagePathPrefix;
 
@@ -165,7 +164,7 @@ public class MemberService implements UserDetailsService {
             throw new MemberSearchException("No keyword for search.");
         }
 
-        Pageable page = PageRequest.of(0, PAGE_SIZE, Sort.by("username"));
+        Pageable page = PageRequest.of(0, PageSize.MEMBER_PAGE_SIZE, Sort.by("username"));
 
         Slice<Member> memberEntitySlice = memberRepository.findMembersByUsernameMatches(keyword, page);
 
