@@ -37,15 +37,15 @@ class DiaryControllerTest extends AbstractRestDocsTests {
 
     def feed1 = new FeedResponse(1, new SimpleMemberResponse(1, "writer1"),
             [new GraphicContentResponse(1, "/feed/images/image_1.jpeg")],
-            "This is feed1", 40.0627, -105.1779, List.of("America", "denver"),
+            "This is feed1", 40.0627, -105.1779, ["America", "denver"] as Set,
             new LocationResponse("Colorado", "United States"), 20, LocalDateTime.now())
     def feed2 = new FeedResponse(2, new SimpleMemberResponse(1, "writer1"),
             [new GraphicContentResponse(2, "/feed/images/image_2.jpeg"), new GraphicContentResponse(3, "/feed/images/image_3.jpeg")],
-            "This is feed2", 39.0484, -110.8451, List.of("America", "Utah", "Tavel"),
+            "This is feed2", 39.0484, -110.8451, ["America", "Utah", "Tavel"] as Set,
             new LocationResponse("Utah", "United States"), 13, LocalDateTime.now().plusDays(1))
     def feed3 = new FeedResponse(3, new SimpleMemberResponse(1, "writer1"),
             [new GraphicContentResponse(4, "/feed/images/image_4.jpeg"), new GraphicContentResponse(5, "/feed/images/image_5.jpeg")],
-            "This is feed3", 38.5269, -115.3801, List.of("Nevada", "UFO"),
+            "This is feed3", 38.5269, -115.3801, ["Nevada", "UFO"] as Set,
             new LocationResponse("Nevada", "United States"), 52, LocalDateTime.now().plusDays(2))
 
     def "Create a diary"() {
@@ -77,13 +77,13 @@ class DiaryControllerTest extends AbstractRestDocsTests {
     def "Get diaries of a member"() {
         given:
         def pathParameterDescriptor = parameterWithName("memberId").description("id of member")
-        def queryParameterDescriptor = parameterWithName("pageNo").description("page number of diaries").optional()
+        def queryParameterDescriptor = parameterWithName("cursorId")
+                .description("Results which created order than whose id is cursorId").optional()
         diaryService.getMemberDiaries(_, _) >> new DiaryPageResponse(
-                List.of(
-                        new SimpleDiaryResponse(
-                                1,
-                                "/feed/images/image_14.jpeg",
-                                "My Stoury",
+                [
+                        new SimpleDiaryResponse(3,
+                                "/feed/images/image_120.jpeg",
+                                "Turkiye travel with family",
                                 1,
                                 LocalDateTime.of(2024, 12, 31, 13, 0, 0)),
                         new SimpleDiaryResponse(2,
@@ -91,18 +91,17 @@ class DiaryControllerTest extends AbstractRestDocsTests {
                                 "South Korea, Seoul, 2023-12-01~2024-01-12",
                                 1,
                                 LocalDateTime.of(2024, 12, 31, 13, 0, 0)),
-                        new SimpleDiaryResponse(3,
-                                "/feed/images/image_120.jpeg",
-                                "Turkiye travel with family",
+                        new SimpleDiaryResponse(
+                                1,
+                                "/feed/images/image_14.jpeg",
+                                "My Stoury",
                                 1,
                                 LocalDateTime.of(2024, 12, 31, 13, 0, 0)),
-                ),
-                1,
-                false
+                ]
         )
         when:
-        def response = mockMvc.perform(get("/diaries/member/{memberId}", "1")
-                .param("pageNo", "1"))
+        def response = mockMvc.perform(get("/diaries/member/{memberId}", "4")
+                .param("cursorId", "4"))
                 .andDo(documentWithPathAndQuery(pathParameterDescriptor, queryParameterDescriptor))
         then:
         response.andExpect(status().isOk())
@@ -135,7 +134,7 @@ class DiaryControllerTest extends AbstractRestDocsTests {
                                 "First day",
                                 36.125,
                                 127.123,
-                                ["OneDayTrip"],
+                                ["OneDayTrip"] as Set,
                                 new LocationResponse("city", "country"),
                                 2L,
                                 LocalDateTime.of(2024, 12, 31, 13, 30)

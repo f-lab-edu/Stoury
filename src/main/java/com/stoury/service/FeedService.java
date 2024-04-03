@@ -20,6 +20,7 @@ import com.stoury.repository.MemberRepository;
 import com.stoury.service.location.LocationService;
 import com.stoury.utils.FileUtils;
 import com.stoury.utils.SupportedFileType;
+import com.stoury.utils.cachekeys.PageSize;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
@@ -31,22 +32,21 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class FeedService {
     @Value("${path-prefix}")
     public String pathPrefix;
-    public static final int PAGE_SIZE = 10;
     private final FeedRepository feedRepository;
     private final MemberRepository memberRepository;
     private final LikeRepository likeRepository;
     private final TagService tagService;
-    private final RankingService rankingService;
     private final LocationService locationService;
     private final ApplicationEventPublisher eventPublisher;
 
@@ -84,14 +84,14 @@ public class FeedService {
 
     private Feed createFeedEntity(Member writer, FeedCreateRequest feedCreateRequest,
                                   List<GraphicContent> graphicContents, LocationResponse locationResponse) {
-        List<Tag> tags = getOrCreateTags(feedCreateRequest.tagNames());
+        Set<Tag> tags = getOrCreateTags(feedCreateRequest.tagNames());
         return feedCreateRequest.toEntity(writer, graphicContents, tags, locationResponse.city(), locationResponse.country());
     }
 
-    private List<Tag> getOrCreateTags(List<String> tagNames) {
+    private Set<Tag> getOrCreateTags(Set<String> tagNames) {
         return tagNames.stream()
                 .map(tagService::getTagOrElseCreate)
-                .toList();
+                .collect(Collectors.toSet());
     }
 
     private GraphicSaveEvent publishNewFileEvent(MultipartFile file) {
@@ -114,12 +114,13 @@ public class FeedService {
     }
 
     @Transactional(readOnly = true)
-    public List<FeedResponse> getFeedsOfMemberId(Long memberId, LocalDateTime orderThan) {
+    public List<FeedResponse> getFeedsOfMemberId(Long memberId, Long cursorId) {
         Member feedWriter = memberRepository.findById(Objects.requireNonNull(memberId))
                 .orElseThrow(() -> new FeedCreateException("Cannot find the member."));
+        Long cursorIdNotNull = Objects.requireNonNull(cursorId);
 
-        Pageable page = PageRequest.of(0, PAGE_SIZE, Sort.by("createdAt").descending());
-        List<Feed> feeds = feedRepository.findAllByMemberAndCreatedAtIsBefore(feedWriter, orderThan, page);
+        Pageable page = PageRequest.of(0, PageSize.FEED_PAGE_SIZE, Sort.by("createdAt").descending());
+        List<Feed> feeds = feedRepository.findAllByMemberAndIdLessThan(feedWriter, cursorIdNotNull, page);
 
         return feeds.stream()
                 .map(this::toFeedResponse)
@@ -127,10 +128,11 @@ public class FeedService {
     }
 
     @Transactional(readOnly = true)
-    public List<FeedResponse> getFeedsByTag(String tagName, LocalDateTime orderThan) {
-        Pageable page = PageRequest.of(0, PAGE_SIZE, Sort.by("createdAt").descending());
+    public List<FeedResponse> getFeedsByTag(String tagName, Long cursorId) {
+        Pageable page = PageRequest.of(0, PageSize.FEED_PAGE_SIZE, Sort.by("createdAt").descending());
+        Long cursorIdNotNull = Objects.requireNonNull(cursorId);
 
-        List<Feed> feeds = feedRepository.findByTagAndCreateAtLessThan(tagName, orderThan, page);
+        List<Feed> feeds = feedRepository.findByTags_TagNameAndIdLessThan(tagName, cursorIdNotNull, page);
 
         return feeds.stream()
                 .map(this::toFeedResponse)

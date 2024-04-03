@@ -9,12 +9,14 @@ spring:
     job:
       names: ${job.name:NONE}
   datasource:
-    url: jdbc:mariadb://${db.host}:3306/stouryprod?allowPublicKeyRetrieval=true&useSSL=false
+    url: jdbc:mariadb://${db.host}:3306/stouryprod?allowPublicKeyRetrieval=true&useSSL=false&sendFractionalSeconds=false
     username: ${db.username}
     password: ${db.password}
 logging:
   level:
     org.hibernate.orm.jdbc.bind: off
+    com.zaxxer.hikari.HikariConfig: off
+    com.zaxxer.hikari: off
 google:
   geocoding:
     api-key: ${geocode.apikey:NONE}

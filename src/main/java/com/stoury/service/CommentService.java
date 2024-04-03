@@ -13,6 +13,7 @@ import com.stoury.exception.member.MemberSearchException;
 import com.stoury.repository.CommentRepository;
 import com.stoury.repository.FeedRepository;
 import com.stoury.repository.MemberRepository;
+import com.stoury.utils.cachekeys.PageSize;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -20,14 +21,12 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
 public class CommentService {
-    public static final int PAGE_SIZE = 20;
     private final CommentRepository commentRepository;
     private final MemberRepository memberRepository;
     private final FeedRepository feedRepository;
@@ -62,27 +61,30 @@ public class CommentService {
     }
 
     @Transactional(readOnly = true)
-    public List<CommentResponse> getCommentsOfFeed(Long feedId, LocalDateTime orderThan) {
+    public List<CommentResponse> getCommentsOfFeed(Long feedId, Long cursorId) {
         Feed feed = feedRepository.findById(Objects.requireNonNull(feedId))
                 .orElseThrow(FeedSearchException::new);
+        Long cursorIdNotNull = Objects.requireNonNull(cursorId);
 
-        Pageable pageable = PageRequest.of(0, PAGE_SIZE, Sort.by("createdAt").descending());
+        Pageable pageable = PageRequest.of(0, PageSize.COMMENT_PAGE_SIZE, Sort.by("createdAt").descending());
 
-        return CommentResponse.from(commentRepository.findAllByFeedAndCreatedAtBeforeAndParentCommentIsNull(feed, orderThan, pageable));
+        return CommentResponse.from(commentRepository.findAllByFeedAndIdLessThanAndParentCommentIsNull(feed, cursorIdNotNull, pageable));
     }
 
     @Transactional(readOnly = true)
-    public List<ChildCommentResponse> getChildComments(Long parentCommentId, LocalDateTime orderThan) {
+    public List<ChildCommentResponse> getChildComments(Long parentCommentId, Long cursorId) {
         Comment parentComment = commentRepository.findById(Objects.requireNonNull(parentCommentId))
                 .orElseThrow(CommentSearchException::new);
+        Long cursorIdNotNull = Objects.requireNonNull(cursorId);
+
         if (parentComment.hasParent()) {
             throw new CommentSearchException("Nested comments are allowed in a level.");
         }
 
-        Pageable pageable = PageRequest.of(0, PAGE_SIZE, Sort.by("createdAt").descending());
+        Pageable pageable = PageRequest.of(0, PageSize.COMMENT_PAGE_SIZE, Sort.by("createdAt").descending());
 
-        return ChildCommentResponse.from(commentRepository.findAllByParentCommentAndCreatedAtBefore(parentComment,
-                orderThan, pageable));
+        return ChildCommentResponse.from(commentRepository.findAllByParentCommentAndIdLessThan(parentComment,
+                cursorIdNotNull, pageable));
     }
 
     protected CommentResponse deleteComment(Long commentId) {

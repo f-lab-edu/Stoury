@@ -5,12 +5,12 @@ import com.stoury.dto.feed.FeedResponse;
 import com.stoury.dto.feed.FeedUpdateRequest;
 import com.stoury.dto.member.AuthenticatedMember;
 import com.stoury.service.FeedService;
+import com.stoury.utils.Values;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -32,16 +32,14 @@ public class FeedController {
 
     @GetMapping("/feeds/tag/{tagName}")
     public List<FeedResponse> getFeedsOfTag(@PathVariable String tagName,
-                                            @RequestParam(required = false, defaultValue = "2100-12-31T00:00:00")
-                                            LocalDateTime orderThan) {
+                                            @RequestParam(required = false, defaultValue = Values.MAX_LONG) Long orderThan) {
         return feedService.getFeedsByTag(tagName, orderThan);
     }
 
     @GetMapping("/feeds/member/{memberId}")
     public List<FeedResponse> getFeedsOfMember(@PathVariable Long memberId,
-                                               @RequestParam(required = false, defaultValue = "2100-12-31T00:00:00")
-                                               LocalDateTime orderThan) {
-        return feedService.getFeedsOfMemberId(memberId, orderThan);
+                                               @RequestParam(required = false, defaultValue = Values.MAX_LONG) Long cursorId) {
+        return feedService.getFeedsOfMemberId(memberId, cursorId);
     }
 
     @PutMapping("/feeds/{feedId}")

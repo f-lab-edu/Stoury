@@ -15,6 +15,7 @@ import com.stoury.repository.ChatMessageRepository;
 import com.stoury.repository.ChatRoomRepository;
 import com.stoury.repository.MemberRepository;
 import com.stoury.service.kafka.KafkaProducer;
+import com.stoury.utils.cachekeys.PageSize;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.PageRequest;
@@ -26,8 +27,10 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -41,10 +44,10 @@ public class ChatService {
 
     @Transactional
     public ChatRoomResponse createChatRoom(Long senderId, Long receiverId) {
-        List<Member> members = memberRepository.findAllById(List.of(senderId, receiverId));
+        Set<Member> members = new HashSet<>(memberRepository.findAllById(List.of(senderId, receiverId)));
 
         ChatRoom chatRoom = new ChatRoom(members);
-        if (chatRoomRepository.existsByMembers(members)) {
+        if (chatRoomRepository.existsBy(members)) {
             throw new ChatRoomCreateException("The chat room is already exists.");
         }
         ChatRoom savedChatRoom = chatRoomRepository.save(chatRoom);
@@ -69,25 +72,23 @@ public class ChatService {
     }
 
     @Transactional(readOnly = true)
-    public List<ChatMessageResponse> getPreviousChatMessages(Long memberId, Long chatRoomId, LocalDateTime orderThan) {
+    public List<ChatMessageResponse> getPreviousChatMessages(Long memberId, Long chatRoomId, Long cursorId) {
         Long senderIdNotNull = Objects.requireNonNull(memberId);
         Long chatRoomIdNotNull = Objects.requireNonNull(chatRoomId);
-        if (orderThan == null) {
-            orderThan = LocalDateTime.of(2100, 12, 31, 0, 0, 0);
-        }
+        Long cursorIdNotNull = Objects.requireNonNull(cursorId);
 
         Member member = memberRepository.findById(senderIdNotNull).orElseThrow(MemberSearchException::new);
         ChatRoom chatRoom = chatRoomRepository.findById(chatRoomIdNotNull).orElseThrow(ChatRoomSearchException::new);
         if (chatRoom.hasMember(member)) {
-            Pageable pageable = PageRequest.of(0, 50, Sort.by("createdAt").descending());
-            List<ChatMessage> chatMessages = chatMessageRepository.findAllByChatRoomAndCreatedAtBefore(chatRoom, orderThan, pageable);
+            Pageable pageable = PageRequest.of(0, PageSize.CHAT_PAGE_SIZE, Sort.by("createdAt").descending());
+            List<ChatMessage> chatMessages = chatMessageRepository.findAllByChatRoomAndIdLessThan(chatRoom, cursorIdNotNull, pageable);
 
             return chatMessages.stream().map(ChatMessageResponse::from).toList();
         }
         throw new NotAuthorizedException("You're not a member of the chat room.");
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public ChatMessageResponse sendChatMessage(Long memberId, Long chatRoomId, String textContent) {
         checkIfRoomMember(memberId, chatRoomId);
         if (!StringUtils.hasText(textContent)) {

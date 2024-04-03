@@ -10,6 +10,7 @@ import com.stoury.dto.member.OnlineMember
 import com.stoury.repository.*
 import com.stoury.service.FeedService
 import com.stoury.service.MemberService
+import com.stoury.utils.cachekeys.PageSize
 import jakarta.persistence.EntityManager
 import jakarta.persistence.PersistenceContext
 import org.springframework.beans.factory.annotation.Autowired
@@ -206,7 +207,7 @@ class IntegrationTest extends Specification {
         List<MemberResponse> foundMembers = slice.getContent();
 
         then:
-        slice.size == MemberService.PAGE_SIZE
+        slice.size == PageSize.MEMBER_PAGE_SIZE
         slice.hasNext()
         foundMembers.get(0).username() == member1.getUsername()
         foundMembers.get(1).username() == member2.getUsername()
@@ -269,7 +270,7 @@ class IntegrationTest extends Specification {
         tagRepository.saveAndFlush(new Tag("tag0"))
         def feedCreateRequest = FeedCreateRequest.builder()
                 .textContent("Feed with tags")
-                .tagNames(List.of("tag0", "tag1", "tag2"))
+                .tagNames(["tag0", "tag1", "tag2"] as Set)
                 .latitude(0)
                 .longitude(0)
                 .build()

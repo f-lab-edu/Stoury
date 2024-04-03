@@ -5,6 +5,7 @@ import com.stoury.dto.diary.DiaryPageResponse;
 import com.stoury.dto.diary.DiaryResponse;
 import com.stoury.dto.member.AuthenticatedMember;
 import com.stoury.service.DiaryService;
+import com.stoury.utils.Values;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -27,8 +28,8 @@ public class DiaryController {
 
     @GetMapping("/diaries/member/{memberId}")
     public DiaryPageResponse getMemberDiaries(@PathVariable Long memberId,
-                                              @RequestParam(required = false, defaultValue = "0") int pageNo) {
-        return diaryService.getMemberDiaries(memberId, pageNo);
+                                              @RequestParam(required = false, defaultValue = Values.MAX_LONG) Long cursorId) {
+        return diaryService.getMemberDiaries(memberId, cursorId);
     }
 
     @DeleteMapping("/diaries/{diaryId}")

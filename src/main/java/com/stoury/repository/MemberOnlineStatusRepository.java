@@ -45,7 +45,7 @@ public class MemberOnlineStatusRepository {
         opsForGeo.remove(MEMBER_POS_CACHE_KEY, memberId.toString());
     }
 
-    public Map<Long, Integer> findByPoint(Point point, double radiusKm) {
+    public Map<Long, Integer> findByPoint(long memberId, Point point, double radiusKm) {
         Circle within = new Circle(point, new Distance(radiusKm, Metrics.KILOMETERS));
         RedisGeoCommands.GeoRadiusCommandArgs args = RedisGeoCommands.GeoRadiusCommandArgs.newGeoRadiusArgs()
                 .includeDistance()
@@ -56,6 +56,7 @@ public class MemberOnlineStatusRepository {
 
         return geoResults.stream()
                 .filter(this::nonNull)
+                .filter(res -> getId(res) != memberId)
                 .map(res -> Map.entry(getId(res), getDistance(res)))
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }

@@ -8,13 +8,15 @@ import com.stoury.exception.feed.FeedCreateException;
 import lombok.Builder;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Builder
-public record FeedCreateRequest(String textContent, Double latitude, Double longitude, List<String> tagNames) {
+public record FeedCreateRequest(String textContent, Double latitude, Double longitude, Set<String> tagNames) {
     public FeedCreateRequest{
         if (tagNames == null) {
-            tagNames = new ArrayList<>();
+            tagNames = new HashSet<>();
         }
         if (latitude == null) {
             throw new FeedCreateException("Latitude is required");
@@ -23,7 +25,7 @@ public record FeedCreateRequest(String textContent, Double latitude, Double long
             throw new FeedCreateException("Longitude is required");
         }
     }
-    public Feed toEntity(Member writer, List<GraphicContent> graphicContents, List<Tag> tags, String city, String country) {
+    public Feed toEntity(Member writer, List<GraphicContent> graphicContents, Set<Tag> tags, String city, String country) {
         Feed feed = Feed.builder()
                 .member(writer)
                 .textContent(textContent)

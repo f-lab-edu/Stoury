@@ -18,6 +18,7 @@ import com.stoury.repository.DiaryRepository;
 import com.stoury.repository.FeedRepository;
 import com.stoury.repository.LikeRepository;
 import com.stoury.repository.MemberRepository;
+import com.stoury.utils.cachekeys.PageSize;
 import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.data.domain.Page;
@@ -35,7 +36,6 @@ import java.util.Objects;
 @Service
 @RequiredArgsConstructor
 public class DiaryService {
-    public static final int PAGE_SIZE = 10;
     private final MemberRepository memberRepository;
     private final FeedRepository feedRepository;
     private final DiaryRepository diaryRepository;
@@ -111,12 +111,14 @@ public class DiaryService {
     }
 
     @Transactional(readOnly = true)
-    public DiaryPageResponse getMemberDiaries(Long memberId, int pageNo) {
+    public DiaryPageResponse getMemberDiaries(Long memberId, Long cursorId) {
         Member member = memberRepository.findById(Objects.requireNonNull(memberId, "Member Id cannot be null"))
                 .orElseThrow(MemberSearchException::new);
-        Pageable page = PageRequest.of(pageNo, PAGE_SIZE, Sort.by("createdAt"));
+        Long cursorIdNotNull = Objects.requireNonNull(cursorId);
 
-        Page<Diary> diaryPage = diaryRepository.findByMember(member, page);
+        Pageable page = PageRequest.of(0, PageSize.DIARY_PAGE_SIZE, Sort.by("createdAt"));
+
+        List<Diary> diaryPage = diaryRepository.findByMemberAndIdLessThan(member, cursorIdNotNull, page);
 
         return DiaryPageResponse.from(diaryPage);
     }

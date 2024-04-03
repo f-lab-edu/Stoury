@@ -1,16 +1,19 @@
 package com.stoury.domain;
 
 import com.stoury.dto.feed.FeedUpdateRequest;
+import com.stoury.utils.cachekeys.PageSize;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.BatchSize;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -31,6 +34,7 @@ public class Feed {
     @CreatedDate
     private LocalDateTime createdAt;
 
+    @BatchSize(size = PageSize.FEED_PAGE_SIZE)
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "feed")
     private List<GraphicContent> graphicContents = new ArrayList<>();
 
@@ -43,12 +47,13 @@ public class Feed {
     @Column(name = "LONGITUDE", nullable = false)
     private Double longitude;
 
+    @BatchSize(size = PageSize.FEED_PAGE_SIZE)
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
             name = "FEED_TAG",
             joinColumns = @JoinColumn(name = "FEED_ID"),
             inverseJoinColumns = @JoinColumn(name = "TAG_ID"))
-    private List<Tag> tags = new ArrayList<>();
+    private Set<Tag> tags = new HashSet<>();
 
     @Column(name = "CITY", length = 35, nullable = false)
     private String city = "UNDEFINED";
@@ -58,7 +63,7 @@ public class Feed {
 
     @Builder
     public Feed(Member member, String textContent, Double latitude, Double longitude,
-                List<Tag> tags, String city, String country) {
+                Set<Tag> tags, String city, String country) {
         this.member = member;
         this.textContent = textContent;
         this.latitude = latitude;
@@ -81,7 +86,7 @@ public class Feed {
         this.textContent = feedUpdateRequest.textContent();
     }
 
-    public void updateTags(List<Tag> tags) {
+    public void updateTags(Set<Tag> tags) {
         this.tags = tags;
     }
 

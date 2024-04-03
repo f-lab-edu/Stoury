@@ -21,13 +21,11 @@ import spock.lang.Specification
 class FeedServiceTest extends Specification {
     def memberRepository = Mock(MemberRepository)
     def tagService = Mock(TagService)
-    def rankingServie = Mock(RankingService)
     def feedRepository = Mock(FeedRepository)
     def likeRepository = Mock(LikeRepository)
     def eventPublisher = Mock(ApplicationEventPublisher)
     def locationService = Mock(LocationService)
-    def feedService = new FeedService(feedRepository, memberRepository, likeRepository,
-            tagService, rankingServie, locationService, eventPublisher)
+    def feedService = new FeedService(feedRepository, memberRepository, likeRepository, tagService,  locationService, eventPublisher)
 
     def writer = Mock(Member)
     def feedCreateRequest = FeedCreateRequest.builder()
@@ -44,7 +42,7 @@ class FeedServiceTest extends Specification {
             .textContent(feedCreateRequest.textContent())
             .latitude(11.11)
             .longitude(22.22)
-            .tags(new ArrayList<>())
+            .tags([] as Set)
             .build()
 
     def setup() {
@@ -91,7 +89,7 @@ class FeedServiceTest extends Specification {
     def "피드 업데이트 성공"() {
         given:
         def feed = new Feed(writer, "before updated", 11.11, 22.22,
-                List.of(Mock(Tag)), "city", "country")
+                [Mock(Tag)] as Set, "city", "country")
         feed.id = 1L
         feed.graphicContents = new ArrayList<>(List.of(
                 new GraphicContent("path1", 0),
@@ -101,7 +99,7 @@ class FeedServiceTest extends Specification {
                 new GraphicContent("path5", 4)))
         feedRepository.findById(_ as Long) >> Optional.of(feed)
 
-        def feedUpdateRequest = new FeedUpdateRequest("updated", Collections.emptyList(), Set.of(1, 3))
+        def feedUpdateRequest = new FeedUpdateRequest("updated", [] as Set, Set.of(1, 3))
         when:
         feedService.updateFeed(1L, feedUpdateRequest)
         then:

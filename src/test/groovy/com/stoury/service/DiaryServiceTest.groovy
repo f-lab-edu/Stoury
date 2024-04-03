@@ -12,7 +12,6 @@ import com.stoury.repository.MemberRepository
 import org.springframework.data.domain.Page
 import spock.lang.Specification
 
-import java.awt.print.Pageable
 import java.time.LocalDateTime
 
 class DiaryServiceTest extends Specification {
@@ -29,7 +28,7 @@ class DiaryServiceTest extends Specification {
     }
 
     Feed createFeed(long feedId, LocalDateTime localDateTime, int likes) {
-        def feed = new Feed(writer, "feed#" + feedId, 0, 0, Collections.emptyList(), "city", "country")
+        def feed = new Feed(writer, "feed#" + feedId, 0, 0, [] as Set, "city", "country")
         feed.id = feedId
         feed.createdAt = localDateTime
         feedRepository.findById(feedId) >> Optional.of(feed)
@@ -78,9 +77,9 @@ class DiaryServiceTest extends Specification {
 
     def "사용자의 여행일지 조회"() {
         when:
-        diaryService.getMemberDiaries(1L, 0)
+        diaryService.getMemberDiaries(1L, Long.MAX_VALUE)
         then:
-        1 * diaryRepository.findByMember(_ as Member, _) >> Page.empty()
+        1 * diaryRepository.findByMemberAndIdLessThan(_ as Member, _, _) >> []
     }
 
     def "단일 여행일지 조회"() {

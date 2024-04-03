@@ -5,12 +5,10 @@ import org.springframework.data.domain.Page;
 
 import java.util.List;
 
-public record DiaryPageResponse(List<SimpleDiaryResponse> diaries, int pageNo, boolean hasNext) {
-    public static DiaryPageResponse from(Page<Diary> page) {
-        List<SimpleDiaryResponse> diaries = page.getContent().stream().map(SimpleDiaryResponse::from).toList();
-        int pageNo = page.getNumber();
-        boolean hasNext = page.hasNext();
+public record DiaryPageResponse(List<SimpleDiaryResponse> diaries) {
+    public static DiaryPageResponse from(List<Diary> page) {
+        List<SimpleDiaryResponse> diaries = page.stream().map(SimpleDiaryResponse::from).toList();
 
-        return new DiaryPageResponse(diaries, pageNo, hasNext);
+        return new DiaryPageResponse(diaries);
     }
 }

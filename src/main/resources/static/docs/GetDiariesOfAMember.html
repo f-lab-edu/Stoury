@@ -447,7 +447,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <h3 id="_get_diaries_of_a_member_http_request">HTTP request</h3>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight nowrap"><code class="language-http" data-lang="http">GET /diaries/member/1?pageNo=1 HTTP/1.1
+<pre class="highlight nowrap"><code class="language-http" data-lang="http">GET /diaries/member/4?cursorId=4 HTTP/1.1
 Host: localhost:8080</code></pre>
 </div>
 </div>
@@ -458,13 +458,13 @@ Host: localhost:8080</code></pre>
 <div class="content">
 <pre class="highlight nowrap"><code class="language-http" data-lang="http">HTTP/1.1 200 OK
 Content-Type: application/json;charset=UTF-8
-Content-Length: 575
+Content-Length: 538
 
 {
   "diaries" : [ {
-    "id" : 1,
-    "thumbnail" : "/feed/images/image_14.jpeg",
-    "title" : "My Stoury",
+    "id" : 3,
+    "thumbnail" : "/feed/images/image_120.jpeg",
+    "title" : "Turkiye travel with family",
     "memberId" : 1,
     "createdAt" : "2024-12-31T13:00:00"
   }, {
@@ -474,14 +474,12 @@ Content-Length: 575
     "memberId" : 1,
     "createdAt" : "2024-12-31T13:00:00"
   }, {
-    "id" : 3,
-    "thumbnail" : "/feed/images/image_120.jpeg",
-    "title" : "Turkiye travel with family",
+    "id" : 1,
+    "thumbnail" : "/feed/images/image_14.jpeg",
+    "title" : "My Stoury",
     "memberId" : 1,
     "createdAt" : "2024-12-31T13:00:00"
-  } ],
-  "pageNo" : 1,
-  "hasNext" : false
+  } ]
 }</code></pre>
 </div>
 </div>
@@ -523,8 +521,8 @@ Content-Length: 575
 </thead>
 <tbody>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>pageNo</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">page number of diaries</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>cursorId</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Results which created order than whose id is cursorId</p></td>
 </tr>
 </tbody>
 </table>

@@ -9,5 +9,5 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 public interface ChatMessageRepository extends JpaRepository<ChatMessage, Long> {
-    List<ChatMessage> findAllByChatRoomAndCreatedAtBefore(ChatRoom chatRoom, LocalDateTime createdAt, Pageable pageable);
+    List<ChatMessage> findAllByChatRoomAndIdLessThan(ChatRoom chatRoom, Long offsetId, Pageable pageable);
 }

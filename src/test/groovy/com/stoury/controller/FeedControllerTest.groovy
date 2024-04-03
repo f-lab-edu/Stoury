@@ -38,7 +38,7 @@ class FeedControllerTest extends AbstractRestDocsTests {
                 .textContent("This is content")
                 .latitude(36.5116)
                 .longitude(127.2359)
-                .tagNames(List.of("korea", "travel"))
+                .tagNames(["korea", "travel"] as Set)
                 .build()
         List<MultipartFile> graphicContents = [
                 new MockMultipartFile("images", "file1.jpeg", "image/jpeg", new byte[0]),
@@ -93,7 +93,7 @@ class FeedControllerTest extends AbstractRestDocsTests {
                         "This is content",
                         36.5116,
                         127.2359,
-                        List.of("korea", "travel"),
+                        ["korea", "travel"] as Set,
                         new LocationResponse("sejong-si", "Republic of Korea"),
                         0,
                         LocalDateTime.of(2024, 12, 31, 13, 30, 20, 14)
@@ -111,14 +111,12 @@ class FeedControllerTest extends AbstractRestDocsTests {
     def "Get feeds by tag"() {
         given:
         def parameterDescriptor = parameterWithName("tagName").description("name of tag")
-        def queryDescriptor = parameterWithName("orderThan")
-                .description("Results which created orderThan this value are listed")
-                .optional()
-
+        def queryDescriptor = parameterWithName("cursorId")
+                .description("Results which created order than whose id is cursorId").optional()
 
         when(feedService.getFeedsByTag(any(), any())).thenReturn(List.of(
                 new FeedResponse(
-                        1L,
+                        2L,
                         new SimpleMemberResponse(1L, "testWriter"),
                         [
                                 new GraphicContentResponse(1, "/file1.jpeg"),
@@ -128,7 +126,7 @@ class FeedControllerTest extends AbstractRestDocsTests {
                         "This is content",
                         36.5116,
                         127.2359,
-                        List.of("korea", "travel"),
+                        ["korea", "travel"] as Set,
                         new LocationResponse("sejong-si", "Republic of Korea"),
                         0,
                         LocalDateTime.of(2024, 12, 31, 13, 30, 20, 14)
@@ -140,7 +138,7 @@ class FeedControllerTest extends AbstractRestDocsTests {
                         "This is content2",
                         36.3157,
                         127.3913,
-                        List.of("daejeon", "travel"),
+                        ["daejeon", "travel"] as Set,
                         new LocationResponse("daejeon-si", "Republic of Korea"),
                         0,
                         LocalDateTime.of(2024, 12, 31, 13, 30, 20, 14)
@@ -148,7 +146,7 @@ class FeedControllerTest extends AbstractRestDocsTests {
         ))
         when:
         def response = mockMvc.perform(get("/feeds/tag/{tagName}", "travel")
-                .param("orderThan", "2024-12-31T15:00:00"))
+                .param("cursorId", "4"))
                 .andDo(documentWithPathAndQuery(parameterDescriptor, queryDescriptor))
         then:
         response.andExpect(status().isOk())
@@ -157,14 +155,12 @@ class FeedControllerTest extends AbstractRestDocsTests {
     def "Get feeds of member"() {
         given:
         def parameterDescriptor = parameterWithName("memberId").description("id of member")
-        def queryDescriptor = parameterWithName("orderThan")
-                .description("Results which created orderThan this value are listed")
-                .optional()
-
+        def queryDescriptor = parameterWithName("cursorId")
+                .description("Results which created order than whose id is cursorId").optional()
 
         when(feedService.getFeedsOfMemberId(any(), any())).thenReturn(List.of(
                 new FeedResponse(
-                        1L,
+                        2L,
                         new SimpleMemberResponse(1L, "testWriter"),
                         [
                                 new GraphicContentResponse(1, "/file1.jpeg"),
@@ -174,7 +170,7 @@ class FeedControllerTest extends AbstractRestDocsTests {
                         "This is content",
                         36.5116,
                         127.2359,
-                        List.of("korea", "travel"),
+                        ["korea", "travel"] as Set,
                         new LocationResponse("sejong-si", "Republic of Korea"),
                         0,
                         LocalDateTime.of(2024, 12, 31, 13, 30, 20, 14)
@@ -186,7 +182,7 @@ class FeedControllerTest extends AbstractRestDocsTests {
                         "This is content2",
                         36.3157,
                         127.3913,
-                        List.of("daejeon", "travel"),
+                        ["daejeon", "travel"] as Set,
                         new LocationResponse("daejeon-si", "Republic of Korea"),
                         0,
                         LocalDateTime.of(2024, 12, 31, 13, 30, 20, 14)
@@ -194,7 +190,7 @@ class FeedControllerTest extends AbstractRestDocsTests {
         ))
         when:
         def response = mockMvc.perform(get("/feeds/member/{memberId}", "1")
-                .param("orderThan", "2024-12-31T15:00:00"))
+                .param("cursorId", "4"))
                 .andDo(documentWithPathAndQuery(parameterDescriptor, queryDescriptor))
         then:
         response.andExpect(status().isOk())
@@ -207,7 +203,7 @@ class FeedControllerTest extends AbstractRestDocsTests {
         def writer = new AuthenticatedMember(1L, "test@email.com", "pwdpwd1111")
         def feedUpdateRequest = new FeedUpdateRequest(
                 "Updated content",
-                List.of("New", "Updated"),
+                ["New", "Updated"] as Set,
                 Set.of(1, 3))
         when(feedService.updateFeedIfOwner(any(), any(), any())).thenReturn(
                 new FeedResponse(

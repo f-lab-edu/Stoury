@@ -25,7 +25,7 @@ public class GraphicContent {
 
     @Getter(value = AccessLevel.PRIVATE)
     @Setter(value = AccessLevel.PACKAGE)
-    @ManyToOne(optional = false)
+    @ManyToOne(optional = false, fetch = FetchType.LAZY)
     private Feed feed;
 
     public GraphicContent(String path, int sequence) {

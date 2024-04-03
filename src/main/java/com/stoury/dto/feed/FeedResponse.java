@@ -6,6 +6,8 @@ import com.stoury.dto.SimpleMemberResponse;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 public record FeedResponse(Long feedId,
                            SimpleMemberResponse writer,
@@ -13,7 +15,7 @@ public record FeedResponse(Long feedId,
                            String textContent,
                            Double latitude,
                            Double longitude,
-                           List<String> tagNames,
+                           Set<String> tagNames,
                            LocationResponse location,
                            long likes,
                            LocalDateTime createdAt) {
@@ -25,7 +27,7 @@ public record FeedResponse(Long feedId,
                 feed.getTextContent(),
                 feed.getLatitude(),
                 feed.getLongitude(),
-                feed.getTags().stream().map(Tag::getTagName).toList(),
+                feed.getTags().stream().map(Tag::getTagName).collect(Collectors.toSet()),
                 new LocationResponse(feed.getCity(), feed.getCountry()),
                 feedLikes,
                 feed.getCreatedAt()

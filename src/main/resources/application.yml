@@ -36,10 +36,13 @@ spring:
     jdbc:
       initialize-schema: always
   datasource:
-    url: jdbc:mariadb://localhost:4306/stourydev?allowPublicKeyRetrieval=true&useSSL=false
+    url: jdbc:mariadb://localhost:4306/stourydev?allowPublicKeyRetrieval=true&useSSL=false&sendFractionalSeconds=false
     username: root
     password:
     driver-class-name: org.mariadb.jdbc.Driver
+    hikari:
+      maximum-pool-size: 47
+      minimum-idle: 47
   jpa:
     show-sql: true
     hibernate:
@@ -50,6 +53,7 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.MySQL8Dialect
         format_sql: true
+        default_batch_fetch_size: 50
       defer-datasource-initialization: false
     open-in-view: false
   sql:
@@ -66,6 +70,8 @@ spring:
 logging:
   level:
     org.hibernate.orm.jdbc.bind: trace
+    com.zaxxer.hikari.HikariConfig: DEBUG
+    com.zaxxer.hikari: TRACE
 path-prefix: /feeds
 profileImage:
   path-prefix: /members/profiles

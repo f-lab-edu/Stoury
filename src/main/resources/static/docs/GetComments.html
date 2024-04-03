@@ -458,7 +458,7 @@ Host: localhost:8080</code></pre>
 <div class="content">
 <pre class="highlight nowrap"><code class="language-http" data-lang="http">HTTP/1.1 200 OK
 Content-Type: application/json;charset=UTF-8
-Content-Length: 626
+Content-Length: 625
 
 [ {
   "id" : 1,
@@ -469,7 +469,7 @@ Content-Length: 626
   "feedId" : 1,
   "hasNestedComments" : false,
   "textContent" : "First comment",
-  "createdAt" : "2024-03-04T20:32:17.548424"
+  "createdAt" : "2024-03-29T10:49:15.294126"
 }, {
   "id" : 2,
   "writer" : {
@@ -479,7 +479,7 @@ Content-Length: 626
   "feedId" : 1,
   "hasNestedComments" : true,
   "textContent" : "This comment was deleted",
-  "createdAt" : "2024-03-04T20:32:17.551022"
+  "createdAt" : "2024-03-29T10:49:15.29647"
 }, {
   "id" : 3,
   "writer" : {
@@ -489,7 +489,7 @@ Content-Length: 626
   "feedId" : 1,
   "hasNestedComments" : true,
   "textContent" : "Third comment",
-  "createdAt" : "2024-03-04T20:32:17.551505"
+  "createdAt" : "2024-03-29T10:49:15.296922"
 } ]</code></pre>
 </div>
 </div>
@@ -531,8 +531,8 @@ Content-Length: 626
 </thead>
 <tbody>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>orderThan</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Results which created orderThan this value are listed</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>cursorId</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Results which created order than whose id is cursorId</p></td>
 </tr>
 </tbody>
 </table>
