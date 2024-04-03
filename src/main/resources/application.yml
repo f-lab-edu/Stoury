@@ -41,8 +41,8 @@ spring:
     password:
     driver-class-name: org.mariadb.jdbc.Driver
     hikari:
-      maximum-pool-size: 20
-      minimum-idle: 20
+      maximum-pool-size: 47
+      minimum-idle: 47
   jpa:
     show-sql: true
     hibernate:
