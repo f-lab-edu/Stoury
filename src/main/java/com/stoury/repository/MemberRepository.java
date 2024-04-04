@@ -9,6 +9,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.SliceImpl;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 
@@ -16,6 +17,7 @@ import static com.stoury.domain.QMember.member;
 
 @Repository
 @RequiredArgsConstructor
+@Transactional
 public class MemberRepository {
     private final JPAQueryFactory jpaQueryFactory;
     private final EntityManager entityManager;
@@ -25,6 +27,7 @@ public class MemberRepository {
         return saveMember;
     }
 
+    @Transactional(readOnly = true)
     public Optional<Member> findByEmail(String email) {
         return Optional.ofNullable(jpaQueryFactory
                 .selectFrom(member)
@@ -32,6 +35,7 @@ public class MemberRepository {
                 .fetchFirst());
     }
 
+    @Transactional(readOnly = true)
     public Slice<Member> findMembersByUsernameMatches(String username, Pageable page){
         int pageSize = page.getPageSize();
         Query nativeQuery = entityManager.createNativeQuery("""
@@ -57,6 +61,7 @@ public class MemberRepository {
         return new SliceImpl<>(foundMembers, page, false);
     }
 
+    @Transactional(readOnly = true)
     public List<Member> findAllByDeletedIsTrue(){
         return jpaQueryFactory
                 .selectFrom(member)
@@ -64,6 +69,7 @@ public class MemberRepository {
                 .fetch();
     }
 
+    @Transactional(readOnly = true)
     public boolean existsByEmail(String email){
         return jpaQueryFactory
                 .select(member.count())
@@ -72,6 +78,7 @@ public class MemberRepository {
                 .fetchFirst() > 0;
     }
 
+    @Transactional(readOnly = true)
     public Optional<Member> findById(Long memberId) {
         return Optional.ofNullable(jpaQueryFactory
                 .selectFrom(member)
@@ -79,10 +86,26 @@ public class MemberRepository {
                 .fetchFirst());
     }
 
+    @Transactional(readOnly = true)
     public Collection<Member> findAllById(Collection<Long> memberIds) {
         return jpaQueryFactory
                 .selectFrom(member)
                 .where(member.id.in(memberIds))
                 .fetch();
+    }
+
+    public void deleteAll() {
+        jpaQueryFactory.selectFrom(member).fetch().forEach(entityManager::remove);
+    }
+
+    public List<Member> saveAll(Collection<Member> members) {
+        members.forEach(entityManager::persist);
+        return members.stream().toList();
+    }
+
+    public List<Member> saveAllAndFlush(Collection<Member> members) {
+        List<Member> savedMembers = saveAll(members);
+        entityManager.flush();
+        return savedMembers;
     }
 }

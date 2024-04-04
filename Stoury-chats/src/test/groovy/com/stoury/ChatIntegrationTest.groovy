@@ -4,25 +4,22 @@ import com.stoury.domain.ChatMessage
 import com.stoury.domain.ChatRoom
 import com.stoury.domain.Member
 import com.stoury.repository.ChatMessageRepository
-
 import com.stoury.repository.ChatRoomRepository
-import com.stoury.repository.MemberRepositoryJPA
+import com.stoury.repository.MemberRepository
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort
 import org.springframework.test.context.ActiveProfiles
-import org.springframework.transaction.annotation.Transactional
 import spock.lang.Specification
 
 import java.time.LocalDateTime
 
-@Transactional
 @SpringBootTest(classes = ChatStouryApplication.class)
 @ActiveProfiles("test")
 class ChatIntegrationTest extends Specification {
     @Autowired
-    MemberRepositoryJPA memberRepository
+    MemberRepository memberRepository
     @Autowired
     ChatRoomRepository chatRoomRepository
     @Autowired
@@ -31,7 +28,16 @@ class ChatIntegrationTest extends Specification {
     def member = new Member("aaa@dddd.com", "qwdqwdqwd", "username", null);
 
     def setup() {
+        chatMessageRepository.deleteAll()
+        chatRoomRepository.deleteAll()
+        memberRepository.deleteAll()
         memberRepository.save(member)
+    }
+
+    def cleanup() {
+        chatMessageRepository.deleteAll()
+        chatRoomRepository.deleteAll()
+        memberRepository.deleteAll()
     }
 
     def "이전 채팅 불러오기"() {

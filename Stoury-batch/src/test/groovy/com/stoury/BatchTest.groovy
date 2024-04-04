@@ -1,15 +1,7 @@
 package com.stoury
 
-import com.stoury.domain.Diary
-import com.stoury.domain.Feed
-import com.stoury.domain.GraphicContent
-import com.stoury.domain.Like
-import com.stoury.domain.Member
-import com.stoury.repository.DiaryRepositoryJPA
-import com.stoury.repository.FeedRepositoryJPA
-import com.stoury.repository.LikeRepository
-import com.stoury.repository.MemberRepositoryJPA
-import com.stoury.repository.RankingRepository
+import com.stoury.domain.*
+import com.stoury.repository.*
 import com.stoury.utils.cachekeys.FeedLikesCountSnapshotKeys
 import com.stoury.utils.cachekeys.PopularSpotsKey
 import org.springframework.batch.core.Job
@@ -24,9 +16,7 @@ import spock.lang.Specification
 
 import java.time.temporal.ChronoUnit
 
-import static com.stoury.utils.cachekeys.HotFeedsKeys.DAILY_HOT_FEEDS
-import static com.stoury.utils.cachekeys.HotFeedsKeys.MONTHLY_HOT_FEEDS
-import static com.stoury.utils.cachekeys.HotFeedsKeys.WEEKLY_HOT_FEEDS
+import static com.stoury.utils.cachekeys.HotFeedsKeys.*
 
 @SpringBootTest(classes = StouryBatchApplication.class)
 @SpringBatchTest
@@ -46,15 +36,15 @@ class BatchTest extends Specification {
     Job updateYearlyDiariesJob
 
     @Autowired
-    MemberRepositoryJPA memberRepository
+    MemberRepository memberRepository
     @Autowired
-    FeedRepositoryJPA feedRepository
+    FeedRepository feedRepository
     @Autowired
     RankingRepository rankingRepository
     @Autowired
     LikeRepository likeRepository
     @Autowired
-    DiaryRepositoryJPA diaryRepository
+    DiaryRepository diaryRepository
 
     @Autowired
     StringRedisTemplate redisTemplate

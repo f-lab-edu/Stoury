@@ -7,6 +7,7 @@ import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -14,6 +15,7 @@ import static com.stoury.domain.QChatMessage.*;
 
 @Repository
 @RequiredArgsConstructor
+@Transactional
 public class ChatMessageRepository {
     private final JPAQueryFactory jpaQueryFactory;
     private final EntityManager entityManager;
@@ -23,6 +25,7 @@ public class ChatMessageRepository {
         return saveChatMessage;
     }
 
+    @Transactional(readOnly = true)
     public List<ChatMessage> findAllByChatRoomAndIdLessThan(ChatRoom chatRoom, Long offsetId, Pageable pageable){
         return jpaQueryFactory
                 .selectFrom(chatMessage)
@@ -37,5 +40,9 @@ public class ChatMessageRepository {
     public List<ChatMessage> saveAll(List<ChatMessage> saveChatMessages) {
         saveChatMessages.forEach(entityManager::persist);
         return saveChatMessages;
+    }
+
+    public void deleteAll() {
+        jpaQueryFactory.selectFrom(chatMessage).fetch().forEach(entityManager::remove);
     }
 }

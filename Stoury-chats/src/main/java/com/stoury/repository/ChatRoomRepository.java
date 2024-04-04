@@ -6,6 +6,7 @@ import com.stoury.domain.Member;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 import java.util.Set;
@@ -15,6 +16,7 @@ import static com.stoury.domain.QMember.member;
 
 @Repository
 @RequiredArgsConstructor
+@Transactional
 public class ChatRoomRepository {
     private final JPAQueryFactory jpaQueryFactory;
     private final EntityManager entityManager;
@@ -38,5 +40,9 @@ public class ChatRoomRepository {
                 .selectFrom(chatRoom)
                 .where(chatRoom.id.eq(id))
                 .fetchFirst());
+    }
+
+    public void deleteAll() {
+        jpaQueryFactory.selectFrom(chatRoom).fetch().forEach(entityManager::remove);
     }
 }
