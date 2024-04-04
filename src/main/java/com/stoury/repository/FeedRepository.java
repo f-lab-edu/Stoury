@@ -1,37 +1,84 @@
 package com.stoury.repository;
 
+import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.stoury.domain.Feed;
 import com.stoury.domain.Member;
+import jakarta.persistence.EntityManager;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
+import org.springframework.stereotype.Repository;
 
-import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
-public interface FeedRepository extends JpaRepository<Feed, Long> {
+import static com.stoury.domain.QFeed.feed;
+import static com.stoury.domain.QTag.tag;
 
-    List<Feed> findAllByMemberAndIdLessThan(Member feedWriter, Long offsetId, Pageable page);
+@Repository
+@RequiredArgsConstructor
+public class FeedRepository {
+    private final JPAQueryFactory jpaQueryFactory;
+    private final EntityManager entityManager;
 
-    List<Feed> findByTags_TagNameAndIdLessThan(String tag, Long offsetId, Pageable page);
+    public Feed save(Feed saveFeed) {
+        entityManager.persist(saveFeed);
+        return saveFeed;
+    }
 
-    @Query(""" 
-            SELECT f.city
-            FROM Feed f 
-            WHERE f.country = 'South Korea' 
-            GROUP BY f.city 
-            HAVING f.city <> 'UNDEFINED'
-            ORDER BY COUNT(f) DESC
-            """)
-    List<String> findTop10CitiesInKorea(Pageable pageable);
+    public void delete(Feed deleteFeed) {
+        jpaQueryFactory
+                .delete(feed)
+                .where(feed.eq(deleteFeed))
+                .execute();
+    }
 
-    @Query("""
-            SELECT f.country 
-            FROM Feed f 
-            WHERE f.country <> 'South Korea' 
-            GROUP BY f.country 
-            HAVING f.country <> 'UNDEFINED'
-            ORDER BY COUNT(f) DESC
-            """)
-    List<String> findTop10CountriesNotKorea(Pageable pageable);
+    public Optional<Feed> findById(Long id) {
+        return Optional.ofNullable(jpaQueryFactory
+                .selectFrom(feed)
+                .where(feed.id.eq(id))
+                .fetchFirst());
+    }
+
+    public List<Feed> findAllByMemberAndIdLessThan(Member feedWriter, Long offsetId, Pageable page) {
+        return jpaQueryFactory
+                .selectFrom(feed)
+                .where(feed.member.eq(feedWriter)
+                        .and(feed.id.lt(offsetId)))
+                .offset(page.getOffset())
+                .limit(page.getPageSize())
+                .fetch();
+    }
+
+    public List<Feed> findByTagNameAndIdLessThan(String tagName, Long offsetId, Pageable page) {
+        return jpaQueryFactory
+                .selectFrom(feed)
+                .leftJoin(feed.tags, tag).on(tag.tagName.eq(tagName))
+                .where(feed.id.lt(offsetId))
+                .offset(page.getOffset())
+                .limit(page.getPageSize())
+                .fetch();
+    }
+
+    public List<String> findTop10CitiesInKorea(Pageable pageable) {
+        return findTop10(feed.country.eq("South Korea"), pageable);
+    }
+
+    public List<String> findTop10CountriesNotKorea(Pageable pageable){
+        return findTop10(feed.country.ne("South Korea"), pageable);
+    }
+
+    private List<String> findTop10(BooleanExpression expression, Pageable pageable) {
+        return jpaQueryFactory
+                .select(feed.country)
+                .select(feed.city)
+                .from(feed)
+                .where(expression)
+                .groupBy(feed.city)
+                .having(feed.city.ne("UNDEFINED"))
+                .orderBy(feed.count().desc())
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize())
+                .fetch();
+    }
 }

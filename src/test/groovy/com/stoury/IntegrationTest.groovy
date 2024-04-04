@@ -37,7 +37,7 @@ class IntegrationTest extends Specification {
     @Autowired
     TagRepositoryJPA tagRepository
     @Autowired
-    FeedRepository feedRepository
+    FeedRepositoryJPA feedRepository
     @Autowired
     MemberRepositoryJPA memberRepository
     @Autowired

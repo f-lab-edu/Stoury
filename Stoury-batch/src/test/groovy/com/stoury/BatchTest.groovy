@@ -6,7 +6,7 @@ import com.stoury.domain.GraphicContent
 import com.stoury.domain.Like
 import com.stoury.domain.Member
 import com.stoury.repository.DiaryRepository
-import com.stoury.repository.FeedRepository
+import com.stoury.repository.FeedRepositoryJPA
 import com.stoury.repository.LikeRepository
 import com.stoury.repository.MemberRepositoryJPA
 import com.stoury.repository.RankingRepository
@@ -48,7 +48,7 @@ class BatchTest extends Specification {
     @Autowired
     MemberRepositoryJPA memberRepository
     @Autowired
-    FeedRepository feedRepository
+    FeedRepositoryJPA feedRepository
     @Autowired
     RankingRepository rankingRepository
     @Autowired
