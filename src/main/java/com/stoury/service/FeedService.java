@@ -132,7 +132,7 @@ public class FeedService {
         Pageable page = PageRequest.of(0, PageSize.FEED_PAGE_SIZE, Sort.by("createdAt").descending());
         Long cursorIdNotNull = Objects.requireNonNull(cursorId);
 
-        List<Feed> feeds = feedRepository.findByTags_TagNameAndIdLessThan(tagName, cursorIdNotNull, page);
+        List<Feed> feeds = feedRepository.findByTagNameAndIdLessThan(tagName, cursorIdNotNull, page);
 
         return feeds.stream()
                 .map(this::toFeedResponse)
