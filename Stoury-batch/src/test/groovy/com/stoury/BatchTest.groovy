@@ -8,7 +8,7 @@ import com.stoury.domain.Member
 import com.stoury.repository.DiaryRepository
 import com.stoury.repository.FeedRepository
 import com.stoury.repository.LikeRepository
-import com.stoury.repository.MemberRepository
+import com.stoury.repository.MemberRepositoryJPA
 import com.stoury.repository.RankingRepository
 import com.stoury.utils.cachekeys.FeedLikesCountSnapshotKeys
 import com.stoury.utils.cachekeys.PopularSpotsKey
@@ -46,7 +46,7 @@ class BatchTest extends Specification {
     Job updateYearlyDiariesJob
 
     @Autowired
-    MemberRepository memberRepository
+    MemberRepositoryJPA memberRepository
     @Autowired
     FeedRepository feedRepository
     @Autowired

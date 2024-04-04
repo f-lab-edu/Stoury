@@ -5,7 +5,7 @@ import com.stoury.domain.ChatRoom
 import com.stoury.domain.Member
 import com.stoury.repository.ChatMessageRepository
 import com.stoury.repository.ChatRoomRepository
-import com.stoury.repository.MemberRepository
+import com.stoury.repository.MemberRepositoryJPA
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.data.domain.PageRequest
@@ -19,7 +19,7 @@ import java.time.LocalDateTime
 @ActiveProfiles("test")
 class ChatIntegrationTest extends Specification {
     @Autowired
-    MemberRepository memberRepository
+    MemberRepositoryJPA memberRepository
     @Autowired
     ChatRoomRepository chatRoomRepository
     @Autowired

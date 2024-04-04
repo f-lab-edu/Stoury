@@ -39,7 +39,7 @@ class IntegrationTest extends Specification {
     @Autowired
     FeedRepository feedRepository
     @Autowired
-    MemberRepository memberRepository
+    MemberRepositoryJPA memberRepository
     @Autowired
     DiaryRepository diaryRepository
     @Autowired
