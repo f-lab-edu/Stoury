@@ -30,6 +30,7 @@ public class DiaryRepository {
                 .selectFrom(diary).leftJoin(diary.thumbnail, graphicContent)
                 .where(diary.member.eq(member)
                         .and(diary.id.lt(offsetId)))
+                .orderBy(diary.createdAt.desc())
                 .offset(page.getOffset())
                 .limit(page.getPageSize())
                 .fetch();

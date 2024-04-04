@@ -45,6 +45,7 @@ public class FeedRepository {
                 .selectFrom(feed)
                 .where(feed.member.eq(feedWriter)
                         .and(feed.id.lt(offsetId)))
+                .orderBy(feed.createdAt.desc())
                 .offset(page.getOffset())
                 .limit(page.getPageSize())
                 .fetch();
@@ -55,6 +56,7 @@ public class FeedRepository {
                 .selectFrom(feed)
                 .leftJoin(feed.tags, tag).on(tag.tagName.eq(tagName))
                 .where(feed.id.lt(offsetId))
+                .orderBy(feed.createdAt.desc())
                 .offset(page.getOffset())
                 .limit(page.getPageSize())
                 .fetch();
