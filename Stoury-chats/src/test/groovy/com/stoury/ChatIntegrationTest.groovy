@@ -11,10 +11,12 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort
 import org.springframework.test.context.ActiveProfiles
+import org.springframework.transaction.annotation.Transactional
 import spock.lang.Specification
 
 import java.time.LocalDateTime
 
+@Transactional
 @SpringBootTest(classes = ChatStouryApplication.class)
 @ActiveProfiles("test")
 class ChatIntegrationTest extends Specification {
