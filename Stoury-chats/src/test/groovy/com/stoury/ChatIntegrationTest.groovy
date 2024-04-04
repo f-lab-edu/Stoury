@@ -4,6 +4,7 @@ import com.stoury.domain.ChatMessage
 import com.stoury.domain.ChatRoom
 import com.stoury.domain.Member
 import com.stoury.repository.ChatMessageRepository
+
 import com.stoury.repository.ChatRoomRepository
 import com.stoury.repository.MemberRepositoryJPA
 import org.springframework.beans.factory.annotation.Autowired
@@ -30,16 +31,7 @@ class ChatIntegrationTest extends Specification {
     def member = new Member("aaa@dddd.com", "qwdqwdqwd", "username", null);
 
     def setup() {
-        chatMessageRepository.deleteAll()
-        chatRoomRepository.deleteAll()
-        memberRepository.deleteAll()
         memberRepository.save(member)
-    }
-
-    def cleanup() {
-        chatMessageRepository.deleteAll()
-        chatRoomRepository.deleteAll()
-        memberRepository.deleteAll()
     }
 
     def "이전 채팅 불러오기"() {

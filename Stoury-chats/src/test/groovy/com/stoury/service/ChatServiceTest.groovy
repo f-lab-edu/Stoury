@@ -9,6 +9,7 @@ import com.stoury.event.ChatMessageSaveEvent
 import com.stoury.exception.authentication.NotAuthorizedException
 import com.stoury.exception.chat.ChatRoomCreateException
 import com.stoury.repository.ChatMessageRepository
+
 import com.stoury.repository.ChatRoomRepository
 import com.stoury.repository.MemberRepository
 import com.stoury.service.kafka.KafkaProducer

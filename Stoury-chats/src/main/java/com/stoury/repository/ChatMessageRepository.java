@@ -34,10 +34,6 @@ public class ChatMessageRepository {
                 .fetch();
     }
 
-    public void deleteAll() {
-        jpaQueryFactory.delete(chatMessage).execute();
-    }
-
     public List<ChatMessage> saveAll(List<ChatMessage> saveChatMessages) {
         saveChatMessages.forEach(entityManager::persist);
         return saveChatMessages;
