@@ -42,6 +42,7 @@ out/
 ### asciidoc ###
 asciidoc
 *.adoc
+**/resources/static/docs/*.html
 
 ### monitoring ###
 infra/**/volume

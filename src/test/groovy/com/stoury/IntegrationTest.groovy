@@ -6,7 +6,6 @@ import com.stoury.dto.feed.FeedCreateRequest
 import com.stoury.dto.feed.SimpleFeedResponse
 import com.stoury.dto.member.AuthenticatedMember
 import com.stoury.dto.member.MemberResponse
-import com.stoury.dto.member.OnlineMember
 import com.stoury.repository.*
 import com.stoury.service.FeedService
 import com.stoury.service.MemberService
@@ -36,7 +35,7 @@ import static com.stoury.utils.cachekeys.HotFeedsKeys.getHotFeedsKey
 @ActiveProfiles("test")
 class IntegrationTest extends Specification {
     @Autowired
-    TagRepository tagRepository
+    TagRepositoryJPA tagRepository
     @Autowired
     FeedRepository feedRepository
     @Autowired

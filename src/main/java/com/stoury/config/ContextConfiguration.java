@@ -1,6 +1,9 @@
 package com.stoury.config;
 
 import com.google.maps.GeoApiContext;
+import com.querydsl.jpa.impl.JPAQueryFactory;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -13,6 +16,13 @@ import java.util.concurrent.TimeUnit;
 public class ContextConfiguration {
     @Value("${google.geocoding.api-key}")
     private String apiKey;
+    @PersistenceContext
+    private EntityManager entityManager;
+
+    @Bean
+    public JPAQueryFactory queryFactory() {
+        return new JPAQueryFactory(entityManager);
+    }
 
     @Bean
     public PasswordEncoder passwordEncoder() {
