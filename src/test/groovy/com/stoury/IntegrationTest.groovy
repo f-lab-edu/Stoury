@@ -41,7 +41,7 @@ class IntegrationTest extends Specification {
     @Autowired
     MemberRepositoryJPA memberRepository
     @Autowired
-    DiaryRepository diaryRepository
+    DiaryRepositoryJPA diaryRepository
     @Autowired
     LikeRepository likeRepository
     @Autowired

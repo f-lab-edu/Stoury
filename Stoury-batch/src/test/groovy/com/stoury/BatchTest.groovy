@@ -5,7 +5,7 @@ import com.stoury.domain.Feed
 import com.stoury.domain.GraphicContent
 import com.stoury.domain.Like
 import com.stoury.domain.Member
-import com.stoury.repository.DiaryRepository
+import com.stoury.repository.DiaryRepositoryJPA
 import com.stoury.repository.FeedRepositoryJPA
 import com.stoury.repository.LikeRepository
 import com.stoury.repository.MemberRepositoryJPA
@@ -54,7 +54,7 @@ class BatchTest extends Specification {
     @Autowired
     LikeRepository likeRepository
     @Autowired
-    DiaryRepository diaryRepository
+    DiaryRepositoryJPA diaryRepository
 
     @Autowired
     StringRedisTemplate redisTemplate
