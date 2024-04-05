@@ -30,7 +30,8 @@ public class DiaryRepository {
     @Transactional(readOnly = true)
     public List<Diary> findByMemberAndIdLessThan(Member member, Long offsetId, Pageable page) {
         return jpaQueryFactory
-                .selectFrom(diary).leftJoin(diary.thumbnail, graphicContent)
+                .selectFrom(diary)
+                .leftJoin(diary.thumbnail, graphicContent)
                 .where(diary.member.eq(member)
                         .and(diary.id.lt(offsetId)))
                 .orderBy(diary.createdAt.desc())

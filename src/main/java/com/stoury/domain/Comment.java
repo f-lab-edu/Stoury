@@ -26,7 +26,7 @@ public class Comment {
     @ManyToOne(optional = false)
     private Member member;
 
-    @ManyToOne(optional = false)
+    @ManyToOne(optional = false, fetch = FetchType.LAZY)
     private Feed feed;
 
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "parentComment")
@@ -35,7 +35,7 @@ public class Comment {
     @Column(name = "HAS_CHILD_COMMENTS", nullable = false)
     private boolean hasChildComments;
 
-    @ManyToOne(optional = true)
+    @ManyToOne(optional = true, fetch = FetchType.LAZY)
     @JoinColumn(name = "PARENT_COMMENT_ID")
     private Comment parentComment;
 

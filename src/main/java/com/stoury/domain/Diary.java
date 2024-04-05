@@ -21,7 +21,7 @@ public class Diary {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(optional = false)
+    @ManyToOne(optional = false, fetch = FetchType.LAZY)
     private Member member;
 
     @JoinColumn(name = "DIARY_ID", referencedColumnName = "ID")
