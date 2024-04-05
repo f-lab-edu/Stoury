@@ -37,7 +37,7 @@ public class ChatMessage {
     }
 
     public ChatMessage(Member sender, ChatRoom chatRoom, String textContent, LocalDateTime createdAt) {
-        this(sender, chatRoom, textContent);정
+        this(sender, chatRoom, textContent);
         this.createdAt = createdAt;
     }
 }
