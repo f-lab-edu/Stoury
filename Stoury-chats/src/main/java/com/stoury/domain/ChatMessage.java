@@ -27,13 +27,17 @@ public class ChatMessage {
     @Column(name = "TEXT_CONTENT", columnDefinition = "text", nullable = false)
     private String textContent;
 
-    @Column(name = "CREATED_AT", nullable = false, columnDefinition = "DATETIME(6)")
+    @Column(name = "CREATED_AT", nullable = false)
     private LocalDateTime createdAt;
 
-    public ChatMessage(Member sender, ChatRoom chatRoom, String textContent, LocalDateTime createdAt) {
+    public ChatMessage(Member sender, ChatRoom chatRoom, String textContent) {
         this.sender = sender;
         this.chatRoom = chatRoom;
         this.textContent = textContent;
+    }
+
+    public ChatMessage(Member sender, ChatRoom chatRoom, String textContent, LocalDateTime createdAt) {
+        this(sender, chatRoom, textContent);정
         this.createdAt = createdAt;
     }
 }

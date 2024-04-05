@@ -4,8 +4,6 @@ import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -13,7 +11,6 @@ import java.util.List;
 
 @Entity
 @Getter
-@EntityListeners(AuditingEntityListener.class)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "DIARY")
 public class Diary {
@@ -35,7 +32,6 @@ public class Diary {
     @OneToOne(optional = true)
     private GraphicContent thumbnail;
 
-    @CreatedDate
     @Column(name = "CREATED_AT", nullable = false)
     private LocalDateTime createdAt;
 

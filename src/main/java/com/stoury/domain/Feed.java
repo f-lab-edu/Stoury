@@ -8,8 +8,6 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.BatchSize;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -19,7 +17,6 @@ import java.util.Set;
 
 @Entity
 @Getter
-@EntityListeners(AuditingEntityListener.class)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "FEED")
 public class Feed {
@@ -31,7 +28,6 @@ public class Feed {
     private Member member;
 
     @Column(name = "CREATED_AT")
-    @CreatedDate
     private LocalDateTime createdAt;
 
     @BatchSize(size = PageSize.FEED_PAGE_SIZE)

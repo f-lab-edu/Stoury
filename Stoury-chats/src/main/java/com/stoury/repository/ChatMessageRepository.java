@@ -31,7 +31,7 @@ public class ChatMessageRepository {
                 .selectFrom(chatMessage)
                 .where(chatMessage.chatRoom.eq(chatRoom)
                         .and(chatMessage.id.lt(offsetId)))
-                .orderBy(chatMessage.createdAt.desc())
+                .orderBy(chatMessage.id.desc())
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .fetch();

@@ -33,9 +33,8 @@ public class CommentRepository {
                 .leftJoin(comment.member, member).fetchJoin()
                 .leftJoin(comment.feed, QFeed.feed).fetchJoin()
                 .where(comment.id.lt(offsetId)
-                        .and(QFeed.feed.eq(feed))
-                        .and(comment.parentComment.isNull()))
-                .orderBy(comment.createdAt.desc())
+                        .and(QFeed.feed.eq(feed)))
+                .orderBy(comment.id.desc())
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .fetch();
@@ -51,7 +50,7 @@ public class CommentRepository {
                 .leftJoin(comment.parentComment)
                 .where(comment.id.lt(offsetId)
                         .and(comment.parentComment.eq(parentComment)))
-                .orderBy(comment.createdAt.desc())
+                .orderBy(comment.id.desc())
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .fetch();
@@ -66,5 +65,9 @@ public class CommentRepository {
                 .leftJoin(comment.parentComment).fetchJoin()
                 .where(comment.id.eq(id))
                 .fetchFirst());
+    }
+
+    public void deleteAll() {
+        jpaQueryFactory.selectFrom(comment).fetch().forEach(entityManager::remove);
     }
 }
