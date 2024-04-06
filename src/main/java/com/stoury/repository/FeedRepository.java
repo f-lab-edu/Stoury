@@ -27,6 +27,7 @@ public class FeedRepository {
 
     public Feed save(Feed saveFeed) {
         entityManager.persist(saveFeed);
+        entityManager.refresh(saveFeed);
         return saveFeed;
     }
 

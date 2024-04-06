@@ -22,6 +22,7 @@ public class ChatMessageRepository {
 
     public ChatMessage save(ChatMessage saveChatMessage) {
         entityManager.persist(saveChatMessage);
+        entityManager.refresh(saveChatMessage);
         return saveChatMessage;
     }
 

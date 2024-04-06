@@ -24,6 +24,7 @@ public class DiaryRepository {
 
     public Diary save(Diary saveDiary) {
         entityManager.persist(saveDiary);
+        entityManager.refresh(saveDiary);
         return saveDiary;
     }
 

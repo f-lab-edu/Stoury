@@ -23,6 +23,7 @@ public class CommentRepository {
 
     public Comment save(Comment saveComment) {
         entityManager.persist(saveComment);
+        entityManager.refresh(saveComment);
         return saveComment;
     }
 
@@ -30,8 +31,7 @@ public class CommentRepository {
     public List<Comment> findAllByFeedAndIdLessThanAndParentCommentIsNull(Feed feed, Long offsetId, Pageable pageable) {
         return jpaQueryFactory
                 .selectFrom(comment)
-                .leftJoin(comment.member, member).fetchJoin()
-                .leftJoin(comment.feed, QFeed.feed).fetchJoin()
+                .innerJoin(comment.member, member).fetchJoin()
                 .where(comment.id.lt(offsetId)
                         .and(comment.feed.eq(feed)))
                 .orderBy(comment.id.desc())
@@ -45,8 +45,7 @@ public class CommentRepository {
         return jpaQueryFactory
                 .select(comment)
                 .from(comment)
-                .leftJoin(comment.member, member).fetchJoin()
-                .leftJoin(comment.parentComment)
+                .innerJoin(comment.member, member).fetchJoin()
                 .where(comment.id.lt(offsetId)
                         .and(comment.parentComment.eq(parentComment)))
                 .orderBy(comment.id.desc())

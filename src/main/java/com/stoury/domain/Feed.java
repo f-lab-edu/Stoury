@@ -8,6 +8,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.BatchSize;
+import org.hibernate.annotations.DynamicInsert;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -15,6 +16,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+@DynamicInsert
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -27,7 +29,7 @@ public class Feed {
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
     private Member member;
 
-    @Column(name = "CREATED_AT")
+    @Column(name = "CREATED_AT", nullable = false)
     private LocalDateTime createdAt;
 
     @BatchSize(size = PageSize.FEED_PAGE_SIZE)
