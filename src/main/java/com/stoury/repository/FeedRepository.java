@@ -12,6 +12,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -49,18 +50,16 @@ public class FeedRepository {
 
     @Transactional(readOnly = true)
     public List<Feed> findAllByMemberAndIdLessThan(Member feedWriter, Long offsetId, Pageable page) {
-        return jpaQueryFactory
-                .selectFrom(feed)
-                .where(feed.member.eq(feedWriter)
-                        .and(feed.id.lt(offsetId)))
-                .orderBy(feed.id.desc())
-                .offset(page.getOffset())
-                .limit(page.getPageSize())
-                .fetch();
+        List<Long> ids = findAllFeedIdByMemberAndIdLessThan(feedWriter, offsetId, page);
+
+        if (ids.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        return findAllIn(ids);
     }
 
-    @Transactional(readOnly = true)
-    public List<Long> findAllFeedIdByMemberAndIdLessThan(Member feedWriter, Long offsetId, Pageable page) {
+    private List<Long> findAllFeedIdByMemberAndIdLessThan(Member feedWriter, Long offsetId, Pageable page) {
         return jpaQueryFactory
                 .select(feed.id)
                 .from(feed)
@@ -72,8 +71,7 @@ public class FeedRepository {
                 .fetch();
     }
 
-    @Transactional(readOnly = true)
-    public List<Feed> findAllIn(List<Long> ids) {
+    private List<Feed> findAllIn(List<Long> ids) {
         return jpaQueryFactory
                 .selectFrom(feed)
                 .where(feed.id.in(ids))

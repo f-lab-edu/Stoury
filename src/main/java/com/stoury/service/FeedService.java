@@ -120,6 +120,7 @@ public class FeedService {
         Long cursorIdNotNull = Objects.requireNonNull(cursorId);
 
         Pageable page = PageRequest.of(0, PageSize.FEED_PAGE_SIZE, Sort.by("createdAt").descending());
+
         List<Feed> feeds = feedRepository.findAllByMemberAndIdLessThan(feedWriter, cursorIdNotNull, page);
 
         return feeds.stream()

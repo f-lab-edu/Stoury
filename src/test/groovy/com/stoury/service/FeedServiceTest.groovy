@@ -25,7 +25,7 @@ class FeedServiceTest extends Specification {
     def likeRepository = Mock(LikeRepository)
     def eventPublisher = Mock(ApplicationEventPublisher)
     def locationService = Mock(LocationService)
-    def feedService = new FeedService(feedRepository, memberRepository, likeRepository, tagService,  locationService, eventPublisher)
+    def feedService = new FeedService(feedRepository, memberRepository, likeRepository, tagService, locationService, eventPublisher)
 
     def writer = Mock(Member)
     def feedCreateRequest = FeedCreateRequest.builder()
@@ -114,19 +114,39 @@ class FeedServiceTest extends Specification {
         feedRepository.findById(_) >> Optional.of(feed)
         feed.notOwnedBy(1) >> true
         when:
-        feedService.deleteFeedIfOwner(1,1)
+        feedService.deleteFeedIfOwner(1, 1)
         then:
         thrown(NotAuthorizedException)
     }
 
     def "피드 삭제 성공"() {
         given:
-        def writer = new Member(id:1)
-        def feed = new Feed(id:1, member: writer)
+        def writer = new Member(id: 1)
+        def feed = new Feed(id: 1, member: writer)
         feedRepository.findById(_) >> Optional.of(feed)
         when:
-        feedService.deleteFeedIfOwner(feed.id,writer.id)
+        feedService.deleteFeedIfOwner(feed.id, writer.id)
         then:
         1 * feedRepository.delete(_)
+    }
+
+    def "사용자의 피드 조회 성공"() {
+        given:
+        def feeds = [
+                new Feed(id: 1L, member: writer, graphicContents: [], textContent: "", latitude: 0.0, longitude: 0.0, tags: [] as Set, city: "", country: ""),
+                new Feed(id: 2L, member: writer, graphicContents: [], textContent: "", latitude: 0.0, longitude: 0.0, tags: [] as Set, city: "", country: ""),
+                new Feed(id: 3L, member: writer, graphicContents: [], textContent: "", latitude: 0.0, longitude: 0.0, tags: [] as Set, city: "", country: ""),
+                new Feed(id: 4L, member: writer, graphicContents: [], textContent: "", latitude: 0.0, longitude: 0.0, tags: [] as Set, city: "", country: ""),
+                new Feed(id: 5L, member: writer, graphicContents: [], textContent: "", latitude: 0.0, longitude: 0.0, tags: [] as Set, city: "", country: ""),
+                new Feed(id: 6L, member: writer, graphicContents: [], textContent: "", latitude: 0.0, longitude: 0.0, tags: [] as Set, city: "", country: ""),
+                new Feed(id: 7L, member: writer, graphicContents: [], textContent: "", latitude: 0.0, longitude: 0.0, tags: [] as Set, city: "", country: ""),
+                new Feed(id: 8L, member: writer, graphicContents: [], textContent: "", latitude: 0.0, longitude: 0.0, tags: [] as Set, city: "", country: ""),
+                new Feed(id: 9L, member: writer, graphicContents: [], textContent: "", latitude: 0.0, longitude: 0.0, tags: [] as Set, city: "", country: ""),
+                new Feed(id: 10L, member: writer, graphicContents: [], textContent: "", latitude: 0.0, longitude: 0.0, tags: [] as Set, city: "", country: ""),
+        ]
+        when:
+        feedService.getFeedsOfMemberId(1L, 20L)
+        then:
+        1 * feedRepository.findAllByMemberAndIdLessThan(_,_,_) >> feeds
     }
 }
