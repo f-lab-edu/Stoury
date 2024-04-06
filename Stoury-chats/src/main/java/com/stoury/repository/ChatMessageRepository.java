@@ -11,7 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
-import static com.stoury.domain.QChatMessage.*;
+import static com.stoury.domain.QChatMessage.chatMessage;
 
 @Repository
 @RequiredArgsConstructor

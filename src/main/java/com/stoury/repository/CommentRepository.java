@@ -1,7 +1,9 @@
 package com.stoury.repository;
 
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import com.stoury.domain.*;
+import com.stoury.domain.Comment;
+import com.stoury.domain.Feed;
+import com.stoury.domain.QFeed;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
