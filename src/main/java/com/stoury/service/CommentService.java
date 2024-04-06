@@ -1,5 +1,6 @@
 package com.stoury.service;
 
+import com.stoury.domain.ChildComment;
 import com.stoury.domain.Comment;
 import com.stoury.domain.Feed;
 import com.stoury.domain.Member;
@@ -10,6 +11,7 @@ import com.stoury.exception.comment.CommentCreateException;
 import com.stoury.exception.comment.CommentSearchException;
 import com.stoury.exception.feed.FeedSearchException;
 import com.stoury.exception.member.MemberSearchException;
+import com.stoury.repository.ChildCommentRepository;
 import com.stoury.repository.CommentRepository;
 import com.stoury.repository.FeedRepository;
 import com.stoury.repository.MemberRepository;
@@ -28,6 +30,7 @@ import java.util.Objects;
 @RequiredArgsConstructor
 public class CommentService {
     private final CommentRepository commentRepository;
+    private final ChildCommentRepository childCommentRepository;
     private final MemberRepository memberRepository;
     private final FeedRepository feedRepository;
 
@@ -50,14 +53,13 @@ public class CommentService {
                 .orElseThrow(MemberSearchException::new);
         Comment parentComment = commentRepository.findById(Objects.requireNonNull(parentCommentId))
                 .orElseThrow(CommentSearchException::new);
-        if (parentComment.hasParent()) {
-            throw new CommentCreateException("Nested comments are allowed in a level.");
-        }
 
-        Comment comment = new Comment(member, parentComment,
+        ChildComment childComment = new ChildComment(member, parentComment,
                 Objects.requireNonNull(commentText, "Comment text can not be empty."));
 
-        return ChildCommentResponse.from(commentRepository.save(comment));
+        ChildComment saveChildComment = childCommentRepository.save(childComment);
+
+        return ChildCommentResponse.from(saveChildComment);
     }
 
     @Transactional(readOnly = true)
@@ -68,7 +70,7 @@ public class CommentService {
 
         Pageable pageable = PageRequest.of(0, PageSize.COMMENT_PAGE_SIZE, Sort.by("createdAt").descending());
 
-        return CommentResponse.from(commentRepository.findAllByFeedAndIdLessThanAndParentCommentIsNull(feed, cursorIdNotNull, pageable));
+        return CommentResponse.from(commentRepository.findAllByFeedAndIdLessThan(feed, cursorIdNotNull, pageable));
     }
 
     @Transactional(readOnly = true)
@@ -77,14 +79,10 @@ public class CommentService {
                 .orElseThrow(CommentSearchException::new);
         Long cursorIdNotNull = Objects.requireNonNull(cursorId);
 
-        if (parentComment.hasParent()) {
-            throw new CommentSearchException("Nested comments are allowed in a level.");
-        }
-
         Pageable pageable = PageRequest.of(0, PageSize.COMMENT_PAGE_SIZE, Sort.by("createdAt").descending());
+        List<ChildComment> childComments = childCommentRepository.findAllByParentComment(parentComment, cursorIdNotNull, pageable);
 
-        return ChildCommentResponse.from(commentRepository.findAllByParentCommentAndIdLessThan(parentComment,
-                cursorIdNotNull, pageable));
+        return ChildCommentResponse.from(childComments);
     }
 
     protected CommentResponse deleteComment(Long commentId) {

@@ -4,19 +4,16 @@ import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 import org.hibernate.annotations.DynamicInsert;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
 @DynamicInsert
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Table(name = "COMMENT")
-public class Comment {
+@Table(name = "CHILD_COMMENT")
+public class ChildComment {
     public static final String DELETED_CONTENT_TEXT = "This comment was deleted";
 
     @Id
@@ -27,14 +24,8 @@ public class Comment {
     private Member member;
 
     @ManyToOne(optional = true, fetch = FetchType.LAZY)
-    private Feed feed;
-
-    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "parentComment")
-    private List<ChildComment> childComments = new ArrayList<>();
-
-    @Setter(value = AccessLevel.PACKAGE)
-    @Column(name = "HAS_CHILD_COMMENTS", nullable = false)
-    private boolean hasChildComments;
+    @JoinColumn(name = "PARENT_COMMENT_ID")
+    private Comment parentComment;
 
     @Column(name = "TEXT_CONTENT", length = 200, nullable = false)
     private String textContent;
@@ -45,19 +36,11 @@ public class Comment {
     @Column(name = "DELETED", nullable = false)
     private boolean deleted;
 
-    public Comment(Member member, Feed feed, String textContent) {
+    public ChildComment(Member member, Comment parentComment, String textContent) {
         this.member = member;
-        this.feed = feed;
+        this.parentComment = parentComment;
         this.textContent = textContent;
-    }
-
-    public Comment(Member member, String textContent) {
-        this.member = member;
-        this.textContent = textContent;
-    }
-
-    public boolean hasChildComments() {
-        return hasChildComments;
+        this.parentComment.setHasChildComments(true);
     }
 
     public void delete() {

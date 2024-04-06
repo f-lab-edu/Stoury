@@ -1,7 +1,8 @@
 package com.stoury.repository;
 
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import com.stoury.domain.*;
+import com.stoury.domain.ChildComment;
+import com.stoury.domain.Comment;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
@@ -11,47 +12,45 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Optional;
 
-import static com.stoury.domain.QComment.comment;
+import static com.stoury.domain.QChildComment.childComment;
 import static com.stoury.domain.QMember.member;
 
 @Transactional
 @Repository
 @RequiredArgsConstructor
-public class CommentRepository {
+public class ChildCommentRepository {
     private final JPAQueryFactory jpaQueryFactory;
     private final EntityManager entityManager;
 
-    public Comment save(Comment saveComment) {
+
+    public ChildComment save(ChildComment saveComment) {
         entityManager.persist(saveComment);
         entityManager.refresh(saveComment);
         return saveComment;
     }
 
+
     @Transactional(readOnly = true)
-    public List<Comment> findAllByFeedAndIdLessThan(Feed feed, Long offsetId, Pageable pageable) {
+    public List<ChildComment> findAllByParentComment(Comment parentComment, Long offsetId, Pageable pageable) {
         return jpaQueryFactory
-                .selectFrom(comment)
-                .innerJoin(comment.member, member).fetchJoin()
-                .where(comment.id.lt(offsetId)
-                        .and(comment.feed.eq(feed)))
-                .orderBy(comment.id.desc())
+                .selectFrom(childComment)
+                .innerJoin(childComment.member, member).fetchJoin()
+                .where(childComment.id.lt(offsetId)
+                        .and(childComment.parentComment.eq(parentComment)))
+                .orderBy(childComment.id.desc())
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .fetch();
     }
 
-
-    @Transactional(readOnly = true)
-    public Optional<Comment> findById(Long id) {
-        return Optional.ofNullable(jpaQueryFactory
-                .selectFrom(comment)
-                .leftJoin(comment.member, member).fetchJoin()
-                .leftJoin(comment.feed, QFeed.feed).fetchJoin()
-                .where(comment.id.eq(id))
-                .fetchFirst());
+    public void deleteAll() {
+        jpaQueryFactory.selectFrom(childComment).fetch().forEach(entityManager::remove);
     }
 
-    public void deleteAll() {
-        jpaQueryFactory.selectFrom(comment).fetch().forEach(entityManager::remove);
+    public Optional<ChildComment> findById(Long id) {
+        return Optional.ofNullable(jpaQueryFactory
+                .selectFrom(childComment)
+                .where(childComment.id.eq(id))
+                .fetchFirst());
     }
 }
