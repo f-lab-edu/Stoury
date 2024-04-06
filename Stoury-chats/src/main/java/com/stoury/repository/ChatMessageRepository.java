@@ -15,11 +15,11 @@ import static com.stoury.domain.QChatMessage.*;
 
 @Repository
 @RequiredArgsConstructor
-@Transactional
 public class ChatMessageRepository {
     private final JPAQueryFactory jpaQueryFactory;
     private final EntityManager entityManager;
 
+    @Transactional
     public ChatMessage save(ChatMessage saveChatMessage) {
         entityManager.persist(saveChatMessage);
         entityManager.refresh(saveChatMessage);
@@ -38,11 +38,13 @@ public class ChatMessageRepository {
                 .fetch();
     }
 
+    @Transactional
     public List<ChatMessage> saveAll(List<ChatMessage> saveChatMessages) {
         saveChatMessages.forEach(entityManager::persist);
         return saveChatMessages;
     }
 
+    @Transactional
     public void deleteAll() {
         jpaQueryFactory.selectFrom(chatMessage).fetch().forEach(entityManager::remove);
     }

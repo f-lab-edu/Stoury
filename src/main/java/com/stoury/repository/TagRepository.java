@@ -13,22 +13,24 @@ import static com.stoury.domain.QTag.tag;
 
 @Repository
 @RequiredArgsConstructor
-@Transactional
 public class TagRepository {
     private final JPAQueryFactory jpaQueryFactory;
     private final EntityManager entityManager;
 
+    @Transactional
     public Tag save(Tag saveTag) {
         entityManager.persist(saveTag);
         return saveTag;
     }
 
+    @Transactional
     public Tag saveAndFlush(Tag saveTag) {
         entityManager.persist(saveTag);
         entityManager.flush();
         return saveTag;
     }
 
+    @Transactional
     public void deleteAll() {
         jpaQueryFactory.selectFrom(tag).fetch().forEach(entityManager::remove);
     }

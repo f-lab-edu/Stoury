@@ -16,16 +16,17 @@ import static com.stoury.domain.QMember.member;
 
 @Repository
 @RequiredArgsConstructor
-@Transactional
 public class ChatRoomRepository {
     private final JPAQueryFactory jpaQueryFactory;
     private final EntityManager entityManager;
 
+    @Transactional
     public ChatRoom save(ChatRoom saveChatRoom) {
         entityManager.persist(saveChatRoom);
         return saveChatRoom;
     }
 
+    @Transactional(readOnly = true)
     public boolean existsBy(Set<Member> members) {
         return jpaQueryFactory
                 .selectFrom(chatRoom).leftJoin(chatRoom.members, member)
@@ -35,6 +36,7 @@ public class ChatRoomRepository {
                 .fetchFirst() != null;
     }
 
+    @Transactional(readOnly = true)
     public Optional<ChatRoom> findById(Long id) {
         return Optional.ofNullable(jpaQueryFactory
                 .selectFrom(chatRoom)
@@ -42,6 +44,7 @@ public class ChatRoomRepository {
                 .fetchFirst());
     }
 
+    @Transactional
     public void deleteAll() {
         jpaQueryFactory.selectFrom(chatRoom).fetch().forEach(entityManager::remove);
     }

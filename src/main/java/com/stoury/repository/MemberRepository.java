@@ -17,11 +17,11 @@ import static com.stoury.domain.QMember.member;
 
 @Repository
 @RequiredArgsConstructor
-@Transactional
 public class MemberRepository {
     private final JPAQueryFactory jpaQueryFactory;
     private final EntityManager entityManager;
 
+    @Transactional
     public Member save(Member saveMember) {
         entityManager.persist(saveMember);
         return saveMember;
@@ -52,7 +52,8 @@ public class MemberRepository {
         return getMemberSlice(members, page);
     }
 
-    private Slice<Member> getMemberSlice(List<Member> foundMembers, Pageable page) {
+    @Transactional(readOnly = true)
+    public Slice<Member> getMemberSlice(List<Member> foundMembers, Pageable page) {
         int pageSize = page.getPageSize();
         if (foundMembers.size() == pageSize + 1) {
             List<Member> content = foundMembers.subList(0, pageSize);
@@ -94,15 +95,18 @@ public class MemberRepository {
                 .fetch();
     }
 
+    @Transactional
     public void deleteAll() {
         jpaQueryFactory.selectFrom(member).fetch().forEach(entityManager::remove);
     }
 
+    @Transactional
     public List<Member> saveAll(Collection<Member> members) {
         members.forEach(entityManager::persist);
         return members.stream().toList();
     }
 
+    @Transactional
     public List<Member> saveAllAndFlush(Collection<Member> members) {
         List<Member> savedMembers = saveAll(members);
         entityManager.flush();

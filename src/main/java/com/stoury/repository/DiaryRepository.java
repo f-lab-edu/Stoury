@@ -17,11 +17,11 @@ import static com.stoury.domain.QGraphicContent.graphicContent;
 
 @Repository
 @RequiredArgsConstructor
-@Transactional
 public class DiaryRepository {
     private final JPAQueryFactory jpaQueryFactory;
     private final EntityManager entityManager;
 
+    @Transactional
     public Diary save(Diary saveDiary) {
         entityManager.persist(saveDiary);
         entityManager.refresh(saveDiary);
@@ -49,15 +49,18 @@ public class DiaryRepository {
                 .fetchFirst());
     }
 
+    @Transactional
     public void delete(Diary deleteDiary) {
         jpaQueryFactory.delete(diary)
                 .where(diary.eq(deleteDiary));
     }
 
+    @Transactional
     public void deleteAll() {
         jpaQueryFactory.selectFrom(diary).fetch().forEach(entityManager::remove);
     }
 
+    @Transactional
     public Diary saveAndFlush(Diary diary) {
         Diary savedDiary = save(diary);
         entityManager.flush();

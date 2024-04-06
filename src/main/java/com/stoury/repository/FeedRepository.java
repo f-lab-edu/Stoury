@@ -20,17 +20,18 @@ import static com.stoury.domain.QTag.tag;
 
 @Repository
 @RequiredArgsConstructor
-@Transactional
 public class FeedRepository {
     private final JPAQueryFactory jpaQueryFactory;
     private final EntityManager entityManager;
 
+    @Transactional
     public Feed save(Feed saveFeed) {
         entityManager.persist(saveFeed);
         entityManager.refresh(saveFeed);
         return saveFeed;
     }
 
+    @Transactional
     public void delete(Feed deleteFeed) {
         jpaQueryFactory
                 .delete(feed)
@@ -59,6 +60,27 @@ public class FeedRepository {
     }
 
     @Transactional(readOnly = true)
+    public List<Long> findAllFeedIdByMemberAndIdLessThan(Member feedWriter, Long offsetId, Pageable page) {
+        return jpaQueryFactory
+                .select(feed.id)
+                .from(feed)
+                .where(feed.member.eq(feedWriter)
+                        .and(feed.id.lt(offsetId)))
+                .orderBy(feed.id.desc())
+                .offset(page.getOffset())
+                .limit(page.getPageSize())
+                .fetch();
+    }
+
+    @Transactional(readOnly = true)
+    public List<Feed> findAllIn(List<Long> ids) {
+        return jpaQueryFactory
+                .selectFrom(feed)
+                .where(feed.id.in(ids))
+                .fetch();
+    }
+
+    @Transactional(readOnly = true)
     public List<Feed> findByTagNameAndIdLessThan(String tagName, Long offsetId, Pageable page) {
         return jpaQueryFactory
                 .selectFrom(feed)
@@ -76,11 +98,12 @@ public class FeedRepository {
     }
 
     @Transactional(readOnly = true)
-    public List<String> findTop10CountriesNotKorea(Pageable pageable){
+    public List<String> findTop10CountriesNotKorea(Pageable pageable) {
         return findTop10(feed.country, feed.country.ne("South Korea"), pageable);
     }
 
-    private List<String> findTop10(StringPath column, BooleanExpression expression, Pageable pageable) {
+    @Transactional(readOnly = true)
+    public List<String> findTop10(StringPath column, BooleanExpression expression, Pageable pageable) {
         return jpaQueryFactory
                 .select(column)
                 .from(feed)
@@ -93,10 +116,12 @@ public class FeedRepository {
                 .fetch();
     }
 
+    @Transactional
     public void deleteAll() {
         jpaQueryFactory.selectFrom(feed).fetch().forEach(entityManager::remove);
     }
 
+    @Transactional
     public Feed saveAndFlush(Feed saveFeed) {
         entityManager.persist(saveFeed);
         return saveFeed;
@@ -110,6 +135,7 @@ public class FeedRepository {
                 .fetchFirst() != null;
     }
 
+    @Transactional
     public List<Feed> saveAll(Collection<Feed> feeds) {
         return feeds.stream().map(this::save).toList();
     }

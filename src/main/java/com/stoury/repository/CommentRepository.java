@@ -14,13 +14,13 @@ import java.util.Optional;
 import static com.stoury.domain.QComment.comment;
 import static com.stoury.domain.QMember.member;
 
-@Transactional
 @Repository
 @RequiredArgsConstructor
 public class CommentRepository {
     private final JPAQueryFactory jpaQueryFactory;
     private final EntityManager entityManager;
 
+    @Transactional
     public Comment save(Comment saveComment) {
         entityManager.persist(saveComment);
         entityManager.refresh(saveComment);
@@ -51,6 +51,7 @@ public class CommentRepository {
                 .fetchFirst());
     }
 
+    @Transactional
     public void deleteAll() {
         jpaQueryFactory.selectFrom(comment).fetch().forEach(entityManager::remove);
     }

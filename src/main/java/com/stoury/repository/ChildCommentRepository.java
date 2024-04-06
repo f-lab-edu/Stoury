@@ -15,14 +15,13 @@ import java.util.Optional;
 import static com.stoury.domain.QChildComment.childComment;
 import static com.stoury.domain.QMember.member;
 
-@Transactional
 @Repository
 @RequiredArgsConstructor
 public class ChildCommentRepository {
     private final JPAQueryFactory jpaQueryFactory;
     private final EntityManager entityManager;
 
-
+    @Transactional
     public ChildComment save(ChildComment saveComment) {
         entityManager.persist(saveComment);
         entityManager.refresh(saveComment);
@@ -43,10 +42,12 @@ public class ChildCommentRepository {
                 .fetch();
     }
 
+    @Transactional
     public void deleteAll() {
         jpaQueryFactory.selectFrom(childComment).fetch().forEach(entityManager::remove);
     }
 
+    @Transactional(readOnly = true)
     public Optional<ChildComment> findById(Long id) {
         return Optional.ofNullable(jpaQueryFactory
                 .selectFrom(childComment)
