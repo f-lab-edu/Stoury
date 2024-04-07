@@ -32,8 +32,8 @@ public class ChatController {
     @GetMapping("/chats/{chatRoomId}")
     public List<ChatMessageResponse> getChatMessages(@AuthenticationPrincipal AuthenticatedMember authenticatedMember,
                                                      @PathVariable Long chatRoomId,
-                                                     @RequestParam(required = false, defaultValue = Values.MAX_LONG) Long cursorId) {
-        return chatService.getPreviousChatMessages(authenticatedMember.getId(), chatRoomId, cursorId);
+                                                     @RequestParam(required = false, defaultValue = Values.MAX_LONG) Long offsetId) {
+        return chatService.getPreviousChatMessages(authenticatedMember.getId(), chatRoomId, offsetId);
     }
 
     @GetMapping(value = "/chatRoom/{chatRoomId}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)

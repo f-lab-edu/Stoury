@@ -110,14 +110,14 @@ public class DiaryService {
     }
 
     @Transactional(readOnly = true)
-    public DiaryPageResponse getMemberDiaries(Long memberId, Long cursorId) {
+    public DiaryPageResponse getMemberDiaries(Long memberId, Long offsetId) {
         Member member = memberRepository.findById(Objects.requireNonNull(memberId, "Member Id cannot be null"))
                 .orElseThrow(MemberSearchException::new);
-        Long cursorIdNotNull = Objects.requireNonNull(cursorId);
+        Long offsetIdNotNull = Objects.requireNonNull(offsetId);
 
         Pageable page = PageRequest.of(0, PageSize.DIARY_PAGE_SIZE, Sort.by("createdAt"));
 
-        List<Diary> diaryPage = diaryRepository.findByMemberAndIdLessThan(member, cursorIdNotNull, page);
+        List<Diary> diaryPage = diaryRepository.findByMemberAndIdLessThan(member, offsetIdNotNull, page);
 
         return DiaryPageResponse.from(diaryPage);
     }

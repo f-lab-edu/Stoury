@@ -34,8 +34,8 @@ public class DiaryController {
 
     @GetMapping("/diaries/member/{memberId}")
     public DiaryPageResponse getMemberDiaries(@PathVariable Long memberId,
-                                              @RequestParam(required = false, defaultValue = Values.MAX_LONG) Long cursorId) {
-        return diaryService.getMemberDiaries(memberId, cursorId);
+                                              @RequestParam(required = false, defaultValue = Values.MAX_LONG) Long offsetId) {
+        return diaryService.getMemberDiaries(memberId, offsetId);
     }
 
     @DeleteMapping("/diaries/{diaryId}")

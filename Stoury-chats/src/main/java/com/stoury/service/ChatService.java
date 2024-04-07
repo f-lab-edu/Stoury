@@ -72,16 +72,16 @@ public class ChatService {
     }
 
     @Transactional(readOnly = true)
-    public List<ChatMessageResponse> getPreviousChatMessages(Long memberId, Long chatRoomId, Long cursorId) {
+    public List<ChatMessageResponse> getPreviousChatMessages(Long memberId, Long chatRoomId, Long offsetId) {
         Long senderIdNotNull = Objects.requireNonNull(memberId);
         Long chatRoomIdNotNull = Objects.requireNonNull(chatRoomId);
-        Long cursorIdNotNull = Objects.requireNonNull(cursorId);
+        Long offsetIdNotNull = Objects.requireNonNull(offsetId);
 
         Member member = memberRepository.findById(senderIdNotNull).orElseThrow(MemberSearchException::new);
         ChatRoom chatRoom = chatRoomRepository.findById(chatRoomIdNotNull).orElseThrow(ChatRoomSearchException::new);
         if (chatRoom.hasMember(member)) {
             Pageable pageable = PageRequest.of(0, PageSize.CHAT_PAGE_SIZE, Sort.by("createdAt").descending());
-            List<ChatMessage> chatMessages = chatMessageRepository.findAllByChatRoomAndIdLessThan(chatRoom, cursorIdNotNull, pageable);
+            List<ChatMessage> chatMessages = chatMessageRepository.findAllByChatRoomAndIdLessThan(chatRoom, offsetIdNotNull, pageable);
 
             return chatMessages.stream().map(ChatMessageResponse::from).toList();
         }

@@ -63,24 +63,24 @@ public class CommentService {
     }
 
     @Transactional(readOnly = true)
-    public List<CommentResponse> getCommentsOfFeed(Long feedId, Long cursorId) {
+    public List<CommentResponse> getCommentsOfFeed(Long feedId, Long offsetId) {
         Feed feed = feedRepository.findById(Objects.requireNonNull(feedId))
                 .orElseThrow(FeedSearchException::new);
-        Long cursorIdNotNull = Objects.requireNonNull(cursorId);
+        Long offsetIdNotNull = Objects.requireNonNull(offsetId);
 
         Pageable pageable = PageRequest.of(0, PageSize.COMMENT_PAGE_SIZE, Sort.by("createdAt").descending());
 
-        return CommentResponse.from(commentRepository.findAllByFeedAndIdLessThan(feed, cursorIdNotNull, pageable));
+        return CommentResponse.from(commentRepository.findAllByFeedAndIdLessThan(feed, offsetIdNotNull, pageable));
     }
 
     @Transactional(readOnly = true)
-    public List<ChildCommentResponse> getChildComments(Long parentCommentId, Long cursorId) {
+    public List<ChildCommentResponse> getChildComments(Long parentCommentId, Long offsetId) {
         Comment parentComment = commentRepository.findById(Objects.requireNonNull(parentCommentId))
                 .orElseThrow(CommentSearchException::new);
-        Long cursorIdNotNull = Objects.requireNonNull(cursorId);
+        Long offsetIdNotNull = Objects.requireNonNull(offsetId);
 
         Pageable pageable = PageRequest.of(0, PageSize.COMMENT_PAGE_SIZE, Sort.by("createdAt").descending());
-        List<ChildComment> childComments = childCommentRepository.findAllByParentComment(parentComment, cursorIdNotNull, pageable);
+        List<ChildComment> childComments = childCommentRepository.findAllByParentComment(parentComment, offsetIdNotNull, pageable);
 
         return ChildCommentResponse.from(childComments);
     }

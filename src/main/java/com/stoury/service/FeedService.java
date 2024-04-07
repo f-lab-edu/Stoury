@@ -114,14 +114,14 @@ public class FeedService {
     }
 
     @Transactional(readOnly = true)
-    public List<FeedResponse> getFeedsOfMemberId(Long memberId, Long cursorId) {
+    public List<FeedResponse> getFeedsOfMemberId(Long memberId, Long offsetId) {
         Member feedWriter = memberRepository.findById(Objects.requireNonNull(memberId))
                 .orElseThrow(() -> new FeedCreateException("Cannot find the member."));
-        Long cursorIdNotNull = Objects.requireNonNull(cursorId);
+        Long offsetIdNotNull = Objects.requireNonNull(offsetId);
 
         Pageable page = PageRequest.of(0, PageSize.FEED_PAGE_SIZE, Sort.by("createdAt").descending());
 
-        List<Feed> feeds = feedRepository.findAllByMemberAndIdLessThan(feedWriter, cursorIdNotNull, page);
+        List<Feed> feeds = feedRepository.findAllByMemberAndIdLessThan(feedWriter, offsetIdNotNull, page);
 
         return feeds.stream()
                 .map(this::toFeedResponse)
@@ -129,11 +129,11 @@ public class FeedService {
     }
 
     @Transactional(readOnly = true)
-    public List<FeedResponse> getFeedsByTag(String tagName, Long cursorId) {
+    public List<FeedResponse> getFeedsByTag(String tagName, Long offsetId) {
         Pageable page = PageRequest.of(0, PageSize.FEED_PAGE_SIZE, Sort.by("createdAt").descending());
-        Long cursorIdNotNull = Objects.requireNonNull(cursorId);
+        Long offsetIdNotNull = Objects.requireNonNull(offsetId);
 
-        List<Feed> feeds = feedRepository.findByTagNameAndIdLessThan(tagName, cursorIdNotNull, page);
+        List<Feed> feeds = feedRepository.findByTagNameAndIdLessThan(tagName, offsetIdNotNull, page);
 
         return feeds.stream()
                 .map(this::toFeedResponse)

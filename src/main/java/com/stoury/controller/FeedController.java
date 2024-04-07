@@ -40,14 +40,14 @@ public class FeedController {
 
     @GetMapping("/feeds/tag/{tagName}")
     public List<FeedResponse> getFeedsOfTag(@PathVariable String tagName,
-                                            @RequestParam(required = false, defaultValue = Values.MAX_LONG) Long orderThan) {
-        return feedService.getFeedsByTag(tagName, orderThan);
+                                            @RequestParam(required = false, defaultValue = Values.MAX_LONG) Long offsetId) {
+        return feedService.getFeedsByTag(tagName, offsetId);
     }
 
     @GetMapping("/feeds/member/{memberId}")
     public List<FeedResponse> getFeedsOfMember(@PathVariable Long memberId,
-                                               @RequestParam(required = false, defaultValue = Values.MAX_LONG) Long cursorId) {
-        return feedService.getFeedsOfMemberId(memberId, cursorId);
+                                               @RequestParam(required = false, defaultValue = Values.MAX_LONG) Long offsetId) {
+        return feedService.getFeedsOfMemberId(memberId, offsetId);
     }
 
     @PutMapping("/feeds/{feedId}")

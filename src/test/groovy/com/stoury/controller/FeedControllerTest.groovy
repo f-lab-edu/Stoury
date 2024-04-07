@@ -111,8 +111,8 @@ class FeedControllerTest extends AbstractRestDocsTests {
     def "Get feeds by tag"() {
         given:
         def parameterDescriptor = parameterWithName("tagName").description("name of tag")
-        def queryDescriptor = parameterWithName("cursorId")
-                .description("Results which created order than whose id is cursorId").optional()
+        def queryDescriptor = parameterWithName("offsetId")
+                .description("Results which created order than whose id is offsetId").optional()
 
         when(feedService.getFeedsByTag(any(), any())).thenReturn(List.of(
                 new FeedResponse(
@@ -146,7 +146,7 @@ class FeedControllerTest extends AbstractRestDocsTests {
         ))
         when:
         def response = mockMvc.perform(get("/feeds/tag/{tagName}", "travel")
-                .param("cursorId", "4"))
+                .param("offsetId", "4"))
                 .andDo(documentWithPathAndQuery(parameterDescriptor, queryDescriptor))
         then:
         response.andExpect(status().isOk())
@@ -155,8 +155,8 @@ class FeedControllerTest extends AbstractRestDocsTests {
     def "Get feeds of member"() {
         given:
         def parameterDescriptor = parameterWithName("memberId").description("id of member")
-        def queryDescriptor = parameterWithName("cursorId")
-                .description("Results which created order than whose id is cursorId").optional()
+        def queryDescriptor = parameterWithName("offsetId")
+                .description("Results which created order than whose id is offsetId").optional()
 
         when(feedService.getFeedsOfMemberId(any(), any())).thenReturn(List.of(
                 new FeedResponse(
@@ -190,7 +190,7 @@ class FeedControllerTest extends AbstractRestDocsTests {
         ))
         when:
         def response = mockMvc.perform(get("/feeds/member/{memberId}", "1")
-                .param("cursorId", "4"))
+                .param("offsetId", "4"))
                 .andDo(documentWithPathAndQuery(parameterDescriptor, queryDescriptor))
         then:
         response.andExpect(status().isOk())

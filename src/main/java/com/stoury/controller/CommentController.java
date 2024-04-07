@@ -38,14 +38,14 @@ public class CommentController {
 
     @GetMapping("/comments/feed/{feedId}")
     public List<CommentResponse> getComments(@PathVariable Long feedId,
-                                             @RequestParam(required = false, defaultValue = Values.MAX_LONG) Long cursorId) {
-        return commentService.getCommentsOfFeed(feedId, cursorId);
+                                             @RequestParam(required = false, defaultValue = Values.MAX_LONG) Long offsetId) {
+        return commentService.getCommentsOfFeed(feedId, offsetId);
     }
 
     @GetMapping("/comments/comment/{commentId}")
     public List<ChildCommentResponse> getChildComments(@PathVariable Long commentId,
-                                                       @RequestParam(required = false, defaultValue = Values.MAX_LONG) Long cursorId) {
-        return commentService.getChildComments(commentId, cursorId);
+                                                       @RequestParam(required = false, defaultValue = Values.MAX_LONG) Long offsetId) {
+        return commentService.getChildComments(commentId, offsetId);
     }
 
     @DeleteMapping("/comments/{commentId}")
