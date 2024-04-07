@@ -81,9 +81,20 @@ public class FeedRepository {
 
     @Transactional(readOnly = true)
     public List<Feed> findByTagNameAndIdLessThan(String tagName, Long offsetId, Pageable page) {
+        List<Long> ids = findAllFeedIdByTagAndIdLessThan(tagName, offsetId, page);
+
+        if (ids.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        return findAllIn(ids);
+    }
+
+    private List<Long> findAllFeedIdByTagAndIdLessThan(String tagName, Long offsetId, Pageable page) {
         return jpaQueryFactory
-                .selectFrom(feed)
-                .leftJoin(feed.tags, tag).on(tag.tagName.eq(tagName))
+                .select(feed.id)
+                .from(feed)
+                .innerJoin(feed.tags, tag).on(tag.tagName.eq(tagName))
                 .where(feed.id.lt(offsetId))
                 .orderBy(feed.id.desc())
                 .offset(page.getOffset())
