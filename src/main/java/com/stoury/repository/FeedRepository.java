@@ -75,6 +75,7 @@ public class FeedRepository {
         return jpaQueryFactory
                 .selectFrom(feed)
                 .where(feed.id.in(ids))
+                .orderBy(feed.id.desc())
                 .fetch();
     }
 
