@@ -447,7 +447,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <h3 id="_get_diaries_of_a_member_http_request">HTTP request</h3>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight nowrap"><code class="language-http" data-lang="http">GET /diaries/member/4?cursorId=4 HTTP/1.1
+<pre class="highlight nowrap"><code class="language-http" data-lang="http">GET /diaries/member/4?offsetId=4 HTTP/1.1
 Host: localhost:8080</code></pre>
 </div>
 </div>
@@ -521,8 +521,8 @@ Content-Length: 538
 </thead>
 <tbody>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>cursorId</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Results which created order than whose id is cursorId</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>offsetId</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Results which created order than whose id is offsetId</p></td>
 </tr>
 </tbody>
 </table>
