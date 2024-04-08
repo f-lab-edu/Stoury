@@ -37,6 +37,12 @@ public class FeedRepository {
     }
 
     @Transactional
+    public FeedResponseEntity saveFeedResponse(FeedResponseEntity saveFeedResponseEntity) {
+        entityManager.persist(saveFeedResponseEntity);
+        return saveFeedResponseEntity;
+    }
+
+    @Transactional
     public void delete(Feed deleteFeed) {
         jpaQueryFactory
                 .delete(feed)
@@ -122,6 +128,11 @@ public class FeedRepository {
     @Transactional
     public void deleteAll() {
         jpaQueryFactory.selectFrom(feed).fetch().forEach(entityManager::remove);
+    }
+
+    @Transactional
+    public void deleteAllFeedResponse() {
+        jpaQueryFactory.selectFrom(feedResponseEntity).fetch().forEach(entityManager::remove);
     }
 
     @Transactional

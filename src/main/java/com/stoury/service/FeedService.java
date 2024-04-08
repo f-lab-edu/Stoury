@@ -7,6 +7,7 @@ import com.stoury.domain.Member;
 import com.stoury.domain.Tag;
 import com.stoury.dto.SimpleMemberResponse;
 import com.stoury.dto.feed.*;
+import com.stoury.event.FeedResponseCreateEvent;
 import com.stoury.event.GraphicDeleteEvent;
 import com.stoury.event.GraphicSaveEvent;
 import com.stoury.exception.authentication.NotAuthorizedException;
@@ -66,6 +67,8 @@ public class FeedService {
         Feed feedEntity = createFeedEntity(writer, feedCreateRequest, graphicContents, locationResponse);
 
         Feed uploadedFeed = feedRepository.save(feedEntity);
+
+        eventPublisher.publishEvent(new FeedResponseCreateEvent(this, uploadedFeed));
 
         return FeedResponse.from(uploadedFeed, 0);
     }

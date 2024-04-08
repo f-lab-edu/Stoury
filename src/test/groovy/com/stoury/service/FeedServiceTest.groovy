@@ -8,6 +8,7 @@ import com.stoury.domain.Tag
 import com.stoury.dto.feed.LocationResponse
 import com.stoury.dto.feed.FeedCreateRequest
 import com.stoury.dto.feed.FeedUpdateRequest
+import com.stoury.event.FeedResponseCreateEvent
 import com.stoury.event.GraphicDeleteEvent
 import com.stoury.exception.authentication.NotAuthorizedException
 import com.stoury.exception.feed.FeedCreateException
@@ -60,6 +61,7 @@ class FeedServiceTest extends Specification {
         then:
         1 * feedRepository.save(_ as Feed) >> savedFeed
         1 * locationService.getLocation(_, _) >> new LocationResponse("city", "country")
+        1 * eventPublisher.publishEvent(_ as FeedResponseCreateEvent)
     }
 
     def "피드 생성 실패, 지원하지 않는 파일"() {
