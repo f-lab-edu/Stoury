@@ -136,7 +136,7 @@ public class FeedService {
         Pageable page = PageRequest.of(0, PageSize.FEED_PAGE_SIZE, Sort.by("createdAt").descending());
         Long offsetIdNotNull = Objects.requireNonNull(offsetId);
 
-        List<Feed> feeds = feedRepository.findByTagNameAndIdLessThan(tagName, offsetIdNotNull, page);
+        List<FeedResponseEntity> feeds = feedRepository.findByTagNameAndIdLessThan(tagName, offsetIdNotNull, page);
 
         return feeds.stream()
                 .map(this::toFeedResponse)
@@ -155,13 +155,6 @@ public class FeedService {
 
 
         return FeedResponse.from(feedResponseEntity, writer, graphicContents, tags, location, likes);
-    }
-
-    private FeedResponse toFeedResponse(Feed feed) {
-        String feedIdStr = feed.getId().toString();
-        long likes = likeRepository.getCountByFeedId(feedIdStr);
-
-        return FeedResponse.from(feed, likes);
     }
 
     protected FeedResponse updateFeed(Long feedId, FeedUpdateRequest feedUpdateRequest) {

@@ -13,13 +13,12 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
 import static com.stoury.domain.QFeed.feed;
 import static com.stoury.domain.QTag.tag;
-import static com.stoury.projection.QFeedResponseEntity.*;
+import static com.stoury.projection.QFeedResponseEntity.feedResponseEntity;
 
 @Repository
 @RequiredArgsConstructor
@@ -73,23 +72,15 @@ public class FeedRepository {
                 .fetch();
     }
 
-    private List<Feed> findAllIn(List<Long> ids) {
-        return jpaQueryFactory
-                .selectFrom(feed)
-                .where(feed.id.in(ids))
-                .orderBy(feed.id.desc())
-                .fetch();
-    }
-
     @Transactional(readOnly = true)
-    public List<Feed> findByTagNameAndIdLessThan(String tagName, Long offsetId, Pageable page) {
-        List<Long> ids = findAllFeedIdByTagAndIdLessThan(tagName, offsetId, page);
+    public List<FeedResponseEntity> findByTagNameAndIdLessThan(String tagName, Long offsetId, Pageable page) {
+        List<Long> feedIds = findAllFeedIdByTagAndIdLessThan(tagName, offsetId, page);
 
-        if (ids.isEmpty()) {
-            return Collections.emptyList();
-        }
-
-        return findAllIn(ids);
+        return jpaQueryFactory
+                .selectFrom(feedResponseEntity)
+                .where(feedResponseEntity.feedId.in(feedIds))
+                .orderBy(feedResponseEntity.feedId.desc())
+                .fetch();
     }
 
     private List<Long> findAllFeedIdByTagAndIdLessThan(String tagName, Long offsetId, Pageable page) {
