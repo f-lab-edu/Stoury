@@ -1,12 +1,21 @@
 package com.stoury.domain;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.DynamicInsert;
 
 import java.time.LocalDateTime;
 
+@DynamicInsert
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -27,13 +36,17 @@ public class ChatMessage {
     @Column(name = "TEXT_CONTENT", columnDefinition = "text", nullable = false)
     private String textContent;
 
-    @Column(name = "CREATED_AT", nullable = false, columnDefinition = "DATETIME(6)")
+    @Column(name = "CREATED_AT", nullable = false)
     private LocalDateTime createdAt;
 
-    public ChatMessage(Member sender, ChatRoom chatRoom, String textContent, LocalDateTime createdAt) {
+    public ChatMessage(Member sender, ChatRoom chatRoom, String textContent) {
         this.sender = sender;
         this.chatRoom = chatRoom;
         this.textContent = textContent;
+    }
+
+    public ChatMessage(Member sender, ChatRoom chatRoom, String textContent, LocalDateTime createdAt) {
+        this(sender, chatRoom, textContent);
         this.createdAt = createdAt;
     }
 }

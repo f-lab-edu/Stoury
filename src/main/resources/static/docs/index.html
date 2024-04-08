@@ -837,7 +837,7 @@ Content-Length: 530
 <h3 id="_get_feeds_by_tag_http_request">HTTP request</h3>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">GET /feeds/tag/travel?cursorId=4 HTTP/1.1
+<pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">GET /feeds/tag/travel?offsetId=4 HTTP/1.1
 Host: localhost:8080</code></pre>
 </div>
 </div>
@@ -934,8 +934,8 @@ Content-Length: 927
 </thead>
 <tbody>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>cursorId</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Results which created order than whose id is cursorId</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>offsetId</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Results which created order than whose id is offsetId</p></td>
 </tr>
 </tbody>
 </table>
@@ -949,7 +949,7 @@ Content-Length: 927
 <h3 id="_get_feeds_of_member_http_request">HTTP request</h3>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">GET /feeds/member/1?cursorId=4 HTTP/1.1
+<pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">GET /feeds/member/1?offsetId=4 HTTP/1.1
 Host: localhost:8080</code></pre>
 </div>
 </div>
@@ -1048,7 +1048,7 @@ Host: localhost:8080
 {
   "textContent" : "Updated content",
   "tagNames" : [ "New", "Updated" ],
-  "deleteGraphicContentSequence" : [ 1, 3 ]
+  "deleteGraphicContentSequence" : [ 3, 1 ]
 }</code></pre>
 </div>
 </div>
@@ -1437,7 +1437,7 @@ Host: localhost:8080</code></pre>
 <div class="content">
 <pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">HTTP/1.1 200 OK
 Content-Type: application/json;charset=UTF-8
-Content-Length: 625
+Content-Length: 626
 
 [ {
   "id" : 1,
@@ -1448,7 +1448,7 @@ Content-Length: 625
   "feedId" : 1,
   "hasNestedComments" : false,
   "textContent" : "First comment",
-  "createdAt" : "2024-03-29T10:49:15.294126"
+  "createdAt" : "2024-04-07T21:40:26.449217"
 }, {
   "id" : 2,
   "writer" : {
@@ -1458,7 +1458,7 @@ Content-Length: 625
   "feedId" : 1,
   "hasNestedComments" : true,
   "textContent" : "This comment was deleted",
-  "createdAt" : "2024-03-29T10:49:15.29647"
+  "createdAt" : "2024-04-07T21:40:26.451538"
 }, {
   "id" : 3,
   "writer" : {
@@ -1468,7 +1468,7 @@ Content-Length: 625
   "feedId" : 1,
   "hasNestedComments" : true,
   "textContent" : "Third comment",
-  "createdAt" : "2024-03-29T10:49:15.296922"
+  "createdAt" : "2024-04-07T21:40:26.452142"
 } ]</code></pre>
 </div>
 </div>
@@ -1510,8 +1510,8 @@ Content-Length: 625
 </thead>
 <tbody>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>cursorId</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Results which created order than whose id is cursorId</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>offsetId</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Results which created order than whose id is offsetId</p></td>
 </tr>
 </tbody>
 </table>
@@ -1536,7 +1536,7 @@ Host: localhost:8080</code></pre>
 <div class="content">
 <pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">HTTP/1.1 200 OK
 Content-Type: application/json;charset=UTF-8
-Content-Length: 601
+Content-Length: 602
 
 [ {
   "id" : 11,
@@ -1546,7 +1546,7 @@ Content-Length: 601
   },
   "parentCommentId" : 1,
   "textContent" : "First child comment",
-  "createdAt" : "2024-03-29T10:49:15.31637"
+  "createdAt" : "2024-04-07T21:40:26.473684"
 }, {
   "id" : 12,
   "writerResponse" : {
@@ -1555,7 +1555,7 @@ Content-Length: 601
   },
   "parentCommentId" : 1,
   "textContent" : "Second child comment",
-  "createdAt" : "2024-03-29T10:49:15.317011"
+  "createdAt" : "2024-04-07T21:40:26.474563"
 }, {
   "id" : 13,
   "writerResponse" : {
@@ -1564,7 +1564,7 @@ Content-Length: 601
   },
   "parentCommentId" : 1,
   "textContent" : "This comment was deleted",
-  "createdAt" : "2024-03-29T10:49:15.317413"
+  "createdAt" : "2024-04-07T21:40:26.474959"
 } ]</code></pre>
 </div>
 </div>
@@ -1772,7 +1772,7 @@ Content-Length: 2027
         "country" : "United States"
       },
       "likes" : 20,
-      "createdAt" : "2024-03-29T10:49:15.376109"
+      "createdAt" : "2024-04-07T21:40:26.546276"
     } ],
     "2" : [ {
       "feedId" : 2,
@@ -1796,7 +1796,7 @@ Content-Length: 2027
         "country" : "United States"
       },
       "likes" : 13,
-      "createdAt" : "2024-03-30T10:49:15.380691"
+      "createdAt" : "2024-04-08T21:40:26.552121"
     }, {
       "feedId" : 3,
       "writer" : {
@@ -1819,11 +1819,11 @@ Content-Length: 2027
         "country" : "United States"
       },
       "likes" : 52,
-      "createdAt" : "2024-03-31T10:49:15.381718"
+      "createdAt" : "2024-04-09T21:40:26.553636"
     } ]
   },
-  "startDate" : "2024-03-29",
-  "endDate" : "2024-03-31",
+  "startDate" : "2024-04-07",
+  "endDate" : "2024-04-09",
   "city" : "Colorado",
   "country" : "United States",
   "likes" : 85,
@@ -1841,7 +1841,7 @@ Content-Length: 2027
 <h3 id="_get_diaries_of_a_member_http_request">HTTP request</h3>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">GET /diaries/member/4?cursorId=4 HTTP/1.1
+<pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">GET /diaries/member/4?offsetId=4 HTTP/1.1
 Host: localhost:8080</code></pre>
 </div>
 </div>
@@ -1915,8 +1915,8 @@ Content-Length: 538
 </thead>
 <tbody>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>cursorId</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Results which created order than whose id is cursorId</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>offsetId</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Results which created order than whose id is offsetId</p></td>
 </tr>
 </tbody>
 </table>

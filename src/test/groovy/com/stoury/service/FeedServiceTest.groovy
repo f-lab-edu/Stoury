@@ -1,5 +1,6 @@
 package com.stoury.service
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.stoury.domain.Feed
 import com.stoury.domain.GraphicContent
 import com.stoury.domain.Member
@@ -7,13 +8,18 @@ import com.stoury.domain.Tag
 import com.stoury.dto.feed.LocationResponse
 import com.stoury.dto.feed.FeedCreateRequest
 import com.stoury.dto.feed.FeedUpdateRequest
+import com.stoury.event.FeedResponseCreateEvent
+import com.stoury.event.FeedResponseDeleteEvent
+import com.stoury.event.FeedResponseUpdateEvent
 import com.stoury.event.GraphicDeleteEvent
 import com.stoury.exception.authentication.NotAuthorizedException
 import com.stoury.exception.feed.FeedCreateException
+import com.stoury.projection.FeedResponseEntity
 import com.stoury.repository.FeedRepository
 import com.stoury.repository.LikeRepository
 import com.stoury.repository.MemberRepository
 import com.stoury.service.location.LocationService
+import com.stoury.utils.JsonMapper
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.mock.web.MockMultipartFile
 import spock.lang.Specification
@@ -25,7 +31,9 @@ class FeedServiceTest extends Specification {
     def likeRepository = Mock(LikeRepository)
     def eventPublisher = Mock(ApplicationEventPublisher)
     def locationService = Mock(LocationService)
-    def feedService = new FeedService(feedRepository, memberRepository, likeRepository, tagService,  locationService, eventPublisher)
+    def jsonMapper = new JsonMapper(new ObjectMapper())
+    def feedService = new FeedService(feedRepository, memberRepository, likeRepository,
+            tagService, locationService, eventPublisher, jsonMapper)
 
     def writer = Mock(Member)
     def feedCreateRequest = FeedCreateRequest.builder()
@@ -55,6 +63,7 @@ class FeedServiceTest extends Specification {
         then:
         1 * feedRepository.save(_ as Feed) >> savedFeed
         1 * locationService.getLocation(_, _) >> new LocationResponse("city", "country")
+        1 * eventPublisher.publishEvent(_ as FeedResponseCreateEvent)
     }
 
     def "피드 생성 실패, 지원하지 않는 파일"() {
@@ -104,6 +113,7 @@ class FeedServiceTest extends Specification {
         feedService.updateFeed(1L, feedUpdateRequest)
         then:
         2 * eventPublisher.publishEvent(_ as GraphicDeleteEvent)
+        1 * eventPublisher.publishEvent(_ as FeedResponseUpdateEvent)
         feed.textContent == "updated"
         feed.tags.isEmpty()
     }
@@ -114,19 +124,40 @@ class FeedServiceTest extends Specification {
         feedRepository.findById(_) >> Optional.of(feed)
         feed.notOwnedBy(1) >> true
         when:
-        feedService.deleteFeedIfOwner(1,1)
+        feedService.deleteFeedIfOwner(1, 1)
         then:
         thrown(NotAuthorizedException)
     }
 
     def "피드 삭제 성공"() {
         given:
-        def writer = new Member(id:1)
-        def feed = new Feed(id:1, member: writer)
+        def writer = new Member(id: 1)
+        def feed = new Feed(id: 1, member: writer)
         feedRepository.findById(_) >> Optional.of(feed)
         when:
-        feedService.deleteFeedIfOwner(feed.id,writer.id)
+        feedService.deleteFeedIfOwner(feed.id, writer.id)
         then:
         1 * feedRepository.delete(_)
+        1 * eventPublisher.publishEvent(_ as FeedResponseDeleteEvent)
+    }
+
+    def "사용자의 피드 조회 성공"() {
+        given:
+        def feeds = [
+                new FeedResponseEntity(1L, writer.id, writer.username,  '[{"id":null, "path":null}]',  "[null]",null,"", 0.0, 0.0,"", ""),
+                new FeedResponseEntity(2L, writer.id, writer.username,  '[{"id":null, "path":null}]',  "[null]",null,"", 0.0, 0.0,"", ""),
+                new FeedResponseEntity(3L, writer.id, writer.username,  '[{"id":null, "path":null}]',  "[null]",null,"", 0.0, 0.0,"", ""),
+                new FeedResponseEntity(4L, writer.id, writer.username,  '[{"id":null, "path":null}]',  "[null]",null,"", 0.0, 0.0,"", ""),
+                new FeedResponseEntity(5L, writer.id, writer.username,  '[{"id":null, "path":null}]',  "[null]",null,"", 0.0, 0.0,"", ""),
+                new FeedResponseEntity(6L, writer.id, writer.username,  '[{"id":null, "path":null}]',  "[null]",null,"", 0.0, 0.0,"", ""),
+                new FeedResponseEntity(7L, writer.id, writer.username,  '[{"id":null, "path":null}]',  "[null]",null,"", 0.0, 0.0,"", ""),
+                new FeedResponseEntity(8L, writer.id, writer.username,  '[{"id":null, "path":null}]',  "[null]",null,"", 0.0, 0.0,"", ""),
+                new FeedResponseEntity(9L, writer.id, writer.username,  '[{"id":null, "path":null}]',  "[null]",null,"", 0.0, 0.0,"", ""),
+                new FeedResponseEntity(10L, writer.id, writer.username,  '[{"id":null, "path":null}]',  "[null]",null,"", 0.0, 0.0,"", ""),
+        ]
+        when:
+        feedService.getFeedsOfMemberId(1L, 20L)
+        then:
+        1 * feedRepository.findAllFeedsByMemberAndIdLessThan(_, _, _) >> feeds
     }
 }

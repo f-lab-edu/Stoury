@@ -1,12 +1,51 @@
 package com.stoury.repository;
 
+import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.stoury.domain.Tag;
-import org.springframework.data.jpa.repository.JpaRepository;
+import jakarta.persistence.EntityManager;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
-public interface TagRepository extends JpaRepository<Tag, Long> {
-    boolean existsByTagName(String tagName);
+import static com.stoury.domain.QTag.tag;
 
-    Optional<Tag> findByTagName(String tagName);
+@Repository
+@RequiredArgsConstructor
+public class TagRepository {
+    private final JPAQueryFactory jpaQueryFactory;
+    private final EntityManager entityManager;
+
+    @Transactional
+    public Tag save(Tag saveTag) {
+        entityManager.persist(saveTag);
+        return saveTag;
+    }
+
+    @Transactional
+    public Tag saveAndFlush(Tag saveTag) {
+        entityManager.persist(saveTag);
+        entityManager.flush();
+        return saveTag;
+    }
+
+    @Transactional
+    public void deleteAll() {
+        jpaQueryFactory.selectFrom(tag).fetch().forEach(entityManager::remove);
+    }
+
+    @Transactional(readOnly = true)
+    public long count() {
+        return jpaQueryFactory.select(tag.count()).from(tag).fetchFirst();
+    }
+
+    @Transactional(readOnly = true)
+    public Optional<Tag> findByTagName(String tagName) {
+        return Optional.ofNullable(jpaQueryFactory
+                .selectFrom(tag)
+                .where(tag.tagName.eq(tagName))
+                .fetchFirst()
+        );
+    }
 }

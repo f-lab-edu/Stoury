@@ -2,14 +2,25 @@ package com.stoury.domain;
 
 import com.stoury.dto.feed.FeedUpdateRequest;
 import com.stoury.utils.cachekeys.PageSize;
-import jakarta.persistence.*;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.BatchSize;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import org.hibernate.annotations.DynamicInsert;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -17,9 +28,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+@DynamicInsert
 @Entity
 @Getter
-@EntityListeners(AuditingEntityListener.class)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "FEED")
 public class Feed {
@@ -27,11 +38,10 @@ public class Feed {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(optional = false)
+    @ManyToOne(optional = false, fetch = FetchType.LAZY)
     private Member member;
 
-    @Column(name = "CREATED_AT")
-    @CreatedDate
+    @Column(name = "CREATED_AT", nullable = false)
     private LocalDateTime createdAt;
 
     @BatchSize(size = PageSize.FEED_PAGE_SIZE)

@@ -8,7 +8,12 @@ import com.stoury.utils.Values;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.util.List;
@@ -27,8 +32,8 @@ public class ChatController {
     @GetMapping("/chats/{chatRoomId}")
     public List<ChatMessageResponse> getChatMessages(@AuthenticationPrincipal AuthenticatedMember authenticatedMember,
                                                      @PathVariable Long chatRoomId,
-                                                     @RequestParam(required = false, defaultValue = Values.MAX_LONG) Long cursorId) {
-        return chatService.getPreviousChatMessages(authenticatedMember.getId(), chatRoomId, cursorId);
+                                                     @RequestParam(required = false, defaultValue = Values.MAX_LONG) Long offsetId) {
+        return chatService.getPreviousChatMessages(authenticatedMember.getId(), chatRoomId, offsetId);
     }
 
     @GetMapping(value = "/chatRoom/{chatRoomId}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)

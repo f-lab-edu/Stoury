@@ -75,8 +75,8 @@ class CommentControllerTest extends AbstractRestDocsTests {
     def "Get comments"() {
         given:
         def pathParameterDescriptor = parameterWithName("feedId").description("id of feed")
-        def queryParameterDescriptor = parameterWithName("cursorId")
-                .description("Results which created order than whose id is cursorId").optional()
+        def queryParameterDescriptor = parameterWithName("offsetId")
+                .description("Results which created order than whose id is offsetId").optional()
 
         when(commentService.getCommentsOfFeed(any(), any(),)).thenReturn(List.of(
                 new CommentResponse(1L, new SimpleMemberResponse(2L, "member2"), 1L, false, "First comment", LocalDateTime.now()),
@@ -94,8 +94,8 @@ class CommentControllerTest extends AbstractRestDocsTests {
     def "Get child comments"() {
         given:
         def pathParameterDescriptor = parameterWithName("commentId").description("id of comment")
-        def queryParameterDescriptor = parameterWithName("cursorId")
-                .description("Results which created order than whose id is cursorId").optional()
+        def queryParameterDescriptor = parameterWithName("offsetId")
+                .description("Results which created order than whose id is offsetId").optional()
 
         when(commentService.getChildComments(any(), any())).thenReturn(List.of(
                 new ChildCommentResponse(11L, new SimpleMemberResponse(1L, "member1"), 1L, "First child comment", LocalDateTime.now()),

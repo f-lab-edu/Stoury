@@ -9,7 +9,6 @@ import com.stoury.repository.DiaryRepository
 import com.stoury.repository.FeedRepository
 import com.stoury.repository.LikeRepository
 import com.stoury.repository.MemberRepository
-import org.springframework.data.domain.Page
 import spock.lang.Specification
 
 import java.time.LocalDateTime

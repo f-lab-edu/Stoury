@@ -17,7 +17,6 @@ import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
 import org.springframework.util.StringUtils;
 
-import java.time.LocalDateTime;
 import java.util.Objects;
 
 @Component
@@ -34,7 +33,6 @@ public class ChatEventHandlers {
         Long memberId = Objects.requireNonNull(chatMessageSaveEvent.getMemberId());
         Long chatRoomId = Objects.requireNonNull(chatMessageSaveEvent.getChatRoomId());
         String textContent = stringNonEmpty(chatMessageSaveEvent.getTextContent());
-        LocalDateTime createdAt = Objects.requireNonNull(chatMessageSaveEvent.getCreatedAt());
 
         Member member = memberRepository
                 .findById(memberId)
@@ -42,7 +40,7 @@ public class ChatEventHandlers {
         ChatRoom chatRoom = chatRoomRepository.findById(chatRoomId)
                 .orElseThrow(ChatRoomSearchException::new);
 
-        ChatMessage chatMessage = new ChatMessage(member, chatRoom, textContent, createdAt);
+        ChatMessage chatMessage = new ChatMessage(member, chatRoom, textContent);
         chatMessageRepository.save(chatMessage);
     }
 

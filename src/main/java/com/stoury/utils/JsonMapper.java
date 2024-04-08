@@ -1,6 +1,7 @@
 package com.stoury.utils;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.stoury.dto.diary.SimpleDiaryResponse;
 import com.stoury.dto.feed.SimpleFeedResponse;
@@ -32,6 +33,14 @@ public class JsonMapper {
     public <T> T stringJsonToObject(String rawJson, Class<T> clazz) {
         try {
             return objectMapper.readValue(rawJson, clazz);
+        } catch (JsonProcessingException e) {
+            throw new JsonConvertException(rawJson, e);
+        }
+    }
+
+    public <T> T stringJsonToObject(String rawJson, TypeReference<T> typeReference) {
+        try {
+            return objectMapper.readValue(rawJson, typeReference);
         } catch (JsonProcessingException e) {
             throw new JsonConvertException(rawJson, e);
         }

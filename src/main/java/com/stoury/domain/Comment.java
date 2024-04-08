@@ -1,19 +1,28 @@
 package com.stoury.domain;
 
-import jakarta.persistence.*;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import lombok.Setter;
+import org.hibernate.annotations.DynamicInsert;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+@DynamicInsert
 @Entity
 @Getter
-@EntityListeners(AuditingEntityListener.class)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "COMMENT")
 public class Comment {
@@ -26,23 +35,19 @@ public class Comment {
     @ManyToOne(optional = false)
     private Member member;
 
-    @ManyToOne(optional = false)
+    @ManyToOne(optional = true, fetch = FetchType.LAZY)
     private Feed feed;
 
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "parentComment")
-    private List<Comment> childComments = new ArrayList<>();
+    private List<ChildComment> childComments = new ArrayList<>();
 
+    @Setter(value = AccessLevel.PACKAGE)
     @Column(name = "HAS_CHILD_COMMENTS", nullable = false)
     private boolean hasChildComments;
-
-    @ManyToOne(optional = true)
-    @JoinColumn(name = "PARENT_COMMENT_ID")
-    private Comment parentComment;
 
     @Column(name = "TEXT_CONTENT", length = 200, nullable = false)
     private String textContent;
 
-    @CreatedDate
     @Column(name = "CREATED_AT", nullable = false)
     private LocalDateTime createdAt;
 
@@ -55,15 +60,9 @@ public class Comment {
         this.textContent = textContent;
     }
 
-    public Comment(Member member, Comment parentComment, String textContent) {
-        this(member, parentComment.getFeed(), textContent);
-
-        this.parentComment = parentComment;
-        parentComment.hasChildComments = true;
-    }
-
-    public boolean hasParent() {
-        return parentComment != null;
+    public Comment(Member member, String textContent) {
+        this.member = member;
+        this.textContent = textContent;
     }
 
     public boolean hasChildComments() {

@@ -6,7 +6,6 @@ import com.stoury.dto.feed.FeedCreateRequest
 import com.stoury.dto.feed.SimpleFeedResponse
 import com.stoury.dto.member.AuthenticatedMember
 import com.stoury.dto.member.MemberResponse
-import com.stoury.dto.member.OnlineMember
 import com.stoury.repository.*
 import com.stoury.service.FeedService
 import com.stoury.service.MemberService
@@ -24,6 +23,7 @@ import org.springframework.mock.web.MockMultipartFile
 import org.springframework.security.core.Authentication
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler
 import org.springframework.security.web.authentication.logout.LogoutSuccessHandler
+import org.springframework.test.annotation.Rollback
 import org.springframework.test.context.ActiveProfiles
 import spock.lang.Specification
 
@@ -65,6 +65,7 @@ class IntegrationTest extends Specification {
     def member = new Member("aaa@dddd.com", "qwdqwdqwd", "username", null)
 
     def setup() {
+        feedRepository.deleteAllFeedResponse()
         feedRepository.deleteAll()
         diaryRepository.deleteAll()
         memberRepository.deleteAll()
@@ -74,8 +75,9 @@ class IntegrationTest extends Specification {
         Set<String> allKeys = redisTemplate.keys("*")
         redisTemplate.delete(allKeys)
     }
-
+    
     def cleanup() {
+        feedRepository.deleteAllFeedResponse()
         feedRepository.deleteAll()
         diaryRepository.deleteAll()
         memberRepository.deleteAll()
@@ -190,6 +192,7 @@ class IntegrationTest extends Specification {
         rankedList == expectedList
     }
 
+    @Rollback(false)
     def "사용자 검색"() {
         given:
         Member member1 = Member.builder().email("mem1@aaaa.com").encryptedPassword("pwdpwdpwdpwd").username("member1").build();
@@ -200,7 +203,7 @@ class IntegrationTest extends Specification {
         Member member6 = Member.builder().email("mem6@aaaa.com").encryptedPassword("pwdpwdpwdpwd").username("member6").build();
         Member member7 = Member.builder().email("mem7@aaaa.com").encryptedPassword("pwdpwdpwdpwd").username("member7").build();
         Member member8 = Member.builder().email("mem8@aaaa.com").encryptedPassword("pwdpwdpwdpwd").username("member8").build();
-        memberRepository.saveAll([member1, member2, member3, member4, member5, member6, member7, member8])
+        memberRepository.saveAllAndFlush([member1, member2, member3, member4, member5, member6, member7, member8])
 
         when:
         Slice<MemberResponse> slice = memberService.searchMembers("mem")

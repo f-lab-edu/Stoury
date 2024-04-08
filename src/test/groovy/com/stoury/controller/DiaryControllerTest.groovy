@@ -77,8 +77,8 @@ class DiaryControllerTest extends AbstractRestDocsTests {
     def "Get diaries of a member"() {
         given:
         def pathParameterDescriptor = parameterWithName("memberId").description("id of member")
-        def queryParameterDescriptor = parameterWithName("cursorId")
-                .description("Results which created order than whose id is cursorId").optional()
+        def queryParameterDescriptor = parameterWithName("offsetId")
+                .description("Results which created order than whose id is offsetId").optional()
         diaryService.getMemberDiaries(_, _) >> new DiaryPageResponse(
                 [
                         new SimpleDiaryResponse(3,
@@ -101,7 +101,7 @@ class DiaryControllerTest extends AbstractRestDocsTests {
         )
         when:
         def response = mockMvc.perform(get("/diaries/member/{memberId}", "4")
-                .param("cursorId", "4"))
+                .param("offsetId", "4"))
                 .andDo(documentWithPathAndQuery(pathParameterDescriptor, queryParameterDescriptor))
         then:
         response.andExpect(status().isOk())
