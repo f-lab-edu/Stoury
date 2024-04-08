@@ -106,4 +106,13 @@ public class EventHandlers {
     private String getJsonRaw(GraphicContent graphicContent) {
         return "{\"id\":%d, \"path\":\"%s\"}".formatted(graphicContent.getId(), graphicContent.getPath());
     }
+
+    @Async
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    public void onFeedResponseDeleteEventHandler(FeedResponseDeleteEvent feedResponseDeleteEvent) {
+        Long feedId = feedResponseDeleteEvent.getFeedId();
+
+        feedRepository.deleteFeedResponseById(feedId);
+    }
 }

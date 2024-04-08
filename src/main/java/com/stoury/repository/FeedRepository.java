@@ -5,9 +5,7 @@ import com.querydsl.core.types.dsl.StringPath;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.stoury.domain.Feed;
 import com.stoury.domain.Member;
-import com.stoury.dto.feed.FeedResponse;
 import com.stoury.projection.FeedResponseEntity;
-import com.stoury.projection.QFeedResponseEntity;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
@@ -52,10 +50,7 @@ public class FeedRepository {
 
     @Transactional
     public void delete(Feed deleteFeed) {
-        jpaQueryFactory
-                .delete(feed)
-                .where(feed.eq(deleteFeed))
-                .execute();
+        entityManager.remove(deleteFeed);
     }
 
     @Transactional(readOnly = true)
@@ -160,5 +155,12 @@ public class FeedRepository {
     @Transactional
     public List<Feed> saveAll(Collection<Feed> feeds) {
         return feeds.stream().map(this::save).toList();
+    }
+
+    @Transactional
+    public void deleteFeedResponseById(Long feedId) {
+        jpaQueryFactory.delete(feedResponseEntity)
+                .where(feedResponseEntity.feedId.eq(feedId))
+                .execute();
     }
 }

@@ -9,6 +9,7 @@ import com.stoury.dto.feed.LocationResponse
 import com.stoury.dto.feed.FeedCreateRequest
 import com.stoury.dto.feed.FeedUpdateRequest
 import com.stoury.event.FeedResponseCreateEvent
+import com.stoury.event.FeedResponseDeleteEvent
 import com.stoury.event.FeedResponseUpdateEvent
 import com.stoury.event.GraphicDeleteEvent
 import com.stoury.exception.authentication.NotAuthorizedException
@@ -137,6 +138,7 @@ class FeedServiceTest extends Specification {
         feedService.deleteFeedIfOwner(feed.id, writer.id)
         then:
         1 * feedRepository.delete(_)
+        1 * eventPublisher.publishEvent(_ as FeedResponseDeleteEvent)
     }
 
     def "사용자의 피드 조회 성공"() {

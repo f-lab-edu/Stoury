@@ -7,10 +7,7 @@ import com.stoury.domain.Member;
 import com.stoury.domain.Tag;
 import com.stoury.dto.SimpleMemberResponse;
 import com.stoury.dto.feed.*;
-import com.stoury.event.FeedResponseCreateEvent;
-import com.stoury.event.FeedResponseUpdateEvent;
-import com.stoury.event.GraphicDeleteEvent;
-import com.stoury.event.GraphicSaveEvent;
+import com.stoury.event.*;
 import com.stoury.exception.authentication.NotAuthorizedException;
 import com.stoury.exception.feed.FeedCreateException;
 import com.stoury.exception.feed.FeedSearchException;
@@ -208,6 +205,7 @@ public class FeedService {
         Feed feed = feedRepository.findById(Objects.requireNonNull(feedId))
                 .orElseThrow(FeedSearchException::new);
         feedRepository.delete(feed);
+        eventPublisher.publishEvent(new FeedResponseDeleteEvent(this, feedId));
     }
 
     @Transactional
