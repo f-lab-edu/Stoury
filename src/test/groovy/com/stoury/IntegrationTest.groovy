@@ -65,6 +65,7 @@ class IntegrationTest extends Specification {
     def member = new Member("aaa@dddd.com", "qwdqwdqwd", "username", null)
 
     def setup() {
+        feedRepository.deleteAllFeedResponse()
         feedRepository.deleteAll()
         diaryRepository.deleteAll()
         memberRepository.deleteAll()
@@ -76,6 +77,7 @@ class IntegrationTest extends Specification {
     }
     
     def cleanup() {
+        feedRepository.deleteAllFeedResponse()
         feedRepository.deleteAll()
         diaryRepository.deleteAll()
         memberRepository.deleteAll()

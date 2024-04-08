@@ -9,6 +9,7 @@ import com.stoury.dto.feed.LocationResponse
 import com.stoury.dto.feed.FeedCreateRequest
 import com.stoury.dto.feed.FeedUpdateRequest
 import com.stoury.event.FeedResponseCreateEvent
+import com.stoury.event.FeedResponseUpdateEvent
 import com.stoury.event.GraphicDeleteEvent
 import com.stoury.exception.authentication.NotAuthorizedException
 import com.stoury.exception.feed.FeedCreateException
@@ -111,6 +112,7 @@ class FeedServiceTest extends Specification {
         feedService.updateFeed(1L, feedUpdateRequest)
         then:
         2 * eventPublisher.publishEvent(_ as GraphicDeleteEvent)
+        1 * eventPublisher.publishEvent(_ as FeedResponseUpdateEvent)
         feed.textContent == "updated"
         feed.tags.isEmpty()
     }

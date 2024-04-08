@@ -8,6 +8,7 @@ import com.stoury.domain.Tag;
 import com.stoury.dto.SimpleMemberResponse;
 import com.stoury.dto.feed.*;
 import com.stoury.event.FeedResponseCreateEvent;
+import com.stoury.event.FeedResponseUpdateEvent;
 import com.stoury.event.GraphicDeleteEvent;
 import com.stoury.event.GraphicSaveEvent;
 import com.stoury.exception.authentication.NotAuthorizedException;
@@ -34,7 +35,6 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -178,6 +178,7 @@ public class FeedService {
         feed.deleteSelectedGraphics(feedUpdateRequest.deleteGraphicContentSequence());
 
         publishDeleteFileEvents(beforeDeleteGraphicContents, feed.getGraphicContents());
+        eventPublisher.publishEvent(new FeedResponseUpdateEvent(this, feed.getId()));
 
         return FeedResponse.from(feed, likeRepository.getCountByFeedId(feed.getId().toString()));
     }

@@ -4,6 +4,7 @@ import com.stoury.domain.Feed;
 import com.stoury.domain.GraphicContent;
 import com.stoury.domain.Member;
 import com.stoury.domain.Tag;
+import com.stoury.exception.feed.FeedSearchException;
 import com.stoury.projection.FeedResponseEntity;
 import com.stoury.repository.FeedRepository;
 import com.stoury.service.storage.StorageService;
@@ -65,6 +66,29 @@ public class EventHandlers {
                 feed.getCountry());
 
         feedRepository.saveFeedResponse(feedResponse);
+    }
+
+    @Async
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    public void onFeedResponseUpdateEventHandler(FeedResponseUpdateEvent feedResponseUpdateEvent) {
+        Long feedId = feedResponseUpdateEvent.getFeedId();
+        FeedResponseEntity feedResponse = feedRepository.findFeedResponseById(feedId).orElseThrow(FeedSearchException::new);
+        Feed feedEntity = feedRepository.findById(feedId).orElseThrow(FeedSearchException::new);
+
+        String graphicContentPaths = concat(feedEntity.getGraphicContents());
+        String tagNames = concat(feedEntity.getTags());
+
+        feedResponse.update(
+                graphicContentPaths,
+                tagNames,
+                feedEntity.getCreatedAt(),
+                feedEntity.getTextContent(),
+                feedEntity.getLatitude(),
+                feedEntity.getLongitude(),
+                feedEntity.getCity(),
+                feedEntity.getCountry());
+
     }
 
     private String concat(List<GraphicContent> graphicContents) {

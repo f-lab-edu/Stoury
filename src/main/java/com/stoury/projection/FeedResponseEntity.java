@@ -63,4 +63,22 @@ public class FeedResponseEntity {
         this.city = city;
         this.country = country;
     }
+
+    public void update(String graphicContentPaths,
+                       String tagNames,
+                       LocalDateTime createdAt,
+                       String textContent,
+                       Double latitude,
+                       Double longitude,
+                       String city,
+                       String country){
+        this.graphicContentPaths = graphicContentPaths;
+        this.tagNames = tagNames;
+        this.createdAt = createdAt;
+        this.textContent = textContent;
+        this.latitude = latitude;
+        this.longitude = longitude;
+        this.city = city;
+        this.country = country;
+    }
 }

@@ -6,7 +6,6 @@ import com.stoury.domain.Member
 import com.stoury.domain.Tag
 import com.stoury.projection.FeedResponseEntity
 import com.stoury.repository.FeedRepository
-import com.stoury.service.FeedService
 import com.stoury.service.storage.StorageService
 import spock.lang.Specification
 

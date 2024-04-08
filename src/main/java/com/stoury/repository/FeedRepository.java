@@ -43,6 +43,14 @@ public class FeedRepository {
     }
 
     @Transactional
+    public Optional<FeedResponseEntity> findFeedResponseById(Long feedId) {
+        return Optional.ofNullable(jpaQueryFactory
+                .selectFrom(feedResponseEntity)
+                .where(feedResponseEntity.feedId.eq(feedId))
+                .fetchFirst());
+    }
+
+    @Transactional
     public void delete(Feed deleteFeed) {
         jpaQueryFactory
                 .delete(feed)
