@@ -1,5 +1,6 @@
 package com.stoury.service
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.stoury.domain.Feed
 import com.stoury.domain.GraphicContent
 import com.stoury.domain.Member
@@ -10,10 +11,12 @@ import com.stoury.dto.feed.FeedUpdateRequest
 import com.stoury.event.GraphicDeleteEvent
 import com.stoury.exception.authentication.NotAuthorizedException
 import com.stoury.exception.feed.FeedCreateException
+import com.stoury.projection.FeedResponseEntity
 import com.stoury.repository.FeedRepository
 import com.stoury.repository.LikeRepository
 import com.stoury.repository.MemberRepository
 import com.stoury.service.location.LocationService
+import com.stoury.utils.JsonMapper
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.mock.web.MockMultipartFile
 import spock.lang.Specification
@@ -25,7 +28,9 @@ class FeedServiceTest extends Specification {
     def likeRepository = Mock(LikeRepository)
     def eventPublisher = Mock(ApplicationEventPublisher)
     def locationService = Mock(LocationService)
-    def feedService = new FeedService(feedRepository, memberRepository, likeRepository, tagService, locationService, eventPublisher)
+    def jsonMapper = new JsonMapper(new ObjectMapper())
+    def feedService = new FeedService(feedRepository, memberRepository, likeRepository,
+            tagService, locationService, eventPublisher, jsonMapper)
 
     def writer = Mock(Member)
     def feedCreateRequest = FeedCreateRequest.builder()
@@ -133,20 +138,20 @@ class FeedServiceTest extends Specification {
     def "사용자의 피드 조회 성공"() {
         given:
         def feeds = [
-                new Feed(id: 1L, member: writer, graphicContents: [], textContent: "", latitude: 0.0, longitude: 0.0, tags: [] as Set, city: "", country: ""),
-                new Feed(id: 2L, member: writer, graphicContents: [], textContent: "", latitude: 0.0, longitude: 0.0, tags: [] as Set, city: "", country: ""),
-                new Feed(id: 3L, member: writer, graphicContents: [], textContent: "", latitude: 0.0, longitude: 0.0, tags: [] as Set, city: "", country: ""),
-                new Feed(id: 4L, member: writer, graphicContents: [], textContent: "", latitude: 0.0, longitude: 0.0, tags: [] as Set, city: "", country: ""),
-                new Feed(id: 5L, member: writer, graphicContents: [], textContent: "", latitude: 0.0, longitude: 0.0, tags: [] as Set, city: "", country: ""),
-                new Feed(id: 6L, member: writer, graphicContents: [], textContent: "", latitude: 0.0, longitude: 0.0, tags: [] as Set, city: "", country: ""),
-                new Feed(id: 7L, member: writer, graphicContents: [], textContent: "", latitude: 0.0, longitude: 0.0, tags: [] as Set, city: "", country: ""),
-                new Feed(id: 8L, member: writer, graphicContents: [], textContent: "", latitude: 0.0, longitude: 0.0, tags: [] as Set, city: "", country: ""),
-                new Feed(id: 9L, member: writer, graphicContents: [], textContent: "", latitude: 0.0, longitude: 0.0, tags: [] as Set, city: "", country: ""),
-                new Feed(id: 10L, member: writer, graphicContents: [], textContent: "", latitude: 0.0, longitude: 0.0, tags: [] as Set, city: "", country: ""),
+                new FeedResponseEntity(1L, writer.id, writer.username,  '[{"id":null, "path":null}]',  "[null]",null,"", 0.0, 0.0,"", ""),
+                new FeedResponseEntity(2L, writer.id, writer.username,  '[{"id":null, "path":null}]',  "[null]",null,"", 0.0, 0.0,"", ""),
+                new FeedResponseEntity(3L, writer.id, writer.username,  '[{"id":null, "path":null}]',  "[null]",null,"", 0.0, 0.0,"", ""),
+                new FeedResponseEntity(4L, writer.id, writer.username,  '[{"id":null, "path":null}]',  "[null]",null,"", 0.0, 0.0,"", ""),
+                new FeedResponseEntity(5L, writer.id, writer.username,  '[{"id":null, "path":null}]',  "[null]",null,"", 0.0, 0.0,"", ""),
+                new FeedResponseEntity(6L, writer.id, writer.username,  '[{"id":null, "path":null}]',  "[null]",null,"", 0.0, 0.0,"", ""),
+                new FeedResponseEntity(7L, writer.id, writer.username,  '[{"id":null, "path":null}]',  "[null]",null,"", 0.0, 0.0,"", ""),
+                new FeedResponseEntity(8L, writer.id, writer.username,  '[{"id":null, "path":null}]',  "[null]",null,"", 0.0, 0.0,"", ""),
+                new FeedResponseEntity(9L, writer.id, writer.username,  '[{"id":null, "path":null}]',  "[null]",null,"", 0.0, 0.0,"", ""),
+                new FeedResponseEntity(10L, writer.id, writer.username,  '[{"id":null, "path":null}]',  "[null]",null,"", 0.0, 0.0,"", ""),
         ]
         when:
         feedService.getFeedsOfMemberId(1L, 20L)
         then:
-        1 * feedRepository.findAllByMemberAndIdLessThan(_,_,_) >> feeds
+        1 * feedRepository.findAllFeedsByMemberAndIdLessThan(_, _, _) >> feeds
     }
 }

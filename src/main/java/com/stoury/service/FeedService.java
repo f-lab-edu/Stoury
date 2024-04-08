@@ -1,24 +1,25 @@
 package com.stoury.service;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.stoury.domain.Feed;
 import com.stoury.domain.GraphicContent;
 import com.stoury.domain.Member;
 import com.stoury.domain.Tag;
-import com.stoury.dto.feed.FeedCreateRequest;
-import com.stoury.dto.feed.FeedResponse;
-import com.stoury.dto.feed.FeedUpdateRequest;
-import com.stoury.dto.feed.LocationResponse;
+import com.stoury.dto.SimpleMemberResponse;
+import com.stoury.dto.feed.*;
 import com.stoury.event.GraphicDeleteEvent;
 import com.stoury.event.GraphicSaveEvent;
 import com.stoury.exception.authentication.NotAuthorizedException;
 import com.stoury.exception.feed.FeedCreateException;
 import com.stoury.exception.feed.FeedSearchException;
 import com.stoury.exception.member.MemberSearchException;
+import com.stoury.projection.FeedResponseEntity;
 import com.stoury.repository.FeedRepository;
 import com.stoury.repository.LikeRepository;
 import com.stoury.repository.MemberRepository;
 import com.stoury.service.location.LocationService;
 import com.stoury.utils.FileUtils;
+import com.stoury.utils.JsonMapper;
 import com.stoury.utils.SupportedFileType;
 import com.stoury.utils.cachekeys.PageSize;
 import lombok.RequiredArgsConstructor;
@@ -32,6 +33,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -49,6 +51,7 @@ public class FeedService {
     private final TagService tagService;
     private final LocationService locationService;
     private final ApplicationEventPublisher eventPublisher;
+    private final JsonMapper jsonMapper;
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public FeedResponse createFeed(Long writerId, FeedCreateRequest feedCreateRequest,
@@ -121,7 +124,7 @@ public class FeedService {
 
         Pageable page = PageRequest.of(0, PageSize.FEED_PAGE_SIZE, Sort.by("createdAt").descending());
 
-        List<Feed> feeds = feedRepository.findAllByMemberAndIdLessThan(feedWriter, offsetIdNotNull, page);
+        List<FeedResponseEntity> feeds = feedRepository.findAllFeedsByMemberAndIdLessThan(feedWriter, offsetIdNotNull, page);
 
         return feeds.stream()
                 .map(this::toFeedResponse)
@@ -138,6 +141,20 @@ public class FeedService {
         return feeds.stream()
                 .map(this::toFeedResponse)
                 .toList();
+    }
+
+    private FeedResponse toFeedResponse(FeedResponseEntity feedResponseEntity) {
+        String feedIdStr = feedResponseEntity.getFeedId().toString();
+        long likes = likeRepository.getCountByFeedId(feedIdStr);
+
+        SimpleMemberResponse writer = new SimpleMemberResponse(feedResponseEntity.getWriterId(), feedResponseEntity.getWriterUsername());
+        List<GraphicContentResponse> graphicContents =
+                jsonMapper.stringJsonToObject(feedResponseEntity.getGraphicContentPaths(), new TypeReference<List<GraphicContentResponse>>() {});
+        Set<String> tags = jsonMapper.stringJsonToObject(feedResponseEntity.getTagNames(), new TypeReference<Set<String>>() {});
+        LocationResponse location = new LocationResponse(feedResponseEntity.getCity(), feedResponseEntity.getCountry());
+
+
+        return FeedResponse.from(feedResponseEntity, writer, graphicContents, tags, location, likes);
     }
 
     private FeedResponse toFeedResponse(Feed feed) {

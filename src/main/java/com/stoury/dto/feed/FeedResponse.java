@@ -3,6 +3,7 @@ package com.stoury.dto.feed;
 import com.stoury.domain.Feed;
 import com.stoury.domain.Tag;
 import com.stoury.dto.SimpleMemberResponse;
+import com.stoury.projection.FeedResponseEntity;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -32,5 +33,24 @@ public record FeedResponse(Long feedId,
                 feedLikes,
                 feed.getCreatedAt()
         );
+    }
+
+    public static FeedResponse from(FeedResponseEntity feedResponseEntity,
+                                    SimpleMemberResponse writer,
+                                    List<GraphicContentResponse> graphicContents,
+                                    Set<String> tags,
+                                    LocationResponse location,
+                                    long likes) {
+        return new FeedResponse(
+                feedResponseEntity.getFeedId(),
+                writer,
+                graphicContents,
+                feedResponseEntity.getTextContent(),
+                feedResponseEntity.getLatitude(),
+                feedResponseEntity.getLongitude(),
+                tags,
+                location,
+                likes,
+                feedResponseEntity.getCreatedAt());
     }
 }

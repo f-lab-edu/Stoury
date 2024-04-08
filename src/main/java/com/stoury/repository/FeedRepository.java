@@ -5,6 +5,9 @@ import com.querydsl.core.types.dsl.StringPath;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.stoury.domain.Feed;
 import com.stoury.domain.Member;
+import com.stoury.dto.feed.FeedResponse;
+import com.stoury.projection.FeedResponseEntity;
+import com.stoury.projection.QFeedResponseEntity;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
@@ -18,6 +21,7 @@ import java.util.Optional;
 
 import static com.stoury.domain.QFeed.feed;
 import static com.stoury.domain.QTag.tag;
+import static com.stoury.projection.QFeedResponseEntity.*;
 
 @Repository
 @RequiredArgsConstructor
@@ -49,23 +53,12 @@ public class FeedRepository {
     }
 
     @Transactional(readOnly = true)
-    public List<Feed> findAllByMemberAndIdLessThan(Member feedWriter, Long offsetId, Pageable page) {
-        List<Long> ids = findAllFeedIdByMemberAndIdLessThan(feedWriter, offsetId, page);
-
-        if (ids.isEmpty()) {
-            return Collections.emptyList();
-        }
-
-        return findAllIn(ids);
-    }
-
-    private List<Long> findAllFeedIdByMemberAndIdLessThan(Member feedWriter, Long offsetId, Pageable page) {
+    public List<FeedResponseEntity> findAllFeedsByMemberAndIdLessThan(Member feedWriter, Long offsetId, Pageable page){
         return jpaQueryFactory
-                .select(feed.id)
-                .from(feed)
-                .where(feed.member.eq(feedWriter)
-                        .and(feed.id.lt(offsetId)))
-                .orderBy(feed.id.desc())
+                .selectFrom(feedResponseEntity)
+                .where(feedResponseEntity.feedId.lt(offsetId)
+                        .and(feedResponseEntity.writerId.eq(feedWriter.getId())))
+                .orderBy(feedResponseEntity.feedId.desc())
                 .offset(page.getOffset())
                 .limit(page.getPageSize())
                 .fetch();
