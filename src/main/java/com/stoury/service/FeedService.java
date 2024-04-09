@@ -215,10 +215,10 @@ public class FeedService {
 
     @Transactional(readOnly = true)
     public FeedResponse getFeed(Long feedId) {
-        Feed feed = feedRepository.findById(Objects.requireNonNull(feedId))
+        Long feedIdNonNull = Objects.requireNonNull(feedId);
+        FeedResponseEntity feedResponseEntity = feedRepository.findFeedResponseById(feedIdNonNull)
                 .orElseThrow(FeedSearchException::new);
-        long likes = likeRepository.getCountByFeedId(feed.getId().toString());
 
-        return FeedResponse.from(feed, likes);
+        return toFeedResponse(feedResponseEntity);
     }
 }
