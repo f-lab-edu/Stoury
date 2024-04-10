@@ -5,42 +5,46 @@ import com.stoury.domain.GraphicContent;
 import com.stoury.domain.Member;
 import com.stoury.domain.Tag;
 import com.stoury.exception.feed.FeedSearchException;
+import com.stoury.exception.graphiccontent.GraphicContentsException;
 import com.stoury.projection.FeedResponseEntity;
 import com.stoury.repository.FeedRepository;
 import com.stoury.service.storage.StorageService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class EventHandlers {
     private final StorageService storageService;
     private final FeedRepository feedRepository;
 
-    @Async
-    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
-    public void onFileSaveEventHandler(GraphicSaveEvent graphicSaveEvent) {
-        MultipartFile fileToSave = graphicSaveEvent.getFileToSave();
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_ROLLBACK)
+    public void onFeedCreationFailEventHandler(GraphicSaveEvent graphicSaveEvent) {
         String path = graphicSaveEvent.getPath();
-        storageService.saveFileAtPath(fileToSave, Paths.get(path));
+        storageService.deleteFileAtPath(Paths.get(path));
     }
 
     @Async
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void onFileDeleteEventHandler(GraphicDeleteEvent graphicDeleteEvent) {
         String path = graphicDeleteEvent.getPath();
-        storageService.deleteFileAtPath(Paths.get(path));
+        try {
+            storageService.deleteFileAtPath(Paths.get(path));
+        } catch (GraphicContentsException exception) {
+            log.error(exception.getMessage());
+        }
     }
 
     @Async

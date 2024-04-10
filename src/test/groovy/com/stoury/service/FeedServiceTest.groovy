@@ -19,12 +19,14 @@ import com.stoury.repository.FeedRepository
 import com.stoury.repository.LikeRepository
 import com.stoury.repository.MemberRepository
 import com.stoury.service.location.LocationService
+import com.stoury.service.storage.StorageService
 import com.stoury.utils.JsonMapper
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.mock.web.MockMultipartFile
 import spock.lang.Specification
 
 class FeedServiceTest extends Specification {
+    def storageService = Mock(StorageService)
     def memberRepository = Mock(MemberRepository)
     def tagService = Mock(TagService)
     def feedRepository = Mock(FeedRepository)
@@ -32,7 +34,7 @@ class FeedServiceTest extends Specification {
     def eventPublisher = Mock(ApplicationEventPublisher)
     def locationService = Mock(LocationService)
     def jsonMapper = new JsonMapper(new ObjectMapper())
-    def feedService = new FeedService(feedRepository, memberRepository, likeRepository,
+    def feedService = new FeedService(storageService, feedRepository, memberRepository, likeRepository,
             tagService, locationService, eventPublisher, jsonMapper)
 
     def writer = Mock(Member)
@@ -132,12 +134,13 @@ class FeedServiceTest extends Specification {
     def "피드 삭제 성공"() {
         given:
         def writer = new Member(id: 1)
-        def feed = new Feed(id: 1, member: writer)
+        def feed = new Feed(id: 1, member: writer, graphicContents: [new GraphicContent("/gc1", 0)])
         feedRepository.findById(_) >> Optional.of(feed)
         when:
         feedService.deleteFeedIfOwner(feed.id, writer.id)
         then:
         1 * feedRepository.delete(_)
+        1 * eventPublisher.publishEvent(_ as GraphicDeleteEvent)
         1 * eventPublisher.publishEvent(_ as FeedResponseDeleteEvent)
     }
 
