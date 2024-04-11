@@ -17,6 +17,7 @@ import com.stoury.repository.FeedRepository;
 import com.stoury.repository.LikeRepository;
 import com.stoury.repository.MemberRepository;
 import com.stoury.service.location.LocationService;
+import com.stoury.service.storage.StorageService;
 import com.stoury.utils.FileUtils;
 import com.stoury.utils.JsonMapper;
 import com.stoury.utils.SupportedFileType;
@@ -32,6 +33,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -43,6 +45,7 @@ import java.util.stream.Collectors;
 public class FeedService {
     @Value("${path-prefix}")
     public String pathPrefix;
+    private final StorageService storageService;
     private final FeedRepository feedRepository;
     private final MemberRepository memberRepository;
     private final LikeRepository likeRepository;
@@ -76,10 +79,12 @@ public class FeedService {
         for (int i = 0; i < graphicContents.size(); i++) {
             MultipartFile file = graphicContents.get(i);
 
-            GraphicSaveEvent event = publishNewFileEvent(file);
-            String contentPath = event.getPath();
+            String path = FileUtils.createFilePath(file, pathPrefix);
 
-            graphicContentList.add(new GraphicContent(contentPath, i));
+            graphicContentList.add(new GraphicContent(path, i));
+
+            storageService.saveFileAtPath(file, Paths.get(path));
+            eventPublisher.publishEvent(new GraphicSaveEvent(this, file, path)); // NOSONAR
         }
 
         return graphicContentList;
@@ -95,13 +100,6 @@ public class FeedService {
         return tagNames.stream()
                 .map(tagService::getTagOrElseCreate)
                 .collect(Collectors.toSet());
-    }
-
-    private GraphicSaveEvent publishNewFileEvent(MultipartFile file) {
-        String path = FileUtils.createFilePath(file, pathPrefix);
-        GraphicSaveEvent event = new GraphicSaveEvent(this, file, path);
-        eventPublisher.publishEvent(event); // NOSONAR
-        return event;
     }
 
     private void validate(Long writerId, FeedCreateRequest feedCreateRequest, List<MultipartFile> graphicContents) {
@@ -149,8 +147,10 @@ public class FeedService {
 
         SimpleMemberResponse writer = new SimpleMemberResponse(feedResponseEntity.getWriterId(), feedResponseEntity.getWriterUsername());
         List<GraphicContentResponse> graphicContents =
-                jsonMapper.stringJsonToObject(feedResponseEntity.getGraphicContentPaths(), new TypeReference<List<GraphicContentResponse>>() {});
-        Set<String> tags = jsonMapper.stringJsonToObject(feedResponseEntity.getTagNames(), new TypeReference<Set<String>>() {});
+                jsonMapper.stringJsonToObject(feedResponseEntity.getGraphicContentPaths(), new TypeReference<List<GraphicContentResponse>>() {
+                });
+        Set<String> tags = jsonMapper.stringJsonToObject(feedResponseEntity.getTagNames(), new TypeReference<Set<String>>() {
+        });
         LocationResponse location = new LocationResponse(feedResponseEntity.getCity(), feedResponseEntity.getCountry());
 
 
@@ -167,7 +167,11 @@ public class FeedService {
         feed.updateTags(getOrCreateTags(feedUpdateRequest.tagNames()));
         feed.deleteSelectedGraphics(feedUpdateRequest.deleteGraphicContentSequence());
 
-        publishDeleteFileEvents(beforeDeleteGraphicContents, feed.getGraphicContents());
+        List<GraphicContent> toDeleteGraphicContents = beforeDeleteGraphicContents.stream()
+                .filter(graphicContent -> !feed.getGraphicContents().contains(graphicContent))
+                .toList();
+
+        publishDeleteFileEvents(toDeleteGraphicContents);
         eventPublisher.publishEvent(new FeedResponseUpdateEvent(this, feed.getId()));
 
         return FeedResponse.from(feed, likeRepository.getCountByFeedId(feed.getId().toString()));
@@ -185,12 +189,10 @@ public class FeedService {
         return updateFeed(feedId, feedUpdateRequest);
     }
 
-    private void publishDeleteFileEvents(List<GraphicContent> beforeDeleteGraphicContents,
-                                         List<GraphicContent> afterDeleteGraphicContents) {
-        for (GraphicContent beforeDeleteGraphicContent : beforeDeleteGraphicContents) {
-            if (!afterDeleteGraphicContents.contains(beforeDeleteGraphicContent)) {
-                eventPublisher.publishEvent(new GraphicDeleteEvent(this, beforeDeleteGraphicContent.getPath()));
-            }
+    private void publishDeleteFileEvents(List<GraphicContent> toDeleteGraphicContents) {
+        for (GraphicContent toDeleteGraphicContent : toDeleteGraphicContents) {
+            String path = toDeleteGraphicContent.getPath();
+            eventPublisher.publishEvent(new GraphicDeleteEvent(this, path));
         }
     }
 
@@ -198,6 +200,8 @@ public class FeedService {
         Feed feed = feedRepository.findById(Objects.requireNonNull(feedId))
                 .orElseThrow(FeedSearchException::new);
         feedRepository.delete(feed);
+
+        publishDeleteFileEvents(feed.getGraphicContents());
         eventPublisher.publishEvent(new FeedResponseDeleteEvent(this, feedId));
     }
 
@@ -215,10 +219,10 @@ public class FeedService {
 
     @Transactional(readOnly = true)
     public FeedResponse getFeed(Long feedId) {
-        Feed feed = feedRepository.findById(Objects.requireNonNull(feedId))
+        Long feedIdNonNull = Objects.requireNonNull(feedId);
+        FeedResponseEntity feedResponseEntity = feedRepository.findFeedResponseById(feedIdNonNull)
                 .orElseThrow(FeedSearchException::new);
-        long likes = likeRepository.getCountByFeedId(feed.getId().toString());
 
-        return FeedResponse.from(feed, likes);
+        return toFeedResponse(feedResponseEntity);
     }
 }

@@ -8,6 +8,7 @@ import com.stoury.exception.diary.DiarySearchException;
 import com.stoury.exception.feed.FeedCreateException;
 import com.stoury.exception.feed.FeedSearchException;
 import com.stoury.exception.feed.FeedUpdateException;
+import com.stoury.exception.graphiccontent.GraphicContentsException;
 import com.stoury.exception.location.GeocodeApiException;
 import com.stoury.exception.member.MemberCreateException;
 import com.stoury.exception.member.MemberDeleteException;
@@ -39,10 +40,10 @@ public class ExceptionController {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ErrorResponse.of(ex.getMessage()));
     }
 
-    @ExceptionHandler(value = {GeocodeApiException.class})
+    @ExceptionHandler(value = {GeocodeApiException.class, GraphicContentsException.class})
     public ResponseEntity<ErrorResponse> handle500(RuntimeException ex) {
         log.error(ex.getMessage());
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ErrorResponse.of(ex.getMessage()));
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ErrorResponse.of("Some error occur."));
     }
 
     @ExceptionHandler(value = {NotAuthorizedException.class})
