@@ -10,6 +10,7 @@ import com.stoury.repository.*
 import com.stoury.service.FeedService
 import com.stoury.service.MemberService
 import com.stoury.utils.cachekeys.PageSize
+import com.stoury.utils.cachekeys.RecommendFeedsKey
 import jakarta.persistence.EntityManager
 import jakarta.persistence.PersistenceContext
 import org.springframework.beans.factory.annotation.Autowired
@@ -61,7 +62,8 @@ class IntegrationTest extends Specification {
     AuthenticationSuccessHandler authenticationSuccessHandler
     @Autowired
     LogoutSuccessHandler logoutSuccessHandler
-
+    @Autowired
+    RecommendFeedsRepository recommendFeedsRepository
     def member = new Member("aaa@dddd.com", "qwdqwdqwd", "username", null)
 
     def setup() {
@@ -339,5 +341,21 @@ class IntegrationTest extends Specification {
         // 거리 오차는 +- 1km 이내여야함
         26 <= member2.distance() && member2.distance() <= 28
         138 <= member3.distance() && member3.distance() <= 140
+    }
+
+    def "리포지토리에서 적당한 개수의 임의 추천 피드 id반환"(){
+        given:
+        def key = RecommendFeedsKey.getRecommendFeedsKey("1");
+        redisTemplate.opsForSet().add(key,
+                "2", "3", "4", "5", "6", "7", "8", "9", "10",
+                "12", "13", "14", "15", "16", "17", "18", "19", "20",
+                "22", "23", "24", "25", "26", "27", "28", "29", "30",
+                "32", "33", "34", "35", "36", "37", "38", "39", "40",
+                "42", "43", "44", "45", "46", "47", "48", "49", "50",
+                "52", "53", "54", "55", "56", "57", "58", "59", "60")
+        when:
+        def recommendFeedIds = recommendFeedsRepository.findAllByMemberId(1L)
+        then:
+        recommendFeedIds.size() == PageSize.RECOMMEND_FEEDS_SIZE
     }
 }
