@@ -175,4 +175,13 @@ class FeedServiceTest extends Specification {
         then:
         1 * feedRepository.findAllFeedsByIdIn(feedIds) >> []
     }
+
+    def "사용자가 피드를 조회시 기록을 남김"(){
+        given:
+        feedRepository.findById(_ as Long) >> Optional.of(new Feed())
+        when:
+        feedService.addViewedFeeds(1L,1L)
+        then:
+        1 * recommendFeedRepository.addViewedFeed(1L, 1L)
+    }
 }

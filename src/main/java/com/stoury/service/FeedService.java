@@ -228,6 +228,7 @@ public class FeedService {
     @Transactional(readOnly = true)
     public List<FeedResponse> getRecommendedFeeds(Long memberId) {
         Long memberIdNonNull = Objects.requireNonNull(memberId);
+        memberRepository.findById(memberIdNonNull).orElseThrow(MemberSearchException::new);
 
         Collection<Long> recommendFeedIds = recommendFeedsRepository.findAllByMemberId(memberIdNonNull);
 
@@ -236,5 +237,15 @@ public class FeedService {
         return feeds.stream()
                 .map(this::toFeedResponse)
                 .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public void addViewedFeeds(Long memberId, Long feedId) {
+        Long memberIdNonNull = Objects.requireNonNull(memberId);
+        Long feedIdNonNull = Objects.requireNonNull(feedId);
+        memberRepository.findById(memberIdNonNull).orElseThrow(MemberSearchException::new);
+        feedRepository.findById(feedIdNonNull).orElseThrow(FeedSearchException::new);
+
+        recommendFeedsRepository.addViewedFeed(memberIdNonNull, feedIdNonNull);
     }
 }

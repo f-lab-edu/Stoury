@@ -67,4 +67,9 @@ public class FeedController {
     public List<FeedResponse> getRecommendedFeeds(@AuthenticationPrincipal AuthenticatedMember authenticatedMember) {
         return feedService.getRecommendedFeeds(authenticatedMember.getId());
     }
+
+    @PostMapping("/feeds/viewed/{feedId}")
+    public void addViewedFeeds(@AuthenticationPrincipal AuthenticatedMember authenticatedMember, Long feedId) {
+        feedService.addViewedFeeds(authenticatedMember.getId(), feedId);
+    }
 }
