@@ -18,6 +18,7 @@ import com.stoury.projection.FeedResponseEntity
 import com.stoury.repository.FeedRepository
 import com.stoury.repository.LikeRepository
 import com.stoury.repository.MemberRepository
+import com.stoury.repository.RecommendFeedsRepository
 import com.stoury.service.location.LocationService
 import com.stoury.service.storage.StorageService
 import com.stoury.utils.JsonMapper
@@ -34,8 +35,9 @@ class FeedServiceTest extends Specification {
     def eventPublisher = Mock(ApplicationEventPublisher)
     def locationService = Mock(LocationService)
     def jsonMapper = new JsonMapper(new ObjectMapper())
+    def recommendFeedRepository = Mock(RecommendFeedsRepository);
     def feedService = new FeedService(storageService, feedRepository, memberRepository, likeRepository,
-            tagService, locationService, eventPublisher, jsonMapper)
+            tagService, locationService, eventPublisher, jsonMapper, recommendFeedRepository)
 
     def writer = Mock(Member)
     def feedCreateRequest = FeedCreateRequest.builder()
@@ -162,5 +164,15 @@ class FeedServiceTest extends Specification {
         feedService.getFeedsOfMemberId(1L, 20L)
         then:
         1 * feedRepository.findAllFeedsByMemberAndIdLessThan(_, _, _) >> feeds
+    }
+
+    def "개인 맞춤 피드 제공 성공"(){
+        given:
+        def feedIds = [1L,2L,4L,5L]
+        recommendFeedRepository.findAllByMemberId(_ as Long) >> feedIds
+        when:
+        feedService.getRecommendedFeeds(1L)
+        then:
+        1 * feedRepository.findAllFeedsByIdIn(feedIds) >> []
     }
 }

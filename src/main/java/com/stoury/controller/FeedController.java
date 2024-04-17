@@ -62,4 +62,9 @@ public class FeedController {
                            @PathVariable Long feedId) {
         feedService.deleteFeedIfOwner(feedId, authenticatedMember.getId());
     }
+
+    @GetMapping("/feeds/recommend")
+    public List<FeedResponse> getRecommendedFeeds(@AuthenticationPrincipal AuthenticatedMember authenticatedMember) {
+        return feedService.getRecommendedFeeds(authenticatedMember.getId());
+    }
 }

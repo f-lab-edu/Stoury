@@ -83,6 +83,14 @@ public class FeedRepository {
                 .fetch();
     }
 
+    @Transactional(readOnly = true)
+    public List<FeedResponseEntity> findAllFeedsByIdIn(Collection<Long> feedIds) {
+        return jpaQueryFactory
+                .selectFrom(feedResponseEntity)
+                .where(feedResponseEntity.feedId.in(feedIds))
+                .fetch();
+    }
+
     private List<Long> findAllFeedIdByTagAndIdLessThan(String tagName, Long offsetId, Pageable page) {
         return jpaQueryFactory
                 .select(feed.id)

@@ -16,6 +16,7 @@ import com.stoury.projection.FeedResponseEntity;
 import com.stoury.repository.FeedRepository;
 import com.stoury.repository.LikeRepository;
 import com.stoury.repository.MemberRepository;
+import com.stoury.repository.RecommendFeedsRepository;
 import com.stoury.service.location.LocationService;
 import com.stoury.service.storage.StorageService;
 import com.stoury.utils.FileUtils;
@@ -34,10 +35,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -53,6 +51,7 @@ public class FeedService {
     private final LocationService locationService;
     private final ApplicationEventPublisher eventPublisher;
     private final JsonMapper jsonMapper;
+    private final RecommendFeedsRepository recommendFeedsRepository;
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public FeedResponse createFeed(Long writerId, FeedCreateRequest feedCreateRequest,
@@ -224,5 +223,18 @@ public class FeedService {
                 .orElseThrow(FeedSearchException::new);
 
         return toFeedResponse(feedResponseEntity);
+    }
+
+    @Transactional(readOnly = true)
+    public List<FeedResponse> getRecommendedFeeds(Long memberId) {
+        Long memberIdNonNull = Objects.requireNonNull(memberId);
+
+        Collection<Long> recommendFeedIds = recommendFeedsRepository.findAllByMemberId(memberIdNonNull);
+
+        List<FeedResponseEntity> feeds = feedRepository.findAllFeedsByIdIn(recommendFeedIds);
+
+        return feeds.stream()
+                .map(this::toFeedResponse)
+                .toList();
     }
 }
