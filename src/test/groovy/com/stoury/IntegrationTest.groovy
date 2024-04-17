@@ -11,6 +11,7 @@ import com.stoury.service.FeedService
 import com.stoury.service.MemberService
 import com.stoury.utils.cachekeys.PageSize
 import com.stoury.utils.cachekeys.RecommendFeedsKey
+import com.stoury.utils.cachekeys.ViewedFeedsKey
 import jakarta.persistence.EntityManager
 import jakarta.persistence.PersistenceContext
 import org.springframework.beans.factory.annotation.Autowired
@@ -357,5 +358,16 @@ class IntegrationTest extends Specification {
         def recommendFeedIds = recommendFeedsRepository.findAllByMemberId(1L)
         then:
         recommendFeedIds.size() == PageSize.RECOMMEND_FEEDS_SIZE
+    }
+
+    def "사용자가 본 피드 id가 ViewedFeeds:{memberID}의 키에 셋으로 저장됨"() {
+        given:
+        def key = ViewedFeedsKey.getViewedFeedsKey("1")
+        when:
+        recommendFeedsRepository.addViewedFeed(1,1)
+        recommendFeedsRepository.addViewedFeed(1,2)
+        recommendFeedsRepository.addViewedFeed(1,3)
+        then:
+        redisTemplate.opsForSet().members(key).containsAll(["1","2","3"])
     }
 }
