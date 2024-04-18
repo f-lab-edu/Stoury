@@ -37,4 +37,12 @@ public class RecommendFeedsRepository {
 
         opsForSet.add(key, feedIdNonNull);
     }
+
+    public List<Long> getViewedFeed(Long memberId){
+        String memberIdNonNull = Objects.requireNonNull(memberId, "member id cannot be null").toString();
+        String key = ViewedFeedsKey.getViewedFeedsKey(memberIdNonNull);
+
+        return opsForSet.members(key).stream().map(Long::parseLong).toList();
+    }
+
 }

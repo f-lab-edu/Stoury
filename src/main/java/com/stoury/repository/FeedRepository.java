@@ -1,11 +1,13 @@
 package com.stoury.repository;
 
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.core.types.dsl.StringPath;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.stoury.domain.Feed;
 import com.stoury.domain.Member;
 import com.stoury.projection.FeedResponseEntity;
+import com.stoury.utils.cachekeys.PageSize;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
@@ -69,6 +71,14 @@ public class FeedRepository {
                 .orderBy(feedResponseEntity.feedId.desc())
                 .offset(page.getOffset())
                 .limit(page.getPageSize())
+                .fetch();
+    }
+
+    @Transactional(readOnly = true)
+    public List<FeedResponseEntity> findAllFeedsByMemberId(Long memberId) {
+        return jpaQueryFactory
+                .selectFrom(feedResponseEntity)
+                .where(feedResponseEntity.writerId.eq(memberId))
                 .fetch();
     }
 
@@ -161,5 +171,17 @@ public class FeedRepository {
         jpaQueryFactory.delete(feedResponseEntity)
                 .where(feedResponseEntity.feedId.eq(feedId))
                 .execute();
+    }
+
+    @Transactional(readOnly = true)
+    public List<Long> findRandomFeedIdsByTagName(Collection<String> tagNames){
+        return jpaQueryFactory.
+                select(feed.id)
+                .from(feed)
+                .join(feed.tags, tag)
+                .where(tag.tagName.in(tagNames))
+                .orderBy(Expressions.numberTemplate(Double.class, "function('random')").asc())
+                .limit(PageSize.RANDOM_FEEDS_FETCH_SIZE)
+                .fetch();
     }
 }
