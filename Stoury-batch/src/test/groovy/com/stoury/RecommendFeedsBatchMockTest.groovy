@@ -2,6 +2,7 @@ package com.stoury
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.stoury.batch.BatchRecommendFeedsConfig
+import com.stoury.dto.FrequentTags
 import com.stoury.projection.FeedResponseEntity
 import com.stoury.repository.FeedRepository
 import com.stoury.repository.RecommendFeedsRepository
@@ -44,6 +45,13 @@ class RecommendFeedsBatchMockTest extends Specification {
     }
 
     def "randomFeedsOfTagProcessor 테스트"() {
-
+        given:
+        feedRepository.findRandomFeedIdsByTagName(_) >> [1L,2L,3L]
+        def processor = batchConfig.randomFeedsOfTagProcessor()
+        when:
+        def result = processor.process(new FrequentTags(1L, ["t1","t2","t3"]))
+        then:
+        result.memberId() == 1L
+        result.feedIds().containsAll([1L,2L,3L])
     }
 }

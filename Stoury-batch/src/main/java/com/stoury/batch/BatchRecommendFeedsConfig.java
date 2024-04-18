@@ -103,7 +103,7 @@ public class BatchRecommendFeedsConfig {
         };
     }
 
-    public JpaPagingItemReader<Long> memberIdReader() {
+    private JpaPagingItemReader<Long> memberIdReader() {
         return new JpaPagingItemReaderBuilder<Long>()
                 .name("memberIdReader")
                 .pageSize(1000)
@@ -112,7 +112,7 @@ public class BatchRecommendFeedsConfig {
                 .build();
     }
 
-    public ItemProcessor<Long, FrequentTags> viewedTagsProcessor() {
+    private ItemProcessor<Long, FrequentTags> viewedTagsProcessor() {
         return memberId -> {
             List<String> tagNames = getFrequentTagsOfViewedFeeds(memberId);
             return new FrequentTags(memberId, tagNames);
@@ -134,7 +134,7 @@ public class BatchRecommendFeedsConfig {
         return recommendFeedsRepository.getViewedFeed(memberId);
     }
 
-    public List<String> flatTagNames(String tagNamesJson){
+    private List<String> flatTagNames(String tagNamesJson){
         return jsonMapper.stringJsonToObject(tagNamesJson, new TypeReference<List<String>>() {});
     }
 }
