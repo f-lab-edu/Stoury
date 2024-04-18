@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.stoury.batch.BatchRecommendFeedsConfig
 import com.stoury.projection.FeedResponseEntity
 import com.stoury.repository.FeedRepository
+import com.stoury.repository.RecommendFeedsRepository
 import com.stoury.utils.JsonMapper
 import com.stoury.utils.cachekeys.PageSize
 import jakarta.persistence.EntityManagerFactory
@@ -13,13 +14,14 @@ import spock.lang.Specification
 class RecommendFeedsBatchMockTest extends Specification {
     def redisTemplate = Mock(StringRedisTemplate)
     def emf = Mock(EntityManagerFactory)
+    def recommendFeedRepository = Mock(RecommendFeedsRepository)
     def feedRepository = Mock(FeedRepository)
     def jsonMapper = new JsonMapper(new ObjectMapper())
-    def batchConfig = new BatchRecommendFeedsConfig(redisTemplate, emf, feedRepository, jsonMapper)
+    def batchConfig = new BatchRecommendFeedsConfig(redisTemplate, emf, feedRepository, recommendFeedRepository, jsonMapper)
 
     def "viewedTagProcessor 테스트"() {
         given:
-        feedRepository.findAllFeedsByMemberId(_ as Long) >> [
+        feedRepository.findAllFeedsByIdIn(_) >> [
                 new FeedResponseEntity(tagNames: '[ "tag1", "tag2", "tag3", "tag4" ]'),
                 new FeedResponseEntity(tagNames: '[ "tag2", "tag3", "tag4", "tag5" ]'),
                 new FeedResponseEntity(tagNames: '[ "tag3", "tag4"]'),
@@ -37,7 +39,11 @@ class RecommendFeedsBatchMockTest extends Specification {
         def result = processor.process(memberId)
         then:
         result.viewedTags().size() == PageSize.FREQUENT_TAGS_SIZE
-        result.viewedTags().containsAll(["tag2","tag3","tag4","tag5"])
+        result.viewedTags().containsAll(["tag2", "tag3", "tag4", "tag5"])
         result.memberId() == 1L
+    }
+
+    def "randomFeedsOfTagProcessor 테스트"() {
+
     }
 }

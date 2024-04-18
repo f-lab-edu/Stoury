@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.stoury.dto.FrequentTags;
 import com.stoury.dto.RecommendFeedIds;
 import com.stoury.repository.FeedRepository;
+import com.stoury.repository.RecommendFeedsRepository;
 import com.stoury.utils.JsonMapper;
 import com.stoury.utils.cachekeys.FrequentTagsKey;
 import com.stoury.utils.cachekeys.PageSize;
@@ -36,6 +37,7 @@ public class BatchRecommendFeedsConfig {
     private final RedisTemplate redisTemplate;
     private final EntityManagerFactory entityManagerFactory;
     private final FeedRepository feedRepository;
+    private final RecommendFeedsRepository recommendFeedsRepository;
     private final JsonMapper jsonMapper;
 
     @Bean
@@ -118,14 +120,18 @@ public class BatchRecommendFeedsConfig {
     }
 
     private List<String> getFrequentTagsOfViewedFeeds(Long memberId) {
-        return feedRepository.findAllFeedsByMemberId(memberId).stream()
-                .flatMap(feedResponse -> flatTagNames(feedResponse.getTagNames()).stream())
+        return feedRepository.findAllFeedsByIdIn(viewedFeedsOfMember(memberId)).stream()
+                .flatMap(feed -> flatTagNames(feed.getTagNames()).stream())
                 .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()))
                 .entrySet().stream()
                 .sorted(Map.Entry.<String, Long>comparingByValue().reversed())
                 .map(Map.Entry::getKey)
                 .limit(PageSize.FREQUENT_TAGS_SIZE)
                 .toList();
+    }
+
+    private List<Long> viewedFeedsOfMember(Long memberId) {
+        return recommendFeedsRepository.getViewedFeed(memberId);
     }
 
     public List<String> flatTagNames(String tagNamesJson){

@@ -75,14 +75,6 @@ public class FeedRepository {
     }
 
     @Transactional(readOnly = true)
-    public List<FeedResponseEntity> findAllFeedsByMemberId(Long memberId) {
-        return jpaQueryFactory
-                .selectFrom(feedResponseEntity)
-                .where(feedResponseEntity.writerId.eq(memberId))
-                .fetch();
-    }
-
-    @Transactional(readOnly = true)
     public List<FeedResponseEntity> findByTagNameAndIdLessThan(String tagName, Long offsetId, Pageable page) {
         List<Long> feedIds = findAllFeedIdByTagAndIdLessThan(tagName, offsetId, page);
 
