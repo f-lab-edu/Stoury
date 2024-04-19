@@ -1,18 +1,26 @@
 package com.stoury
 
+import com.stoury.batch.BatchRecommendFeedsConfig
 import com.stoury.domain.Diary
 import com.stoury.domain.Feed
 import com.stoury.domain.GraphicContent
 import com.stoury.domain.Like
 import com.stoury.domain.Member
+import com.stoury.domain.Tag
+import com.stoury.projection.FeedResponseEntity
 import com.stoury.repository.DiaryRepository
 import com.stoury.repository.FeedRepository
 import com.stoury.repository.LikeRepository
 import com.stoury.repository.MemberRepository
 import com.stoury.repository.RankingRepository
+import com.stoury.repository.RecommendFeedsRepository
+import com.stoury.repository.TagRepository
 import com.stoury.utils.cachekeys.FeedLikesCountSnapshotKeys
+import com.stoury.utils.cachekeys.FrequentTagsKey
 import com.stoury.utils.cachekeys.PopularSpotsKey
+import com.stoury.utils.cachekeys.RecommendFeedsKey
 import org.springframework.batch.core.Job
+import org.springframework.batch.core.Step
 import org.springframework.batch.test.JobLauncherTestUtils
 import org.springframework.batch.test.context.SpringBatchTest
 import org.springframework.beans.factory.annotation.Autowired
@@ -31,7 +39,7 @@ import static com.stoury.utils.cachekeys.HotFeedsKeys.WEEKLY_HOT_FEEDS
 @SpringBootTest(classes = StouryBatchApplication.class)
 @SpringBatchTest
 @ActiveProfiles("test")
-class BatchTest extends Specification {
+class BatchIntegrationTest extends Specification {
     @Autowired
     JobLauncherTestUtils jobLauncherTestUtils;
     @Autowired
@@ -44,6 +52,14 @@ class BatchTest extends Specification {
     Job updateMonthlyFeedsJob
     @Autowired
     Job updateYearlyDiariesJob
+    @Autowired
+    Step getRecommendFeedsStep
+    @Autowired
+    Step getFrequentTagsStep
+    @Autowired
+    Job updateRecommendFeedsJob
+    @Autowired
+    BatchRecommendFeedsConfig batchRecommendFeedsConfig
 
     @Autowired
     MemberRepository memberRepository
@@ -55,6 +71,10 @@ class BatchTest extends Specification {
     LikeRepository likeRepository
     @Autowired
     DiaryRepository diaryRepository
+    @Autowired
+    RecommendFeedsRepository recommendFeedsRepository
+    @Autowired
+    TagRepository tagRepository
 
     @Autowired
     StringRedisTemplate redisTemplate
@@ -62,7 +82,9 @@ class BatchTest extends Specification {
     def member = new Member("aaa@dddd.com", "qwdqwdqwd", "username", null)
 
     def setup() {
+        feedRepository.deleteAllFeedResponse()
         feedRepository.deleteAll()
+        tagRepository.deleteAll()
         diaryRepository.deleteAll()
         memberRepository.deleteAll()
         memberRepository.save(member)
@@ -72,7 +94,9 @@ class BatchTest extends Specification {
     }
 
     def cleanup() {
+        feedRepository.deleteAllFeedResponse()
         feedRepository.deleteAll()
+        tagRepository.deleteAll()
         diaryRepository.deleteAll()
         memberRepository.deleteAll()
 
@@ -178,10 +202,10 @@ class BatchTest extends Specification {
                 likeRepository.getCountSnapshotByFeed(feed.id.toString(), ChronoUnit.YEARS) == 0)
     }
 
-    def feed(long num){
+    def feed(long num) {
         def feed = Feed.builder()
                 .member(member)
-                .textContent("feed"+num)
+                .textContent("feed" + num)
                 .latitude(0)
                 .longitude(0)
                 .city("city" + num)
@@ -312,5 +336,67 @@ class BatchTest extends Specification {
         feeds.get(1) == "Seoul"
         feeds.get(2) == "Daejeon"
         feeds.get(3) == "Hwacheon"
+    }
+
+    def "맞춤피드 업데이트 테스트"() {
+        given:
+        def member1 = memberRepository.save(new Member("test1@test.com", "qweqwe", "user1", null))
+        def member2 = memberRepository.save(new Member("test2@test.com", "qweqwe", "user2", null))
+        def member3 = memberRepository.save(new Member("test3@test.com", "qweqwe", "user3", null))
+
+        def feedResponses = [
+                new FeedResponseEntity(feedId: 1L, tagNames: '[ "tag1", "tag2", "tag3" ]'),
+                new FeedResponseEntity(feedId: 2L, tagNames: '[ "tag2", "tag3", "tag4" ]'),
+                new FeedResponseEntity(feedId: 3L, tagNames: '[ "tag3", "tag4", "tag5" ]'),
+                new FeedResponseEntity(feedId: 4L, tagNames: '[ "tag2", "tag3", "tag1" ]'),
+                new FeedResponseEntity(feedId: 5L, tagNames: '[ "tag6", "tag7", "tag9" ]'),
+                new FeedResponseEntity(feedId: 6L, tagNames: '[ "tag11", "tag8", "tag10" ]'),
+                new FeedResponseEntity(feedId: 7L, tagNames: '[ "tag12", "tag11", "tag2" ]'),
+                new FeedResponseEntity(feedId: 8L, tagNames: '[ "tag2", "tag8", "tag6" ]'),
+                new FeedResponseEntity(feedId: 9L, tagNames: '[ "tag5", "tag10", "tag11" ]'),
+                new FeedResponseEntity(feedId: 10L, tagNames: '[ "tag12", "tag13", "tag14" ]'),
+        ]
+        feedRepository.saveAllFeedResponses(feedResponses)
+
+        List<Tag> tags = tagRepository.saveAll([
+                new Tag("tag0"), new Tag("tag1"), new Tag("tag2"), new Tag("tag3"), new Tag("tag4"),
+                new Tag("tag5"), new Tag("tag6"), new Tag("tag7"), new Tag("tag8"), new Tag("tag9"),
+                new Tag("tag10"), new Tag("tag11"), new Tag("tag12"), new Tag("tag13"), new Tag("tag14"),
+        ])
+        def feeds = [
+                new Feed(member, "", 0, 0, [tags.get(1), tags.get(2), tags.get(3)] as Set, "", ""),
+                new Feed(member, "", 0, 0, [tags.get(2), tags.get(3), tags.get(4)] as Set, "", ""),
+                new Feed(member, "", 0, 0, [tags.get(3), tags.get(4), tags.get(5)] as Set, "", ""),
+                new Feed(member, "", 0, 0, [tags.get(2), tags.get(3), tags.get(1)] as Set, "", ""),
+                new Feed(member, "", 0, 0, [tags.get(6), tags.get(7), tags.get(9)] as Set, "", ""),
+                new Feed(member, "", 0, 0, [tags.get(11), tags.get(8), tags.get(10)] as Set, "", ""),
+                new Feed(member, "", 0, 0, [tags.get(12), tags.get(11), tags.get(2)] as Set, "", ""),
+                new Feed(member, "", 0, 0, [tags.get(2), tags.get(8), tags.get(6)] as Set, "", ""),
+                new Feed(member, "", 0, 0, [tags.get(5), tags.get(10), tags.get(11)] as Set, "", ""),
+                new Feed(member, "", 0, 0, [tags.get(12), tags.get(13), tags.get(14)] as Set, "", ""),
+        ]
+        feedRepository.saveAll(feeds)
+
+        memberViewedFeeds(member1.id, 1L, 2L, 3L) // viewedTags = [ tag1, tag2, tag3, tag4, tag5 ]
+        memberViewedFeeds(member2.id, 2L, 4L, 5L, 6L, 7L) // viewedTags = [ tag1, tag2, tag3, tag4, tag6, tag7, tag8, tag9, tag10, tag11, tag12 ]
+        memberViewedFeeds(member3.id, 5L, 8L, 9L, 10L) // viewedTags = [ tag2, tag5, tag6, tag7, tag9, tag8, tag10, tag11, tag12, tag13, tag14 ]
+
+        jobLauncherTestUtils.setJob(updateRecommendFeedsJob)
+        when:
+        def execution = jobLauncherTestUtils.launchJob()
+        then:
+        "COMPLETED" == execution.getExitStatus().getExitCode()
+        redisTemplate.opsForSet().members(FrequentTagsKey.getFrequentTagsKey(member1.id.toString())).containsAll("tag1", "tag2", "tag3", "tag4", "tag5")
+        redisTemplate.opsForSet().members(FrequentTagsKey.getFrequentTagsKey(member2.id.toString())).containsAll("tag1", "tag2", "tag3", "tag4", "tag6", "tag7", "tag8", "tag9", "tag10", "tag11", "tag12")
+        redisTemplate.opsForSet().members(FrequentTagsKey.getFrequentTagsKey(member3.id.toString())).containsAll("tag2", "tag5", "tag6", "tag7", "tag9", "tag8", "tag10", "tag11", "tag12", "tag13", "tag14")
+        !redisTemplate.opsForSet().members(RecommendFeedsKey.getRecommendFeedsKey(member1.id.toString())).isEmpty()
+        !redisTemplate.opsForSet().members(RecommendFeedsKey.getRecommendFeedsKey(member2.id.toString())).isEmpty()
+        !redisTemplate.opsForSet().members(RecommendFeedsKey.getRecommendFeedsKey(member3.id.toString())).isEmpty()
+    }
+
+    def memberViewedFeeds(Long memberId, Long... feedIds) {
+        for (final def feedId in feedIds) {
+            recommendFeedsRepository.addViewedFeed(memberId, feedId)
+        }
     }
 }

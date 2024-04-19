@@ -159,6 +159,11 @@ public class FeedRepository {
     }
 
     @Transactional
+    public List<FeedResponseEntity> saveAllFeedResponses(Collection<FeedResponseEntity> feeds) {
+        return feeds.stream().map(this::saveFeedResponse).toList();
+    }
+
+    @Transactional
     public void deleteFeedResponseById(Long feedId) {
         jpaQueryFactory.delete(feedResponseEntity)
                 .where(feedResponseEntity.feedId.eq(feedId))
@@ -172,7 +177,7 @@ public class FeedRepository {
                 .from(feed)
                 .join(feed.tags, tag)
                 .where(tag.tagName.in(tagNames))
-                .orderBy(Expressions.numberTemplate(Double.class, "function('random')").asc())
+                .orderBy(Expressions.numberTemplate(Double.class, "function('rand')").asc())
                 .limit(PageSize.RANDOM_FEEDS_FETCH_SIZE)
                 .fetch();
     }

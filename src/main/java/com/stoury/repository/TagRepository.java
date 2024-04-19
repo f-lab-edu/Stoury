@@ -7,6 +7,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 
 import static com.stoury.domain.QTag.tag;
@@ -21,6 +23,12 @@ public class TagRepository {
     public Tag save(Tag saveTag) {
         entityManager.persist(saveTag);
         return saveTag;
+    }
+
+    @Transactional
+    public List<Tag> saveAll(Collection<Tag> saveTags) {
+        saveTags.forEach(entityManager::persist);
+        return saveTags.stream().toList();
     }
 
     @Transactional

@@ -83,11 +83,15 @@ public class BatchRecommendFeedsConfig {
         return recommendFeedIds -> {
             for (RecommendFeedIds recommended : recommendFeedIds) {
                 String memberId = recommended.memberId().toString();
-                List<Long> feedIds = recommended.feedIds();
+                String[] feedIds = recommended.feedIds().stream().map(String::valueOf).toArray(String[]::new);
+
+                if (feedIds.length == 0) {
+                    continue;
+                }
                 String key = RecommendFeedsKey.getRecommendFeedsKey(memberId);
 
                 redisTemplate.delete(memberId);
-                redisTemplate.opsForSet().add(key, feedIds.toString());
+                redisTemplate.opsForSet().add(key, feedIds);
             }
         };
     }
@@ -108,7 +112,7 @@ public class BatchRecommendFeedsConfig {
                 .name("memberIdReader")
                 .pageSize(1000)
                 .entityManagerFactory(entityManagerFactory)
-                .queryString("SELECT m.ID FROM MEMBER m")
+                .queryString("SELECT m.ID FROM Member m")
                 .build();
     }
 
