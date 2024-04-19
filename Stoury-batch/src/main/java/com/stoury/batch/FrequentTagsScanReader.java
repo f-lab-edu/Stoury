@@ -4,12 +4,14 @@ import com.stoury.dto.FrequentTags;
 import com.stoury.utils.cachekeys.FrequentTagsKey;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.item.ItemReader;
+import org.springframework.data.redis.RedisConnectionFailureException;
+import org.springframework.data.redis.connection.RedisConnection;
+import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.core.Cursor;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ScanOptions;
 
 import java.util.ArrayList;
-import java.util.Map;
 import java.util.Set;
 
 @Slf4j
@@ -60,26 +62,28 @@ public class FrequentTagsScanReader implements ItemReader<FrequentTags> {
     }
 
     class FrequentTagsCursor {
-        private Cursor<byte[]> cursor;
+        private final Cursor<byte[]> cursor;
 
         public FrequentTagsCursor(RedisTemplate redisTemplate, String keyPrefix) {
             ScanOptions scanOption = ScanOptions.scanOptions()
                     .match(keyPrefix + "*")
                     .count(BATCH_SCAN_SIZE)
                     .build();
-            cursor = redisTemplate.getConnectionFactory().getConnection().keyCommands()
-                    .scan( scanOption);
+            RedisConnection connection = getConnection(redisTemplate);
+
+            cursor = connection.keyCommands()
+                    .scan(scanOption);
         }
 
         public boolean hasNext() {
             return cursor.hasNext();
         }
 
-        public String next(){
+        public String next() {
             return new String(cursor.next());
         }
 
-        public void close(){
+        public void close() {
             try {
                 if (cursor != null) {
                     cursor.close();
@@ -87,6 +91,24 @@ public class FrequentTagsScanReader implements ItemReader<FrequentTags> {
             } catch (Exception ex) {
                 log.error("error occured while iterating cursor");
             }
+        }
+
+        private RedisConnection getConnection(RedisTemplate redisTemplate) {
+            RedisConnectionFactory connectionFactory = getConnectionFactory(redisTemplate);
+
+            RedisConnection connection = connectionFactory.getConnection();
+            if (connection == null) {
+                throw new RedisConnectionFailureException("Cannot get redis connection");
+            }
+            return connection;
+        }
+
+        private RedisConnectionFactory getConnectionFactory(RedisTemplate redisTemplate) {
+            RedisConnectionFactory redisConnectionFactory = redisTemplate.getConnectionFactory();
+            if (redisConnectionFactory == null) {
+                throw new RedisConnectionFailureException("No connection factory set");
+            }
+            return redisConnectionFactory;
         }
     }
 }
