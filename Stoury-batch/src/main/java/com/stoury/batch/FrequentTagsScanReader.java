@@ -97,7 +97,7 @@ public class FrequentTagsScanReader implements ItemReader<FrequentTags> {
             RedisConnectionFactory connectionFactory = getConnectionFactory(redisTemplate);
 
             RedisConnection connection = connectionFactory.getConnection();
-            if (connection == null) {
+            if (connection == null) { // NOSONAR
                 throw new RedisConnectionFailureException("Cannot get redis connection");
             }
             return connection;
