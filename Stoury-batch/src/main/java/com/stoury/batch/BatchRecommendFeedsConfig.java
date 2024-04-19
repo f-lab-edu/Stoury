@@ -21,6 +21,7 @@ import org.springframework.batch.item.ItemProcessor;
 import org.springframework.batch.item.ItemWriter;
 import org.springframework.batch.item.database.JpaPagingItemReader;
 import org.springframework.batch.item.database.builder.JpaPagingItemReaderBuilder;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -33,6 +34,7 @@ import java.util.stream.Collectors;
 
 @Configuration
 @RequiredArgsConstructor
+@ConditionalOnExpression("'${spring.batch.job.names}'.contains('jobRecommendFeeds')")
 public class BatchRecommendFeedsConfig {
     private final RedisTemplate redisTemplate;
     private final EntityManagerFactory entityManagerFactory;
