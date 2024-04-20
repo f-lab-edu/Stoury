@@ -41,6 +41,7 @@ public class BatchRecommendFeedsConfig {
     private final FeedRepository feedRepository;
     private final RecommendFeedsRepository recommendFeedsRepository;
     private final JsonMapper jsonMapper;
+    private final LogJobExecutionListener logger;
 
     @Bean
     public Job updateRecommendFeedsJob(JobRepository jobRepository, PlatformTransactionManager tm) {
@@ -48,6 +49,7 @@ public class BatchRecommendFeedsConfig {
                 .incrementer(new RunIdIncrementer())
                 .start(getFrequentTagsStep(jobRepository, tm))
                 .next(getRecommendFeedsStep(jobRepository, tm))
+                .listener(logger)
                 .build();
     }
 

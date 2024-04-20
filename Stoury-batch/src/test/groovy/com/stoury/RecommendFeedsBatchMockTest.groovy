@@ -2,6 +2,7 @@ package com.stoury
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.stoury.batch.BatchRecommendFeedsConfig
+import com.stoury.batch.LogJobExecutionListener
 import com.stoury.dto.FrequentTags
 import com.stoury.projection.FeedResponseEntity
 import com.stoury.repository.FeedRepository
@@ -18,7 +19,8 @@ class RecommendFeedsBatchMockTest extends Specification {
     def recommendFeedRepository = Mock(RecommendFeedsRepository)
     def feedRepository = Mock(FeedRepository)
     def jsonMapper = new JsonMapper(new ObjectMapper())
-    def batchConfig = new BatchRecommendFeedsConfig(redisTemplate, emf, feedRepository, recommendFeedRepository, jsonMapper)
+    def logger = Mock(LogJobExecutionListener)
+    def batchConfig = new BatchRecommendFeedsConfig(redisTemplate, emf, feedRepository, recommendFeedRepository, jsonMapper, logger)
 
     def "viewedTagProcessor 테스트"() {
         given:
