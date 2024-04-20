@@ -7,8 +7,10 @@ import org.springframework.data.redis.core.SetOperations;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Repository;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 @Repository
 public class RecommendFeedsRepository {
@@ -24,7 +26,12 @@ public class RecommendFeedsRepository {
 
         String key = RecommendFeedsKey.getRecommendFeedsKey(memberIdNonNull);
 
-        return opsForSet.randomMembers(key, PageSize.RECOMMEND_FEEDS_SIZE).stream()
+        List<String> randomMembers = opsForSet.randomMembers(key, PageSize.RECOMMEND_FEEDS_SIZE);
+        if (randomMembers == null) {
+            return Collections.emptyList();
+        }
+
+        return randomMembers.stream()
                 .map(Long::parseLong)
                 .toList();
     }
@@ -42,7 +49,12 @@ public class RecommendFeedsRepository {
         String memberIdNonNull = Objects.requireNonNull(memberId, "member id cannot be null").toString();
         String key = ViewedFeedsKey.getViewedFeedsKey(memberIdNonNull);
 
-        return opsForSet.members(key).stream().map(Long::parseLong).toList();
+        Set<String> viewedFeeds = opsForSet.members(key);
+        if (viewedFeeds == null) {
+            return Collections.emptyList();
+        }
+
+        return viewedFeeds.stream().map(Long::parseLong).toList();
     }
 
 }
