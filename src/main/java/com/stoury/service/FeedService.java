@@ -228,7 +228,9 @@ public class FeedService {
     @Transactional(readOnly = true)
     public List<FeedResponse> getRecommendedFeeds(Long memberId) {
         Long memberIdNonNull = Objects.requireNonNull(memberId);
-        memberRepository.findById(memberIdNonNull).orElseThrow(MemberSearchException::new);
+        if (memberRepository.findById(memberIdNonNull).isEmpty()) {
+            throw new MemberSearchException();
+        }
 
         Collection<Long> recommendFeedIds = recommendFeedsRepository.findAllByMemberId(memberIdNonNull);
 
@@ -243,8 +245,12 @@ public class FeedService {
     public void addViewedFeeds(Long memberId, Long feedId) {
         Long memberIdNonNull = Objects.requireNonNull(memberId);
         Long feedIdNonNull = Objects.requireNonNull(feedId);
-        memberRepository.findById(memberIdNonNull).orElseThrow(MemberSearchException::new);
-        feedRepository.findById(feedIdNonNull).orElseThrow(FeedSearchException::new);
+        if (memberRepository.findById(memberIdNonNull).isEmpty()) {
+            throw new MemberSearchException();
+        }
+        if (feedRepository.findById(feedIdNonNull).isEmpty()) {
+            throw new FeedSearchException();
+        }
 
         recommendFeedsRepository.addViewedFeed(memberIdNonNull, feedIdNonNull);
     }
