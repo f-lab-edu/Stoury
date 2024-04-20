@@ -24,7 +24,9 @@ import org.springframework.batch.item.database.builder.JpaPagingItemReaderBuilde
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.task.TaskExecutor;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.transaction.PlatformTransactionManager;
 
 import java.util.List;
@@ -44,32 +46,36 @@ public class BatchRecommendFeedsConfig {
     private final LogJobExecutionListener logger;
 
     @Bean
-    public Job updateRecommendFeedsJob(JobRepository jobRepository, PlatformTransactionManager tm) {
+    public Job updateRecommendFeedsJob(JobRepository jobRepository, PlatformTransactionManager tm, ThreadPoolTaskExecutor taskExecutor) {
         return new JobBuilder("jobRecommendFeeds", jobRepository)
                 .incrementer(new RunIdIncrementer())
-                .start(getFrequentTagsStep(jobRepository, tm))
-                .next(getRecommendFeedsStep(jobRepository, tm))
+                .start(getFrequentTagsStep(jobRepository, tm, taskExecutor))
+                .next(getRecommendFeedsStep(jobRepository, tm, taskExecutor))
                 .listener(logger)
                 .build();
     }
 
     @Bean
-    public Step getRecommendFeedsStep(JobRepository jobRepository, PlatformTransactionManager tm) {
+    public Step getRecommendFeedsStep(JobRepository jobRepository, PlatformTransactionManager tm, ThreadPoolTaskExecutor taskExecutor) {
         return new StepBuilder("stepRecommendFeeds", jobRepository)
-                .<FrequentTags, RecommendFeedIds>chunk(1000, tm)
+                .<FrequentTags, RecommendFeedIds>chunk(100, tm)
                 .reader(new FrequentTagsScanReader(redisTemplate))
                 .processor(randomFeedsOfTagProcessor())
                 .writer(recommendFeedsWriter())
+                .taskExecutor(taskExecutor)
+                .allowStartIfComplete(true)
                 .build();
     }
 
     @Bean
-    public Step getFrequentTagsStep(JobRepository jobRepository, PlatformTransactionManager tm) {
+    public Step getFrequentTagsStep(JobRepository jobRepository, PlatformTransactionManager tm, ThreadPoolTaskExecutor taskExecutor) {
         return new StepBuilder("stepFrequentTags", jobRepository)
-                .<Long, FrequentTags>chunk(1000, tm)
+                .<Long, FrequentTags>chunk(100, tm)
                 .reader(memberIdReader())
                 .processor(viewedTagsProcessor())
                 .writer(viewedTagsWriter())
+                .taskExecutor(taskExecutor)
+                .allowStartIfComplete(true)
                 .build();
     }
 
