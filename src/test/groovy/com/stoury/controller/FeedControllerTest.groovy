@@ -1,5 +1,6 @@
 package com.stoury.controller
 
+import com.stoury.domain.GraphicContent
 import com.stoury.dto.SimpleMemberResponse
 import com.stoury.dto.feed.FeedCreateRequest
 import com.stoury.dto.feed.FeedResponse
@@ -241,6 +242,66 @@ class FeedControllerTest extends AbstractRestDocsTests {
         def parameterDescriptor = parameterWithName("feedId").description("id of feed")
         when:
         def response = mockMvc.perform(delete("/feeds/{feedId}", "1")
+                .with(authenticatedMember(writer)))
+                .andDo(documentWithPath(parameterDescriptor))
+        then:
+        response.andExpect(status().isOk())
+    }
+
+    def "Get recommend feeds"() {
+        given:
+        def writer = new AuthenticatedMember(1L, "test@email.com", "pwdpwd1111")
+        when(feedService.getRecommendedFeeds(any())).thenReturn(
+                [
+                        new FeedResponse(10L, new SimpleMemberResponse(2L, "tester2"),
+                                [
+                                        new GraphicContentResponse(20L, "/file1.jpeg"),
+                                        new GraphicContentResponse(21L, "/file2.jpeg"),
+                                ],
+                                "recommend feed1",
+                                36.5,
+                                127.5,
+                                ["tag1", "tag2", "tag3"] as Set,
+                                new LocationResponse("city1", "Country1"),
+                                3, LocalDateTime.of(2024, 12, 31, 0, 0)),
+                        new FeedResponse(233L, new SimpleMemberResponse(3L, "tester3"),
+                                [
+                                        new GraphicContentResponse(45L, "/file3.jpeg"),
+                                        new GraphicContentResponse(46L, "/file4.jpeg"),
+                                ],
+                                "recommend feed2",
+                                36.5,
+                                127.5,
+                                ["tag5", "tag2", "tag3"] as Set,
+                                new LocationResponse("city1", "Country1"),
+                                99, LocalDateTime.of(2024, 12, 31, 0, 0)),
+                        new FeedResponse(3456L, new SimpleMemberResponse(3L, "tester3"),
+                                [
+                                        new GraphicContentResponse(99L, "/file6.jpeg"),
+                                        new GraphicContentResponse(100L, "/file7.jpeg"),
+                                ],
+                                "recommend feed3",
+                                36.5,
+                                127.5,
+                                ["tag1", "tag2", "tag99"] as Set,
+                                new LocationResponse("city1", "Country1"),
+                                3, LocalDateTime.of(2024, 12, 31, 0, 0)),
+                ]
+        )
+        when:
+        def response = mockMvc.perform(get("/feeds/recommend")
+                .with(authenticatedMember(writer)))
+                .andDo(document())
+        then:
+        response.andExpect(status().isOk())
+    }
+
+    def "Update viewed feeds"() {
+        given:
+        def writer = new AuthenticatedMember(1L, "test@email.com", "pwdpwd1111")
+        def parameterDescriptor = parameterWithName("feedId").description("id of feed")
+        when:
+        def response = mockMvc.perform(post("/feeds/viewed/{feedId}", "1")
                 .with(authenticatedMember(writer)))
                 .andDo(documentWithPath(parameterDescriptor))
         then:
