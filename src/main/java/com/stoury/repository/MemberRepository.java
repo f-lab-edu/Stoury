@@ -120,6 +120,7 @@ public class MemberRepository {
         return savedMembers;
     }
 
+    @Transactional(readOnly = true)
     public List<Member> findByFollowersContain(Member follower) {
         return jpaQueryFactory
                 .select(member)
@@ -129,6 +130,7 @@ public class MemberRepository {
                 .fetch();
     }
 
+    @Transactional(readOnly = true)
     public List<Member> findByFollowee(Member followee, String offsetUsername) {
         return jpaQueryFactory
                 .select(member)

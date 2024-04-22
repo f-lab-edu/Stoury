@@ -8,6 +8,7 @@ import com.stoury.dto.member.AuthenticatedMember
 import com.stoury.dto.member.MemberResponse
 import com.stoury.repository.*
 import com.stoury.service.FeedService
+import com.stoury.service.FollowService
 import com.stoury.service.MemberService
 import com.stoury.utils.cachekeys.PageSize
 import com.stoury.utils.cachekeys.RecommendFeedsKey
@@ -38,6 +39,8 @@ import static com.stoury.utils.cachekeys.HotFeedsKeys.getHotFeedsKey
 @ActiveProfiles("test")
 class IntegrationTest extends Specification {
     @Autowired
+    FollowRepository followRepository
+    @Autowired
     TagRepository tagRepository
     @Autowired
     FeedRepository feedRepository
@@ -60,12 +63,15 @@ class IntegrationTest extends Specification {
     @Autowired
     FeedService feedService
     @Autowired
+    FollowService followService
+    @Autowired
     AuthenticationSuccessHandler authenticationSuccessHandler
     @Autowired
     LogoutSuccessHandler logoutSuccessHandler
     def member = new Member("aaa@dddd.com", "qwdqwdqwd", "username", null)
 
     def setup() {
+        followRepository.deleteAll()
         feedRepository.deleteAllFeedResponse()
         feedRepository.deleteAll()
         diaryRepository.deleteAll()
@@ -78,6 +84,7 @@ class IntegrationTest extends Specification {
     }
     
     def cleanup() {
+        followRepository.deleteAll()
         feedRepository.deleteAllFeedResponse()
         feedRepository.deleteAll()
         diaryRepository.deleteAll()
@@ -340,5 +347,26 @@ class IntegrationTest extends Specification {
         // 거리 오차는 +- 1km 이내여야함
         26 <= member2.distance() && member2.distance() <= 28
         138 <= member3.distance() && member3.distance() <= 140
+    }
+
+    def "내 팔로워 출력"() {
+        given:
+        def followers = [
+                new Member("follower4@email.com", "12312", "follower4", null),
+                new Member("follower1@email.com", "12312", "follower1", null),
+                new Member("follower2@email.com", "12312", "follower2", null),
+                new Member("follower3@email.com", "12312", "follower3", null),
+        ]
+        def followee = new Member("followee@email.com", "12312", "followee", null)
+        followers = memberRepository.saveAll(followers)
+        followee = memberRepository.save(followee)
+        followers.forEach(follower -> followService.follow(follower.id, followee.email))
+        when:
+        def followersResponse = followService.getFollowersOfMember(followee.id, "")
+        then:
+        followersResponse.get(0).username() == "follower1"
+        followersResponse.get(1).username() == "follower2"
+        followersResponse.get(2).username() == "follower3"
+        followersResponse.get(3).username() == "follower4"
     }
 }
