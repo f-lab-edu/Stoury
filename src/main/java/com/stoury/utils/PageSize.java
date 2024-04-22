@@ -1,4 +1,4 @@
-package com.stoury.utils.cachekeys;
+package com.stoury.utils;
 
 public class PageSize {
     public static final int MEMBER_PAGE_SIZE = 5;

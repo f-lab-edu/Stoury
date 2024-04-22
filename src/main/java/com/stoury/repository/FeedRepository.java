@@ -9,7 +9,7 @@ import com.stoury.domain.Feed;
 import com.stoury.domain.Member;
 import com.stoury.domain.Tag;
 import com.stoury.projection.FeedResponseEntity;
-import com.stoury.utils.cachekeys.PageSize;
+import com.stoury.utils.PageSize;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;

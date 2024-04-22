@@ -18,7 +18,7 @@ import com.stoury.repository.DiaryRepository;
 import com.stoury.repository.FeedRepository;
 import com.stoury.repository.LikeRepository;
 import com.stoury.repository.MemberRepository;
-import com.stoury.utils.cachekeys.PageSize;
+import com.stoury.utils.PageSize;
 import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.data.domain.PageRequest;

@@ -10,7 +10,7 @@ import com.stoury.repository.*
 import com.stoury.service.FeedService
 import com.stoury.service.FollowService
 import com.stoury.service.MemberService
-import com.stoury.utils.cachekeys.PageSize
+import com.stoury.utils.PageSize
 import com.stoury.utils.cachekeys.RecommendFeedsKey
 import com.stoury.utils.cachekeys.ViewedFeedsKey
 import jakarta.persistence.EntityManager

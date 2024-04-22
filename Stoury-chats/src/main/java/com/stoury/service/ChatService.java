@@ -15,7 +15,7 @@ import com.stoury.repository.ChatMessageRepository;
 import com.stoury.repository.ChatRoomRepository;
 import com.stoury.repository.MemberRepository;
 import com.stoury.service.kafka.KafkaProducer;
-import com.stoury.utils.cachekeys.PageSize;
+import com.stoury.utils.PageSize;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.PageRequest;

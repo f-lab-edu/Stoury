@@ -1,10 +1,8 @@
 package com.stoury.repository;
 
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import com.stoury.domain.Follow;
 import com.stoury.domain.Member;
-import com.stoury.domain.QFollow;
-import com.stoury.utils.cachekeys.PageSize;
+import com.stoury.utils.PageSize;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Query;
 import lombok.RequiredArgsConstructor;
@@ -17,7 +15,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 import static com.stoury.domain.QFollow.*;
 import static com.stoury.domain.QMember.member;

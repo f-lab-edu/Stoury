@@ -16,7 +16,7 @@ import com.stoury.service.storage.StorageService;
 import com.stoury.utils.FileUtils;
 import com.stoury.utils.JsonMapper;
 import com.stoury.utils.SupportedFileType;
-import com.stoury.utils.cachekeys.PageSize;
+import com.stoury.utils.PageSize;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
