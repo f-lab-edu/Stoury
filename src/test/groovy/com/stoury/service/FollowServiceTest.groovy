@@ -25,7 +25,7 @@ class FollowServiceTest extends Specification {
         1 * followRepository.save(_ as Follow)
     }
 
-    def "팔로우한 사람 출력"() {
+    def "내가 팔로우한 사람 출력"() {
         given:
         def followerId = 1L
         def follower = Mock(Member)
@@ -37,6 +37,21 @@ class FollowServiceTest extends Specification {
                 new Member(id: 3L, username: "followee1"),
                 new Member(id: 4L, username: "followee4"),
                 new Member(id: 5L, username: "followee5"),
+        ]
+    }
+
+    def "나를 팔로우한 사람 출력"() {
+        given:
+        def followeeId = 1L
+        def followee = Mock(Member)
+        memberRepository.findById(followeeId) >> Optional.of(followee)
+        when:
+        followService.getFollowersOfMember(followeeId, "")
+        then:
+        1 * memberRepository.findByFollowee(followee, _ as String) >> [
+                new Member(id: 3L, username: "follower1"),
+                new Member(id: 4L, username: "follower2"),
+                new Member(id: 5L, username: "follower3"),
         ]
     }
 }

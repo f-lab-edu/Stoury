@@ -4,6 +4,7 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.stoury.domain.Follow;
 import com.stoury.domain.Member;
 import com.stoury.domain.QFollow;
+import com.stoury.utils.cachekeys.PageSize;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Query;
 import lombok.RequiredArgsConstructor;
@@ -124,6 +125,18 @@ public class MemberRepository {
                 .select(member)
                 .from(member).join(member.followers, follow)
                 .where(follow.follower.eq(follower))
+                .orderBy(member.username.asc())
+                .fetch();
+    }
+
+    public List<Member> findByFollowee(Member followee, String offsetUsername) {
+        return jpaQueryFactory
+                .select(member)
+                .from(member).join(member.followings, follow).join(follow.follower)
+                .where(follow.followee.eq(followee).and(follow.follower.username.gt(offsetUsername)))
+                .orderBy(follow.follower.username.asc())
+                .offset(0)
+                .limit(PageSize.FOLLOWER_PAGE_SIZE)
                 .fetch();
     }
 }
