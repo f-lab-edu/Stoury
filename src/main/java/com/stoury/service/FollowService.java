@@ -3,9 +3,11 @@ package com.stoury.service;
 import com.stoury.domain.Follow;
 import com.stoury.domain.Member;
 import com.stoury.dto.SimpleMemberResponse;
+import com.stoury.exception.MaxFollowingException;
 import com.stoury.exception.member.MemberSearchException;
 import com.stoury.repository.FollowRepository;
 import com.stoury.repository.MemberRepository;
+import com.stoury.utils.Values;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,10 +28,21 @@ public class FollowService {
         String followeeEmailNonNull = Objects.requireNonNull(followeeEmail, "followeeEmail can't be null");
 
         Member follower = memberRepository.findById(followerIdNonNull).orElseThrow(MemberSearchException::new);
+
+        checkFollowingCounts(follower);
+
         Member followee = memberRepository.findByEmail(followeeEmailNonNull).orElseThrow(MemberSearchException::new);
+
 
         Follow follow = new Follow(follower, followee);
         followRepository.save(follow);
+    }
+
+    private void checkFollowingCounts(Member follower) {
+        long followingCounts = followRepository.countFollowingNumbersOf(follower);
+        if (followingCounts >= Values.MAX_FOLLOWING) {
+            throw new MaxFollowingException();
+        }
     }
 
     @Transactional(readOnly = true)

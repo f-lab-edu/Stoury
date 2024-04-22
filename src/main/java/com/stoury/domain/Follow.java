@@ -13,9 +13,9 @@ public class Follow {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     private Member follower;
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     private Member followee;
 
     @Builder

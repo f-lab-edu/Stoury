@@ -2,8 +2,10 @@ package com.stoury.service
 
 import com.stoury.domain.Follow
 import com.stoury.domain.Member
+import com.stoury.exception.MaxFollowingException
 import com.stoury.repository.FollowRepository
 import com.stoury.repository.MemberRepository
+import com.stoury.utils.Values
 import spock.lang.Specification
 
 class FollowServiceTest extends Specification {
@@ -53,5 +55,17 @@ class FollowServiceTest extends Specification {
                 new Member(id: 4L, username: "follower2"),
                 new Member(id: 5L, username: "follower3"),
         ]
+    }
+
+    def "최대 팔로잉 수 제한"() {
+        given:
+        def followerId = 1L
+        def follower = Mock(Member)
+        memberRepository.findById(followerId) >> Optional.of(follower)
+        followRepository.countFollowingNumbersOf(follower) >> Values.MAX_FOLLOWING
+        when:
+        followService.follow(followerId, "any@email.com")
+        then:
+        thrown(MaxFollowingException)
     }
 }
