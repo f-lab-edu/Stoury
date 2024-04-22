@@ -369,4 +369,25 @@ class IntegrationTest extends Specification {
         followersResponse.get(2).username() == "follower3"
         followersResponse.get(3).username() == "follower4"
     }
+
+    def "내가 팔로잉한 사람 출력"() {
+        given:
+        def followings = [
+                new Member("followee4@email.com", "12312", "followee4", null),
+                new Member("followee1@email.com", "12312", "followee1", null),
+                new Member("followee2@email.com", "12312", "followee2", null),
+                new Member("followee3@email.com", "12312", "followee3", null),
+        ]
+        def follower = new Member("follower@email.com", "12312", "follower", null)
+        followings = memberRepository.saveAll(followings)
+        follower = memberRepository.save(follower)
+        followings.forEach(followee -> followService.follow(follower.id, followee.email))
+        when:
+        def followingMembersResponse = followService.getFollowingMembers(follower.id)
+        then:
+        followingMembersResponse.get(0).username() == "followee1"
+        followingMembersResponse.get(1).username() == "followee2"
+        followingMembersResponse.get(2).username() == "followee3"
+        followingMembersResponse.get(3).username() == "followee4"
+    }
 }
