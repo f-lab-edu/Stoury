@@ -41,17 +41,17 @@ public class Member {
     @Column(name = "PROFILE_IMAGE_PATH")
     private String profileImagePath;
 
-    @BatchSize(size = 100)
     @Column(name = "INTRODUCTION", columnDefinition = "TEXT")
     private String introduction;
 
-    @BatchSize(size = 100)
     @Column(name = "DELETED", nullable = false)
     private boolean deleted;
 
+    @BatchSize(size = 700)
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "follower")
     Set<Follow> followings = new LinkedHashSet<>();
 
+    @BatchSize(size = 700)
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "followee")
     Set<Follow> followers = new LinkedHashSet<>();
 

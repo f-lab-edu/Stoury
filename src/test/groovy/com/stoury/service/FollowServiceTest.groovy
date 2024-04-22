@@ -24,4 +24,19 @@ class FollowServiceTest extends Specification {
         then:
         1 * followRepository.save(_ as Follow)
     }
+
+    def "팔로우한 사람 출력"() {
+        given:
+        def followerId = 1L
+        def follower = Mock(Member)
+        memberRepository.findById(followerId) >> Optional.of(follower)
+        when:
+        followService.getFollowingMembers(followerId)
+        then:
+        1 * memberRepository.findByFollowersContain(follower) >> [
+                new Member(id: 3L, username: "followee1"),
+                new Member(id: 4L, username: "followee4"),
+                new Member(id: 5L, username: "followee5"),
+        ]
+    }
 }
