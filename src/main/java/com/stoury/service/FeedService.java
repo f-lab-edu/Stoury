@@ -1,10 +1,7 @@
 package com.stoury.service;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.stoury.domain.Feed;
-import com.stoury.domain.GraphicContent;
-import com.stoury.domain.Member;
-import com.stoury.domain.Tag;
+import com.stoury.domain.*;
 import com.stoury.dto.SimpleMemberResponse;
 import com.stoury.dto.feed.*;
 import com.stoury.event.*;
@@ -13,10 +10,7 @@ import com.stoury.exception.feed.FeedCreateException;
 import com.stoury.exception.feed.FeedSearchException;
 import com.stoury.exception.member.MemberSearchException;
 import com.stoury.projection.FeedResponseEntity;
-import com.stoury.repository.FeedRepository;
-import com.stoury.repository.LikeRepository;
-import com.stoury.repository.MemberRepository;
-import com.stoury.repository.RecommendFeedsRepository;
+import com.stoury.repository.*;
 import com.stoury.service.location.LocationService;
 import com.stoury.service.storage.StorageService;
 import com.stoury.utils.FileUtils;
@@ -35,6 +29,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.nio.file.Paths;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -52,6 +47,7 @@ public class FeedService {
     private final ApplicationEventPublisher eventPublisher;
     private final JsonMapper jsonMapper;
     private final RecommendFeedsRepository recommendFeedsRepository;
+    private final ClickLogRepository clickLogRepository;
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public FeedResponse createFeed(Long writerId, FeedCreateRequest feedCreateRequest,
@@ -242,7 +238,7 @@ public class FeedService {
     }
 
     @Transactional(readOnly = true)
-    public void addViewedFeeds(Long memberId, Long feedId) {
+    public void clickLogUpdate(Long memberId, Long feedId) {
         Long memberIdNonNull = Objects.requireNonNull(memberId);
         Long feedIdNonNull = Objects.requireNonNull(feedId);
         if (memberRepository.findById(memberIdNonNull).isEmpty()) {
@@ -252,6 +248,12 @@ public class FeedService {
             throw new FeedSearchException();
         }
 
-        recommendFeedsRepository.addViewedFeed(memberIdNonNull, feedIdNonNull);
+        ClickLog clickLog = ClickLog.builder()
+                .memberId(memberIdNonNull)
+                .feedId(feedIdNonNull)
+                .createdAt(LocalDateTime.now())
+                .build();
+
+        clickLogRepository.save(clickLog);
     }
 }

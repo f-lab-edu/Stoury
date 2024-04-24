@@ -1,6 +1,7 @@
 package com.stoury.service
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.stoury.domain.ClickLog
 import com.stoury.domain.Feed
 import com.stoury.domain.GraphicContent
 import com.stoury.domain.Member
@@ -15,6 +16,7 @@ import com.stoury.event.GraphicDeleteEvent
 import com.stoury.exception.authentication.NotAuthorizedException
 import com.stoury.exception.feed.FeedCreateException
 import com.stoury.projection.FeedResponseEntity
+import com.stoury.repository.ClickLogRepository
 import com.stoury.repository.FeedRepository
 import com.stoury.repository.LikeRepository
 import com.stoury.repository.MemberRepository
@@ -35,9 +37,10 @@ class FeedServiceTest extends Specification {
     def eventPublisher = Mock(ApplicationEventPublisher)
     def locationService = Mock(LocationService)
     def jsonMapper = new JsonMapper(new ObjectMapper())
-    def recommendFeedRepository = Mock(RecommendFeedsRepository);
+    def recommendFeedRepository = Mock(RecommendFeedsRepository)
+    def clickLogRepository = Mock(ClickLogRepository)
     def feedService = new FeedService(storageService, feedRepository, memberRepository, likeRepository,
-            tagService, locationService, eventPublisher, jsonMapper, recommendFeedRepository)
+            tagService, locationService, eventPublisher, jsonMapper, recommendFeedRepository, clickLogRepository)
 
     def writer = Mock(Member)
     def feedCreateRequest = FeedCreateRequest.builder()
@@ -180,8 +183,8 @@ class FeedServiceTest extends Specification {
         given:
         feedRepository.findById(_ as Long) >> Optional.of(new Feed())
         when:
-        feedService.addViewedFeeds(1L,1L)
+        feedService.clickLogUpdate(1L,1L)
         then:
-        1 * recommendFeedRepository.addViewedFeed(1L, 1L)
+        1 * clickLogRepository.save(_ as ClickLog)
     }
 }

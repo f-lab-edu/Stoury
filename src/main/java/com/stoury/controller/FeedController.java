@@ -70,6 +70,6 @@ public class FeedController {
 
     @PostMapping("/feeds/viewed/{feedId}")
     public void addViewedFeeds(@AuthenticationPrincipal AuthenticatedMember authenticatedMember, @PathVariable Long feedId) {
-        feedService.addViewedFeeds(authenticatedMember.getId(), feedId);
+        feedService.clickLogUpdate(authenticatedMember.getId(), feedId);
     }
 }
