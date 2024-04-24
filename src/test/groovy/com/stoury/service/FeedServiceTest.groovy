@@ -20,7 +20,7 @@ import com.stoury.repository.ClickLogRepository
 import com.stoury.repository.FeedRepository
 import com.stoury.repository.LikeRepository
 import com.stoury.repository.MemberRepository
-import com.stoury.repository.RecommendFeedsRepository
+
 import com.stoury.service.location.LocationService
 import com.stoury.service.storage.StorageService
 import com.stoury.utils.JsonMapper
@@ -37,10 +37,9 @@ class FeedServiceTest extends Specification {
     def eventPublisher = Mock(ApplicationEventPublisher)
     def locationService = Mock(LocationService)
     def jsonMapper = new JsonMapper(new ObjectMapper())
-    def recommendFeedRepository = Mock(RecommendFeedsRepository)
     def clickLogRepository = Mock(ClickLogRepository)
     def feedService = new FeedService(storageService, feedRepository, memberRepository, likeRepository,
-            tagService, locationService, eventPublisher, jsonMapper, recommendFeedRepository, clickLogRepository)
+            tagService, locationService, eventPublisher, jsonMapper,  clickLogRepository)
 
     def writer = Mock(Member)
     def feedCreateRequest = FeedCreateRequest.builder()
@@ -171,24 +170,13 @@ class FeedServiceTest extends Specification {
 
     def "개인 맞춤 피드 제공 성공"(){
         given:
-        def recommendFeeds = [
-                new FeedResponseEntity(1L, 1L, "writer1",
-                        '[{"id":null, "path":null}]',
-                        '["tag1", "tag2", "tag3"]',
-                        null, "", 0.0, 0.0, "", ""),
-                new FeedResponseEntity(2L, 2L, "writer2",
-                        '[{"id":null, "path":null}]',
-                        '["tag1", "tag2", "tag3"]',
-                        null, "", 0.0, 0.0, "", ""),
-                new FeedResponseEntity(3L, 3L, "writer3",
-                        '[{"id":null, "path":null}]',
-                        '["tag1", "tag2", "tag3"]',
-                        null, "", 0.0, 0.0, "", ""),
-        ]
+        def feedIds = [1L,2L,4L,5L]
         when:
         feedService.getRecommendedFeeds(1L)
         then:
-        1 * feedRepository.findRecommendFeeds(_ as Long) >> recommendFeeds
+        1 * tagService.getFrequentTags(1L) >> []
+        1 * feedRepository.findRandomFeedIdsByTagName(_) >> feedIds
+        1 * feedRepository.findAllFeedsByIdIn(feedIds) >> []
     }
 
     def "사용자가 피드를 조회시 기록을 남김"(){

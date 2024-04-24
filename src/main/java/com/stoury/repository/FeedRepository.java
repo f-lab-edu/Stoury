@@ -3,9 +3,11 @@ package com.stoury.repository;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.core.types.dsl.StringPath;
+import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.stoury.domain.Feed;
 import com.stoury.domain.Member;
+import com.stoury.domain.Tag;
 import com.stoury.projection.FeedResponseEntity;
 import com.stoury.utils.cachekeys.PageSize;
 import jakarta.persistence.EntityManager;
@@ -14,10 +16,12 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
+import static com.stoury.domain.QClickLog.clickLog;
 import static com.stoury.domain.QFeed.feed;
 import static com.stoury.domain.QTag.tag;
 import static com.stoury.projection.QFeedResponseEntity.feedResponseEntity;
@@ -171,12 +175,12 @@ public class FeedRepository {
     }
 
     @Transactional(readOnly = true)
-    public List<Long> findRandomFeedIdsByTagName(Collection<String> tagNames){
+    public List<Long> findRandomFeedIdsByTagName(Collection<Tag> tagNames){
         return jpaQueryFactory.
                 select(feed.id)
                 .from(feed)
                 .join(feed.tags, tag)
-                .where(tag.tagName.in(tagNames))
+                .where(tag.in(tagNames))
                 .orderBy(Expressions.numberTemplate(Double.class, "function('rand')").asc())
                 .limit(PageSize.RANDOM_FEEDS_FETCH_SIZE)
                 .fetch();

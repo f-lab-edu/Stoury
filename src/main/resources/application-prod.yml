@@ -23,5 +23,6 @@ google:
   geocoding:
     api-key: ${geocode.apikey:NONE}
 origin: ${origin:NONE}
+path-prefix: /feeds
 token:
   secret: ${token.secret:NONE}

@@ -1,16 +1,22 @@
 package com.stoury.repository;
 
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import com.stoury.domain.QClickLog;
+import com.stoury.domain.QFeed;
 import com.stoury.domain.Tag;
+import com.stoury.utils.cachekeys.PageSize;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
+import static com.stoury.domain.QClickLog.*;
+import static com.stoury.domain.QFeed.*;
 import static com.stoury.domain.QTag.tag;
 
 @Repository
@@ -55,5 +61,19 @@ public class TagRepository {
                 .where(tag.tagName.eq(tagName))
                 .fetchFirst()
         );
+    }
+
+    public List<Tag> findAllByMemberIdAndFrequency(Long memberId) {
+        return jpaQueryFactory
+                .select(tag)
+                .from(clickLog)
+                .join(feed).on(clickLog.feedId.eq(feed.id))
+                .join(feed.tags, tag)
+                .where(clickLog.memberId.eq(memberId)
+                        .and(clickLog.createdAt.between(LocalDateTime.now().minusDays(7), LocalDateTime.now())))
+                .groupBy(tag)
+                .orderBy(tag.count().desc())
+                .limit(PageSize.FREQUENT_TAGS_SIZE)
+                .fetch();
     }
 }

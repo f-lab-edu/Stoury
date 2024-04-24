@@ -8,6 +8,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class TagService {
@@ -29,5 +31,9 @@ public class TagService {
         }
 
         return new Tag(tagName);
+    }
+
+    public List<Tag> getFrequentTags(Long memberId) {
+        return tagRepository.findAllByMemberIdAndFrequency(memberId);
     }
 }

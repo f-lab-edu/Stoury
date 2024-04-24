@@ -73,7 +73,7 @@ logging:
     org.hibernate.orm.jdbc.bind: trace
     com.zaxxer.hikari.HikariConfig: DEBUG
     com.zaxxer.hikari: TRACE
-path-prefix: /feeds
+path-prefix: $HOME/trash/feeds
 profileImage:
   path-prefix: /members/profiles
 google:

@@ -63,8 +63,6 @@ class IntegrationTest extends Specification {
     AuthenticationSuccessHandler authenticationSuccessHandler
     @Autowired
     LogoutSuccessHandler logoutSuccessHandler
-    @Autowired
-    RecommendFeedsRepository recommendFeedsRepository
     def member = new Member("aaa@dddd.com", "qwdqwdqwd", "username", null)
 
     def setup() {
@@ -342,32 +340,5 @@ class IntegrationTest extends Specification {
         // 거리 오차는 +- 1km 이내여야함
         26 <= member2.distance() && member2.distance() <= 28
         138 <= member3.distance() && member3.distance() <= 140
-    }
-
-    def "리포지토리에서 적당한 개수의 임의 추천 피드 id반환"(){
-        given:
-        def key = RecommendFeedsKey.getRecommendFeedsKey("1");
-        redisTemplate.opsForSet().add(key,
-                "2", "3", "4", "5", "6", "7", "8", "9", "10",
-                "12", "13", "14", "15", "16", "17", "18", "19", "20",
-                "22", "23", "24", "25", "26", "27", "28", "29", "30",
-                "32", "33", "34", "35", "36", "37", "38", "39", "40",
-                "42", "43", "44", "45", "46", "47", "48", "49", "50",
-                "52", "53", "54", "55", "56", "57", "58", "59", "60")
-        when:
-        def recommendFeedIds = recommendFeedsRepository.findAllByMemberId(1L)
-        then:
-        recommendFeedIds.size() == PageSize.RECOMMEND_FEEDS_SIZE
-    }
-
-    def "사용자가 본 피드 id가 ViewedFeeds:{memberID}의 키에 셋으로 저장됨"() {
-        given:
-        def key = ViewedFeedsKey.getViewedFeedsKey("1")
-        when:
-        recommendFeedsRepository.addViewedFeed(1,1)
-        recommendFeedsRepository.addViewedFeed(1,2)
-        recommendFeedsRepository.addViewedFeed(1,3)
-        then:
-        redisTemplate.opsForSet().members(key).containsAll(["1","2","3"])
     }
 }

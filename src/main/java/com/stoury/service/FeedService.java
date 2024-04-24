@@ -46,7 +46,6 @@ public class FeedService {
     private final LocationService locationService;
     private final ApplicationEventPublisher eventPublisher;
     private final JsonMapper jsonMapper;
-    private final RecommendFeedsRepository recommendFeedsRepository;
     private final ClickLogRepository clickLogRepository;
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
@@ -228,13 +227,11 @@ public class FeedService {
             throw new MemberSearchException();
         }
 
-        Collection<Long> recommendFeedIds = recommendFeedsRepository.findAllByMemberId(memberIdNonNull);
+        List<Tag> frequentTags = tagService.getFrequentTags(memberId);
+        List<Long> recommendFeedIds = feedRepository.findRandomFeedIdsByTagName(frequentTags);
+        List<FeedResponseEntity> recommendFeeds = feedRepository.findAllFeedsByIdIn(recommendFeedIds);
 
-        List<FeedResponseEntity> feeds = feedRepository.findAllFeedsByIdIn(recommendFeedIds);
-
-        return feeds.stream()
-                .map(this::toFeedResponse)
-                .toList();
+        return recommendFeeds.stream().map(this::toFeedResponse).toList();
     }
 
     @Transactional(readOnly = true)
