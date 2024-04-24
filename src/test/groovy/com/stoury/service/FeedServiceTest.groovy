@@ -171,12 +171,24 @@ class FeedServiceTest extends Specification {
 
     def "개인 맞춤 피드 제공 성공"(){
         given:
-        def feedIds = [1L,2L,4L,5L]
-        recommendFeedRepository.findAllByMemberId(_ as Long) >> feedIds
+        def recommendFeeds = [
+                new FeedResponseEntity(1L, 1L, "writer1",
+                        '[{"id":null, "path":null}]',
+                        '["tag1", "tag2", "tag3"]',
+                        null, "", 0.0, 0.0, "", ""),
+                new FeedResponseEntity(2L, 2L, "writer2",
+                        '[{"id":null, "path":null}]',
+                        '["tag1", "tag2", "tag3"]',
+                        null, "", 0.0, 0.0, "", ""),
+                new FeedResponseEntity(3L, 3L, "writer3",
+                        '[{"id":null, "path":null}]',
+                        '["tag1", "tag2", "tag3"]',
+                        null, "", 0.0, 0.0, "", ""),
+        ]
         when:
         feedService.getRecommendedFeeds(1L)
         then:
-        1 * feedRepository.findAllFeedsByIdIn(feedIds) >> []
+        1 * feedRepository.findRecommendFeeds(_ as Long) >> recommendFeeds
     }
 
     def "사용자가 피드를 조회시 기록을 남김"(){
