@@ -14,6 +14,7 @@ import org.springframework.data.redis.core.StringRedisTemplate
 import org.springframework.test.context.ActiveProfiles
 import spock.lang.Specification
 
+import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
 
 import static com.stoury.utils.cachekeys.HotFeedsKeys.*
@@ -34,6 +35,8 @@ class BatchIntegrationTest extends Specification {
     Job updateMonthlyFeedsJob
     @Autowired
     Job updateYearlyDiariesJob
+    @Autowired
+    Job updateFollowersRecommendFeedsJob
 
     @Autowired
     MemberRepository memberRepository
@@ -47,6 +50,10 @@ class BatchIntegrationTest extends Specification {
     DiaryRepository diaryRepository
     @Autowired
     TagRepository tagRepository
+    @Autowired
+    FollowRepository followRepository
+    @Autowired
+    ClickLogRepository clickLogRepository
 
     @Autowired
     StringRedisTemplate redisTemplate
@@ -54,6 +61,8 @@ class BatchIntegrationTest extends Specification {
     def member = new Member("aaa@dddd.com", "qwdqwdqwd", "username", null)
 
     def setup() {
+        clickLogRepository.deleteAll()
+        followRepository.deleteAll()
         feedRepository.deleteAllFeedResponse()
         feedRepository.deleteAll()
         tagRepository.deleteAll()
@@ -66,6 +75,8 @@ class BatchIntegrationTest extends Specification {
     }
 
     def cleanup() {
+        clickLogRepository.deleteAll()
+        followRepository.deleteAll()
         feedRepository.deleteAllFeedResponse()
         feedRepository.deleteAll()
         tagRepository.deleteAll()
@@ -308,5 +319,29 @@ class BatchIntegrationTest extends Specification {
         feeds.get(1) == "Seoul"
         feeds.get(2) == "Daejeon"
         feeds.get(3) == "Hwacheon"
+    }
+
+    def "팔로워 기반 추천 피드 테스트"() {
+        given:
+        jobLauncherTestUtils.setJob(updateFollowersRecommendFeedsJob)
+        def follower1 = memberRepository.save(new Member("follower1@email.com", "123123", "follower1", null))
+        def follower2 = memberRepository.save(new Member("follower2@email.com", "123123", "follower2", null))
+        def follower3 = memberRepository.save(new Member("follower3@email.com", "123123", "follower3", null))
+        followRepository.save(new Follow(follower1, member))
+        followRepository.save(new Follow(follower2, member))
+        followRepository.save(new Follow(follower3, member))
+        def feed1 = feedRepository.save(new Feed(member, "qwe", 0.0, 0.0, [] as Set, "city", "country"))
+        def feed2 = feedRepository.save(new Feed(member, "qwe", 0.0, 0.0, [] as Set, "city", "country"))
+        def feed3 = feedRepository.save(new Feed(member, "qwe", 0.0, 0.0, [] as Set, "city", "country"))
+        def feed4 = feedRepository.save(new Feed(member, "qwe", 0.0, 0.0, [] as Set, "city", "country"))
+        clickLogRepository.save(new ClickLog(follower1.id, feed1.id, LocalDateTime.now()))
+        clickLogRepository.save(new ClickLog(follower1.id, feed2.id, LocalDateTime.now()))
+        clickLogRepository.save(new ClickLog(follower2.id, feed3.id, LocalDateTime.now()))
+        clickLogRepository.save(new ClickLog(follower3.id, feed4.id, LocalDateTime.now()))
+        when:
+        def jobExecution = jobLauncherTestUtils.launchJob()
+        then:
+        "COMPLETED" == jobExecution.getExitStatus().getExitCode()
+        !feedRepository.findAllRecommendFeedIds(member.id).isEmpty()
     }
 }

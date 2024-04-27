@@ -32,7 +32,7 @@ spring:
   batch:
     job:
       enabled: false
-      names: jobPopularSpots,jobYearlyDiaries,jobDailyFeeds,jobMonthlyFeeds,jobWeeklyFeeds,jobRecommendFeeds
+      names: jobPopularSpots,jobYearlyDiaries,jobDailyFeeds,jobMonthlyFeeds,jobWeeklyFeeds,jobFollowersRecommendFeeds
     jdbc:
       initialize-schema: always
   datasource:

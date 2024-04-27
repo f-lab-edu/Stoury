@@ -3,11 +3,8 @@ package com.stoury.repository;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.core.types.dsl.StringPath;
-import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import com.stoury.domain.Feed;
-import com.stoury.domain.Member;
-import com.stoury.domain.Tag;
+import com.stoury.domain.*;
 import com.stoury.projection.FeedResponseEntity;
 import com.stoury.utils.PageSize;
 import jakarta.persistence.EntityManager;
@@ -21,8 +18,9 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
-import static com.stoury.domain.QClickLog.clickLog;
+import static com.stoury.domain.QClickLog.*;
 import static com.stoury.domain.QFeed.feed;
+import static com.stoury.domain.QRecommendFeed.*;
 import static com.stoury.domain.QTag.tag;
 import static com.stoury.projection.QFeedResponseEntity.feedResponseEntity;
 
@@ -183,6 +181,31 @@ public class FeedRepository {
                 .where(tag.in(tagNames))
                 .orderBy(Expressions.numberTemplate(Double.class, "function('rand')").asc())
                 .limit(PageSize.RANDOM_FEEDS_FETCH_SIZE)
+                .fetch();
+    }
+
+    @Transactional(readOnly = true)
+    public List<Long> findViewedFeedIdsByMember(Member member) {
+        return jpaQueryFactory
+                .select(feed.id)
+                .from(clickLog).join(feed).on(clickLog.feedId.eq(feed.id))
+                .where(clickLog.memberId.eq(member.getId())
+                        .and(clickLog.createdAt.between(LocalDateTime.now().minusDays(7), LocalDateTime.now())))
+                .fetch();
+    }
+
+    @Transactional
+    public List<RecommendFeed> saveRecommendFeeds(Collection<RecommendFeed> recommendFeeds) {
+        recommendFeeds.forEach(entityManager::persist);
+        return recommendFeeds.stream().toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<Long> findAllRecommendFeedIds(Long memberId) {
+        return jpaQueryFactory
+                .select(recommendFeed.feedId)
+                .from(recommendFeed)
+                .where(recommendFeed.memberId.eq(memberId))
                 .fetch();
     }
 }
