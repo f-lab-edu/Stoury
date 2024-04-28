@@ -253,4 +253,15 @@ public class FeedService {
 
         clickLogRepository.save(clickLog);
     }
+
+    @Transactional(readOnly = true)
+    public List<FeedResponse> getFollowerViewedRecommendFeeds(Long memberId) {
+        Long memberIdNonNull = Objects.requireNonNull(memberId);
+        List<Long> recommendFeedIds = feedRepository.findRandomRecommendFeedIds(memberIdNonNull);
+
+        List<FeedResponseEntity> recommendFeeds = feedRepository.findAllFeedsByIdIn(recommendFeedIds);
+        return recommendFeeds.stream()
+                .map(this::toFeedResponse)
+                .toList();
+    }
 }

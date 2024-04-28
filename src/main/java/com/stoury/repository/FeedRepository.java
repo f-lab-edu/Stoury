@@ -208,4 +208,14 @@ public class FeedRepository {
                 .where(recommendFeed.memberId.eq(memberId))
                 .fetch();
     }
+
+    public List<Long> findRandomRecommendFeedIds(Long memberId) {
+        return jpaQueryFactory
+                .select(recommendFeed.feedId)
+                .from(recommendFeed)
+                .where(recommendFeed.memberId.eq(memberId))
+                .orderBy(Expressions.numberTemplate(Double.class, "function('rand')").asc())
+                .limit(PageSize.RANDOM_FEEDS_FETCH_SIZE)
+                .fetch();
+    }
 }
