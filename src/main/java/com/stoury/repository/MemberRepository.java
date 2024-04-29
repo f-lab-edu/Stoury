@@ -2,6 +2,7 @@ package com.stoury.repository;
 
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.stoury.domain.Member;
+import com.stoury.utils.PageSize;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Query;
 import lombok.RequiredArgsConstructor;
@@ -15,6 +16,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
+import static com.stoury.domain.QFollow.*;
 import static com.stoury.domain.QMember.member;
 
 @Repository
@@ -113,5 +115,27 @@ public class MemberRepository {
         List<Member> savedMembers = saveAll(members);
         entityManager.flush();
         return savedMembers;
+    }
+
+    @Transactional(readOnly = true)
+    public List<Member> findByFollowersContain(Member follower) {
+        return jpaQueryFactory
+                .select(member)
+                .from(member).join(member.followers, follow)
+                .where(follow.follower.eq(follower))
+                .orderBy(member.username.asc())
+                .fetch();
+    }
+
+    @Transactional(readOnly = true)
+    public List<Member> findByFollowee(Member followee, String offsetUsername) {
+        return jpaQueryFactory
+                .select(member)
+                .from(member).join(member.followings, follow).join(follow.follower)
+                .where(follow.followee.eq(followee).and(follow.follower.username.gt(offsetUsername)))
+                .orderBy(follow.follower.username.asc())
+                .offset(0)
+                .limit(PageSize.FOLLOWER_PAGE_SIZE)
+                .fetch();
     }
 }

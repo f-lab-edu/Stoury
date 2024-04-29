@@ -1,7 +1,7 @@
 package com.stoury.domain;
 
 import com.stoury.dto.feed.FeedUpdateRequest;
-import com.stoury.utils.cachekeys.PageSize;
+import com.stoury.utils.PageSize;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

@@ -1,10 +1,8 @@
 package com.stoury.repository;
 
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import com.stoury.domain.QClickLog;
-import com.stoury.domain.QFeed;
 import com.stoury.domain.Tag;
-import com.stoury.utils.cachekeys.PageSize;
+import com.stoury.utils.PageSize;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
@@ -15,8 +13,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
-import static com.stoury.domain.QClickLog.*;
-import static com.stoury.domain.QFeed.*;
+import static com.stoury.domain.QClickLog.clickLog;
+import static com.stoury.domain.QFeed.feed;
 import static com.stoury.domain.QTag.tag;
 
 @Repository

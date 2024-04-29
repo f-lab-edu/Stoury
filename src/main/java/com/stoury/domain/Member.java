@@ -16,7 +16,9 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.BatchSize;
 
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Getter
@@ -45,9 +47,13 @@ public class Member {
     @Column(name = "DELETED", nullable = false)
     private boolean deleted;
 
-    @BatchSize(size = 20)
-    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "member")
-    private List<Feed> feeds = new ArrayList<>();
+    @BatchSize(size = 700)
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "follower")
+    Set<Follow> followings = new LinkedHashSet<>();
+
+    @BatchSize(size = 700)
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "followee")
+    Set<Follow> followers = new LinkedHashSet<>();
 
     @Builder
     public Member(String email, String encryptedPassword, String username, String introduction) {
