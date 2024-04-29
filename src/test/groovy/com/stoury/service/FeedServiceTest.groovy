@@ -187,4 +187,18 @@ class FeedServiceTest extends Specification {
         then:
         1 * clickLogRepository.save(_ as ClickLog)
     }
+
+    def "팔로워 기반 추천 피드 조회"() {
+        given:
+        def recommendFeedIds = [1L, 2L, 3L]
+        when:
+        feedService.getFollowerViewedRecommendFeeds(1L)
+        then:
+        1 * feedRepository.findRandomRecommendFeedIds(1L) >> recommendFeedIds
+        1 * feedRepository.findAllFeedsByIdIn(_) >> [
+                new FeedResponseEntity(1L, writer.id, writer.username,  '[{"id":null, "path":null}]',  "[null]",null,"", 0.0, 0.0,"", ""),
+                new FeedResponseEntity(2L, writer.id, writer.username,  '[{"id":null, "path":null}]',  "[null]",null,"", 0.0, 0.0,"", ""),
+                new FeedResponseEntity(3L, writer.id, writer.username,  '[{"id":null, "path":null}]',  "[null]",null,"", 0.0, 0.0,"", ""),
+        ]
+    }
 }

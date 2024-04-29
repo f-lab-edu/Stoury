@@ -10,6 +10,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 import static com.stoury.domain.QFollow.*;
 import static com.stoury.domain.QMember.*;
 
@@ -36,5 +38,14 @@ public class FollowRepository {
                 .from(follow).join(follow.follower, member)
                 .where(member.eq(follower))
                 .fetchFirst();
+    }
+
+    @Transactional(readOnly = true)
+    public List<Member> findFollowerId(Long followeeId) {
+        return jpaQueryFactory
+                .select(follow.follower)
+                .from(follow)
+                .where(follow.followee.id.eq(followeeId))
+                .fetch();
     }
 }

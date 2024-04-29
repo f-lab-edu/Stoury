@@ -68,8 +68,15 @@ public class FeedController {
         return feedService.getRecommendedFeeds(authenticatedMember.getId());
     }
 
+    @GetMapping("/feeds/follower-viewed")
+    public List<FeedResponse> getFollowerViewedFeeds(@AuthenticationPrincipal AuthenticatedMember authenticatedMember) {
+        return feedService.getFollowerViewedRecommendFeeds(authenticatedMember.getId());
+    }
+
     @PostMapping("/feeds/viewed/{feedId}")
+
     public void addViewedFeeds(@AuthenticationPrincipal AuthenticatedMember authenticatedMember, @PathVariable Long feedId) {
         feedService.clickLogUpdate(authenticatedMember.getId(), feedId);
     }
+
 }

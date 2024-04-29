@@ -10,6 +10,7 @@ import com.stoury.dto.feed.LocationResponse
 import com.stoury.dto.member.AuthenticatedMember
 import com.stoury.service.FeedService
 import com.stoury.utils.JsonMapper
+import org.spockframework.spring.SpringBean
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 import org.springframework.boot.test.mock.mockito.MockBean
@@ -27,8 +28,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @WebMvcTest(FeedController.class)
 class FeedControllerTest extends AbstractRestDocsTests {
-    @MockBean
-    FeedService feedService
+    @SpringBean
+    FeedService feedService = Mock()
     @Autowired
     JsonMapper jsonMapper
 
@@ -46,7 +47,7 @@ class FeedControllerTest extends AbstractRestDocsTests {
                 new MockMultipartFile("images", "file2.mp4", "video/mp4", new byte[0]),
                 new MockMultipartFile("images", "file3.jpeg", "image/jpeg", new byte[0]),
         ]
-        when(feedService.createFeed(any(Long.class), any(FeedCreateRequest.class), any(List))).thenReturn(
+        feedService.createFeed(_ as Long, _ as FeedCreateRequest, _ as List) >>
                 new FeedResponse(
                         1L,
                         new SimpleMemberResponse(writer.getId(), "testWriter"),
@@ -63,7 +64,6 @@ class FeedControllerTest extends AbstractRestDocsTests {
                         0,
                         LocalDateTime.of(2024, 12, 31, 13, 30, 20, 14)
                 )
-        )
         MockMultipartFile feedCreateRequestPart = new MockMultipartFile("feedCreateRequest", "", "application/json", jsonMapper.getJsonBytes(feedCreateRequest));
 
         when:
@@ -82,23 +82,21 @@ class FeedControllerTest extends AbstractRestDocsTests {
     def "Get a feed"() {
         given:
         def parameterDescriptor = parameterWithName("feedId").description("id of feed")
-        when(feedService.getFeed(1L)).thenReturn(
-                new FeedResponse(
-                        1L,
-                        new SimpleMemberResponse(1L, "testWriter"),
-                        [
-                                new GraphicContentResponse(1, "/file1.jpeg"),
-                                new GraphicContentResponse(2, "/file2.jpeg"),
-                                new GraphicContentResponse(3, "/file3.jpeg"),
-                        ],
-                        "This is content",
-                        36.5116,
-                        127.2359,
-                        ["korea", "travel"] as Set,
-                        new LocationResponse("sejong-si", "Republic of Korea"),
-                        0,
-                        LocalDateTime.of(2024, 12, 31, 13, 30, 20, 14)
-                )
+        feedService.getFeed(1L) >> new FeedResponse(
+                1L,
+                new SimpleMemberResponse(1L, "testWriter"),
+                [
+                        new GraphicContentResponse(1, "/file1.jpeg"),
+                        new GraphicContentResponse(2, "/file2.jpeg"),
+                        new GraphicContentResponse(3, "/file3.jpeg"),
+                ],
+                "This is content",
+                36.5116,
+                127.2359,
+                ["korea", "travel"] as Set,
+                new LocationResponse("sejong-si", "Republic of Korea"),
+                0,
+                LocalDateTime.of(2024, 12, 31, 13, 30, 20, 14)
         )
 
         when:
@@ -115,7 +113,7 @@ class FeedControllerTest extends AbstractRestDocsTests {
         def queryDescriptor = parameterWithName("offsetId")
                 .description("Results which created order than whose id is offsetId").optional()
 
-        when(feedService.getFeedsByTag(any(), any())).thenReturn(List.of(
+        feedService.getFeedsByTag(_, _) >> [
                 new FeedResponse(
                         2L,
                         new SimpleMemberResponse(1L, "testWriter"),
@@ -144,7 +142,7 @@ class FeedControllerTest extends AbstractRestDocsTests {
                         0,
                         LocalDateTime.of(2024, 12, 31, 13, 30, 20, 14)
                 )
-        ))
+        ]
         when:
         def response = mockMvc.perform(get("/feeds/tag/{tagName}", "travel")
                 .param("offsetId", "4"))
@@ -159,7 +157,7 @@ class FeedControllerTest extends AbstractRestDocsTests {
         def queryDescriptor = parameterWithName("offsetId")
                 .description("Results which created order than whose id is offsetId").optional()
 
-        when(feedService.getFeedsOfMemberId(any(), any())).thenReturn(List.of(
+        feedService.getFeedsOfMemberId(_, _) >> [
                 new FeedResponse(
                         2L,
                         new SimpleMemberResponse(1L, "testWriter"),
@@ -178,7 +176,7 @@ class FeedControllerTest extends AbstractRestDocsTests {
                 ),
                 new FeedResponse(
                         1L,
-                        new SimpleMemberResponse(2L, "testWriter"),
+                        new SimpleMemberResponse(1L, "testWriter"),
                         Collections.emptyList(),
                         "This is content2",
                         36.3157,
@@ -188,7 +186,7 @@ class FeedControllerTest extends AbstractRestDocsTests {
                         0,
                         LocalDateTime.of(2024, 12, 31, 13, 30, 20, 14)
                 )
-        ))
+        ]
         when:
         def response = mockMvc.perform(get("/feeds/member/{memberId}", "1")
                 .param("offsetId", "4"))
@@ -206,25 +204,22 @@ class FeedControllerTest extends AbstractRestDocsTests {
                 "Updated content",
                 ["New", "Updated"] as Set,
                 Set.of(1, 3))
-        when(feedService.updateFeedIfOwner(any(), any(), any())).thenReturn(
-                new FeedResponse(
-                        1L,
-                        new SimpleMemberResponse(writer.getId(), "testWriter"),
-                        [
-                                new GraphicContentResponse(2, "/file2.jpeg"),
-                                new GraphicContentResponse(4, "/file4.jpeg"),
-                                new GraphicContentResponse(5, "/file5.jpeg"),
-                        ],
-                        feedUpdateRequest.textContent(),
-                        36.5116,
-                        127.2359,
-                        feedUpdateRequest.tagNames(),
-                        new LocationResponse("daejeon-si", "Republic of Korea"),
-                        0,
-                        LocalDateTime.of(2024, 12, 31, 13, 30, 20, 14)
-                )
+        feedService.updateFeedIfOwner(_,_,_) >> new FeedResponse(
+                1L,
+                new SimpleMemberResponse(writer.getId(), "testWriter"),
+                [
+                        new GraphicContentResponse(2, "/file2.jpeg"),
+                        new GraphicContentResponse(4, "/file4.jpeg"),
+                        new GraphicContentResponse(5, "/file5.jpeg"),
+                ],
+                feedUpdateRequest.textContent(),
+                36.5116,
+                127.2359,
+                feedUpdateRequest.tagNames(),
+                new LocationResponse("daejeon-si", "Republic of Korea"),
+                0,
+                LocalDateTime.of(2024, 12, 31, 13, 30, 20, 14)
         )
-
         when:
         def response = mockMvc.perform(put("/feeds/{feedId}", "1")
                 .content(jsonMapper.getJsonString(feedUpdateRequest))
@@ -251,43 +246,41 @@ class FeedControllerTest extends AbstractRestDocsTests {
     def "Get recommend feeds"() {
         given:
         def writer = new AuthenticatedMember(1L, "test@email.com", "pwdpwd1111")
-        when(feedService.getRecommendedFeeds(any())).thenReturn(
-                [
-                        new FeedResponse(10L, new SimpleMemberResponse(2L, "tester2"),
-                                [
-                                        new GraphicContentResponse(20L, "/file1.jpeg"),
-                                        new GraphicContentResponse(21L, "/file2.jpeg"),
-                                ],
-                                "recommend feed1",
-                                36.5,
-                                127.5,
-                                ["tag1", "tag2", "tag3"] as Set,
-                                new LocationResponse("city1", "Country1"),
-                                3, LocalDateTime.of(2024, 12, 31, 0, 0)),
-                        new FeedResponse(233L, new SimpleMemberResponse(3L, "tester3"),
-                                [
-                                        new GraphicContentResponse(45L, "/file3.jpeg"),
-                                        new GraphicContentResponse(46L, "/file4.jpeg"),
-                                ],
-                                "recommend feed2",
-                                36.5,
-                                127.5,
-                                ["tag5", "tag2", "tag3"] as Set,
-                                new LocationResponse("city1", "Country1"),
-                                99, LocalDateTime.of(2024, 12, 31, 0, 0)),
-                        new FeedResponse(3456L, new SimpleMemberResponse(3L, "tester3"),
-                                [
-                                        new GraphicContentResponse(99L, "/file6.jpeg"),
-                                        new GraphicContentResponse(100L, "/file7.jpeg"),
-                                ],
-                                "recommend feed3",
-                                36.5,
-                                127.5,
-                                ["tag1", "tag2", "tag99"] as Set,
-                                new LocationResponse("city1", "Country1"),
-                                3, LocalDateTime.of(2024, 12, 31, 0, 0)),
-                ]
-        )
+        feedService.getRecommendedFeeds(_) >> [
+                new FeedResponse(10L, new SimpleMemberResponse(2L, "tester2"),
+                        [
+                                new GraphicContentResponse(20L, "/file1.jpeg"),
+                                new GraphicContentResponse(21L, "/file2.jpeg"),
+                        ],
+                        "recommend feed1",
+                        36.5,
+                        127.5,
+                        ["tag1", "tag2", "tag3"] as Set,
+                        new LocationResponse("city1", "Country1"),
+                        3, LocalDateTime.of(2024, 12, 31, 0, 0)),
+                new FeedResponse(233L, new SimpleMemberResponse(3L, "tester3"),
+                        [
+                                new GraphicContentResponse(45L, "/file3.jpeg"),
+                                new GraphicContentResponse(46L, "/file4.jpeg"),
+                        ],
+                        "recommend feed2",
+                        36.5,
+                        127.5,
+                        ["tag5", "tag2", "tag3"] as Set,
+                        new LocationResponse("city1", "Country1"),
+                        99, LocalDateTime.of(2024, 12, 31, 0, 0)),
+                new FeedResponse(3456L, new SimpleMemberResponse(3L, "tester3"),
+                        [
+                                new GraphicContentResponse(99L, "/file6.jpeg"),
+                                new GraphicContentResponse(100L, "/file7.jpeg"),
+                        ],
+                        "recommend feed3",
+                        36.5,
+                        127.5,
+                        ["tag1", "tag2", "tag99"] as Set,
+                        new LocationResponse("city1", "Country1"),
+                        3, LocalDateTime.of(2024, 12, 31, 0, 0)),
+        ]
         when:
         def response = mockMvc.perform(get("/feeds/recommend")
                 .with(authenticatedMember(writer)))
@@ -304,6 +297,52 @@ class FeedControllerTest extends AbstractRestDocsTests {
         def response = mockMvc.perform(post("/feeds/viewed/{feedId}", "1")
                 .with(authenticatedMember(writer)))
                 .andDo(documentWithPath(parameterDescriptor))
+        then:
+        response.andExpect(status().isOk())
+    }
+
+    def "Get follower view based recommend feeds"() {
+        given:
+        def writer = new AuthenticatedMember(1L, "test@email.com", "pwdpwd1111")
+        feedService.getFollowerViewedRecommendFeeds(1L) >> [
+                new FeedResponse(10L, new SimpleMemberResponse(2L, "tester2"),
+                        [
+                                new GraphicContentResponse(20L, "/file1.jpeg"),
+                                new GraphicContentResponse(21L, "/file2.jpeg"),
+                        ],
+                        "recommend feed1",
+                        36.5,
+                        127.5,
+                        ["tag1", "tag2", "tag3"] as Set,
+                        new LocationResponse("city1", "Country1"),
+                        3, LocalDateTime.of(2024, 12, 31, 0, 0)),
+                new FeedResponse(233L, new SimpleMemberResponse(3L, "tester3"),
+                        [
+                                new GraphicContentResponse(45L, "/file3.jpeg"),
+                                new GraphicContentResponse(46L, "/file4.jpeg"),
+                        ],
+                        "recommend feed2",
+                        36.5,
+                        127.5,
+                        ["tag5", "tag2", "tag3"] as Set,
+                        new LocationResponse("city1", "Country1"),
+                        99, LocalDateTime.of(2024, 12, 31, 0, 0)),
+                new FeedResponse(3456L, new SimpleMemberResponse(3L, "tester3"),
+                        [
+                                new GraphicContentResponse(99L, "/file6.jpeg"),
+                                new GraphicContentResponse(100L, "/file7.jpeg"),
+                        ],
+                        "recommend feed3",
+                        36.5,
+                        127.5,
+                        ["tag1", "tag2", "tag99"] as Set,
+                        new LocationResponse("city1", "Country1"),
+                        3, LocalDateTime.of(2024, 12, 31, 0, 0)),
+        ]
+        when:
+        def response = mockMvc.perform(get("/feeds/follower-viewed")
+                .with(authenticatedMember(writer)))
+                .andDo(document())
         then:
         response.andExpect(status().isOk())
     }
