@@ -1,6 +1,7 @@
 package com.stoury.service
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.stoury.domain.ClickLog
 import com.stoury.domain.Feed
 import com.stoury.domain.GraphicContent
 import com.stoury.domain.Member
@@ -15,9 +16,11 @@ import com.stoury.event.GraphicDeleteEvent
 import com.stoury.exception.authentication.NotAuthorizedException
 import com.stoury.exception.feed.FeedCreateException
 import com.stoury.projection.FeedResponseEntity
+import com.stoury.repository.ClickLogRepository
 import com.stoury.repository.FeedRepository
 import com.stoury.repository.LikeRepository
 import com.stoury.repository.MemberRepository
+
 import com.stoury.service.location.LocationService
 import com.stoury.service.storage.StorageService
 import com.stoury.utils.JsonMapper
@@ -34,8 +37,9 @@ class FeedServiceTest extends Specification {
     def eventPublisher = Mock(ApplicationEventPublisher)
     def locationService = Mock(LocationService)
     def jsonMapper = new JsonMapper(new ObjectMapper())
+    def clickLogRepository = Mock(ClickLogRepository)
     def feedService = new FeedService(storageService, feedRepository, memberRepository, likeRepository,
-            tagService, locationService, eventPublisher, jsonMapper)
+            tagService, locationService, eventPublisher, jsonMapper,  clickLogRepository)
 
     def writer = Mock(Member)
     def feedCreateRequest = FeedCreateRequest.builder()
@@ -162,5 +166,25 @@ class FeedServiceTest extends Specification {
         feedService.getFeedsOfMemberId(1L, 20L)
         then:
         1 * feedRepository.findAllFeedsByMemberAndIdLessThan(_, _, _) >> feeds
+    }
+
+    def "개인 맞춤 피드 제공 성공"(){
+        given:
+        def feedIds = [1L,2L,4L,5L]
+        when:
+        feedService.getRecommendedFeeds(1L)
+        then:
+        1 * tagService.getFrequentTags(1L) >> []
+        1 * feedRepository.findRandomFeedIdsByTagName(_) >> feedIds
+        1 * feedRepository.findAllFeedsByIdIn(feedIds) >> []
+    }
+
+    def "사용자가 피드를 조회시 기록을 남김"(){
+        given:
+        feedRepository.findById(_ as Long) >> Optional.of(new Feed())
+        when:
+        feedService.clickLogUpdate(1L,1L)
+        then:
+        1 * clickLogRepository.save(_ as ClickLog)
     }
 }

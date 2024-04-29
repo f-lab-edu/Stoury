@@ -32,7 +32,7 @@ spring:
   batch:
     job:
       enabled: false
-      names: jobPopularSpots,jobYearlyDiaries,jobDailyFeeds,jobMonthlyFeeds,jobWeeklyFeeds
+      names: jobPopularSpots,jobYearlyDiaries,jobDailyFeeds,jobMonthlyFeeds,jobWeeklyFeeds,jobRecommendFeeds
     jdbc:
       initialize-schema: always
   datasource:
@@ -63,6 +63,7 @@ spring:
     enabled: true
     baseline-on-migrate: true
     baseline-version: 0
+    out-of-order: true
   servlet:
     multipart:
       max-request-size: 50MB
@@ -72,7 +73,7 @@ logging:
     org.hibernate.orm.jdbc.bind: trace
     com.zaxxer.hikari.HikariConfig: DEBUG
     com.zaxxer.hikari: TRACE
-path-prefix: /feeds
+path-prefix: $HOME/trash/feeds
 profileImage:
   path-prefix: /members/profiles
 google:

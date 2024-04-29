@@ -62,4 +62,14 @@ public class FeedController {
                            @PathVariable Long feedId) {
         feedService.deleteFeedIfOwner(feedId, authenticatedMember.getId());
     }
+
+    @GetMapping("/feeds/recommend")
+    public List<FeedResponse> getRecommendedFeeds(@AuthenticationPrincipal AuthenticatedMember authenticatedMember) {
+        return feedService.getRecommendedFeeds(authenticatedMember.getId());
+    }
+
+    @PostMapping("/feeds/viewed/{feedId}")
+    public void addViewedFeeds(@AuthenticationPrincipal AuthenticatedMember authenticatedMember, @PathVariable Long feedId) {
+        feedService.clickLogUpdate(authenticatedMember.getId(), feedId);
+    }
 }

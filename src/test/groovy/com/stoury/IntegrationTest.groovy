@@ -10,6 +10,8 @@ import com.stoury.repository.*
 import com.stoury.service.FeedService
 import com.stoury.service.MemberService
 import com.stoury.utils.cachekeys.PageSize
+import com.stoury.utils.cachekeys.RecommendFeedsKey
+import com.stoury.utils.cachekeys.ViewedFeedsKey
 import jakarta.persistence.EntityManager
 import jakarta.persistence.PersistenceContext
 import org.springframework.beans.factory.annotation.Autowired
@@ -61,7 +63,6 @@ class IntegrationTest extends Specification {
     AuthenticationSuccessHandler authenticationSuccessHandler
     @Autowired
     LogoutSuccessHandler logoutSuccessHandler
-
     def member = new Member("aaa@dddd.com", "qwdqwdqwd", "username", null)
 
     def setup() {

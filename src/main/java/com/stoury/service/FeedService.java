@@ -1,10 +1,7 @@
 package com.stoury.service;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.stoury.domain.Feed;
-import com.stoury.domain.GraphicContent;
-import com.stoury.domain.Member;
-import com.stoury.domain.Tag;
+import com.stoury.domain.*;
 import com.stoury.dto.SimpleMemberResponse;
 import com.stoury.dto.feed.*;
 import com.stoury.event.*;
@@ -13,9 +10,7 @@ import com.stoury.exception.feed.FeedCreateException;
 import com.stoury.exception.feed.FeedSearchException;
 import com.stoury.exception.member.MemberSearchException;
 import com.stoury.projection.FeedResponseEntity;
-import com.stoury.repository.FeedRepository;
-import com.stoury.repository.LikeRepository;
-import com.stoury.repository.MemberRepository;
+import com.stoury.repository.*;
 import com.stoury.service.location.LocationService;
 import com.stoury.service.storage.StorageService;
 import com.stoury.utils.FileUtils;
@@ -34,10 +29,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import java.time.LocalDateTime;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -53,6 +46,7 @@ public class FeedService {
     private final LocationService locationService;
     private final ApplicationEventPublisher eventPublisher;
     private final JsonMapper jsonMapper;
+    private final ClickLogRepository clickLogRepository;
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public FeedResponse createFeed(Long writerId, FeedCreateRequest feedCreateRequest,
@@ -224,5 +218,39 @@ public class FeedService {
                 .orElseThrow(FeedSearchException::new);
 
         return toFeedResponse(feedResponseEntity);
+    }
+
+    @Transactional(readOnly = true)
+    public List<FeedResponse> getRecommendedFeeds(Long memberId) {
+        Long memberIdNonNull = Objects.requireNonNull(memberId);
+        if (memberRepository.findById(memberIdNonNull).isEmpty()) {
+            throw new MemberSearchException();
+        }
+
+        List<Tag> frequentTags = tagService.getFrequentTags(memberId);
+        List<Long> recommendFeedIds = feedRepository.findRandomFeedIdsByTagName(frequentTags);
+        List<FeedResponseEntity> recommendFeeds = feedRepository.findAllFeedsByIdIn(recommendFeedIds);
+
+        return recommendFeeds.stream().map(this::toFeedResponse).toList();
+    }
+
+    @Transactional(readOnly = true)
+    public void clickLogUpdate(Long memberId, Long feedId) {
+        Long memberIdNonNull = Objects.requireNonNull(memberId);
+        Long feedIdNonNull = Objects.requireNonNull(feedId);
+        if (memberRepository.findById(memberIdNonNull).isEmpty()) {
+            throw new MemberSearchException();
+        }
+        if (feedRepository.findById(feedIdNonNull).isEmpty()) {
+            throw new FeedSearchException();
+        }
+
+        ClickLog clickLog = ClickLog.builder()
+                .memberId(memberIdNonNull)
+                .feedId(feedIdNonNull)
+                .createdAt(LocalDateTime.now())
+                .build();
+
+        clickLogRepository.save(clickLog);
     }
 }

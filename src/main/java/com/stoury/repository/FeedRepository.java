@@ -1,21 +1,27 @@
 package com.stoury.repository;
 
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.core.types.dsl.StringPath;
+import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.stoury.domain.Feed;
 import com.stoury.domain.Member;
+import com.stoury.domain.Tag;
 import com.stoury.projection.FeedResponseEntity;
+import com.stoury.utils.cachekeys.PageSize;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
+import static com.stoury.domain.QClickLog.clickLog;
 import static com.stoury.domain.QFeed.feed;
 import static com.stoury.domain.QTag.tag;
 import static com.stoury.projection.QFeedResponseEntity.feedResponseEntity;
@@ -80,6 +86,14 @@ public class FeedRepository {
                 .selectFrom(feedResponseEntity)
                 .where(feedResponseEntity.feedId.in(feedIds))
                 .orderBy(feedResponseEntity.feedId.desc())
+                .fetch();
+    }
+
+    @Transactional(readOnly = true)
+    public List<FeedResponseEntity> findAllFeedsByIdIn(Collection<Long> feedIds) {
+        return jpaQueryFactory
+                .selectFrom(feedResponseEntity)
+                .where(feedResponseEntity.feedId.in(feedIds))
                 .fetch();
     }
 
@@ -149,9 +163,26 @@ public class FeedRepository {
     }
 
     @Transactional
+    public List<FeedResponseEntity> saveAllFeedResponses(Collection<FeedResponseEntity> feeds) {
+        return feeds.stream().map(this::saveFeedResponse).toList();
+    }
+
+    @Transactional
     public void deleteFeedResponseById(Long feedId) {
         jpaQueryFactory.delete(feedResponseEntity)
                 .where(feedResponseEntity.feedId.eq(feedId))
                 .execute();
+    }
+
+    @Transactional(readOnly = true)
+    public List<Long> findRandomFeedIdsByTagName(Collection<Tag> tagNames){
+        return jpaQueryFactory.
+                select(feed.id)
+                .from(feed)
+                .join(feed.tags, tag)
+                .where(tag.in(tagNames))
+                .orderBy(Expressions.numberTemplate(Double.class, "function('rand')").asc())
+                .limit(PageSize.RANDOM_FEEDS_FETCH_SIZE)
+                .fetch();
     }
 }

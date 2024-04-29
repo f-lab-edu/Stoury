@@ -1,15 +1,7 @@
 package com.stoury
 
-import com.stoury.domain.Diary
-import com.stoury.domain.Feed
-import com.stoury.domain.GraphicContent
-import com.stoury.domain.Like
-import com.stoury.domain.Member
-import com.stoury.repository.DiaryRepository
-import com.stoury.repository.FeedRepository
-import com.stoury.repository.LikeRepository
-import com.stoury.repository.MemberRepository
-import com.stoury.repository.RankingRepository
+import com.stoury.domain.*
+import com.stoury.repository.*
 import com.stoury.utils.cachekeys.FeedLikesCountSnapshotKeys
 import com.stoury.utils.cachekeys.PopularSpotsKey
 import org.springframework.batch.core.Job
@@ -24,14 +16,12 @@ import spock.lang.Specification
 
 import java.time.temporal.ChronoUnit
 
-import static com.stoury.utils.cachekeys.HotFeedsKeys.DAILY_HOT_FEEDS
-import static com.stoury.utils.cachekeys.HotFeedsKeys.MONTHLY_HOT_FEEDS
-import static com.stoury.utils.cachekeys.HotFeedsKeys.WEEKLY_HOT_FEEDS
+import static com.stoury.utils.cachekeys.HotFeedsKeys.*
 
 @SpringBootTest(classes = StouryBatchApplication.class)
 @SpringBatchTest
 @ActiveProfiles("test")
-class BatchTest extends Specification {
+class BatchIntegrationTest extends Specification {
     @Autowired
     JobLauncherTestUtils jobLauncherTestUtils;
     @Autowired
@@ -55,6 +45,8 @@ class BatchTest extends Specification {
     LikeRepository likeRepository
     @Autowired
     DiaryRepository diaryRepository
+    @Autowired
+    TagRepository tagRepository
 
     @Autowired
     StringRedisTemplate redisTemplate
@@ -62,7 +54,9 @@ class BatchTest extends Specification {
     def member = new Member("aaa@dddd.com", "qwdqwdqwd", "username", null)
 
     def setup() {
+        feedRepository.deleteAllFeedResponse()
         feedRepository.deleteAll()
+        tagRepository.deleteAll()
         diaryRepository.deleteAll()
         memberRepository.deleteAll()
         memberRepository.save(member)
@@ -72,7 +66,9 @@ class BatchTest extends Specification {
     }
 
     def cleanup() {
+        feedRepository.deleteAllFeedResponse()
         feedRepository.deleteAll()
+        tagRepository.deleteAll()
         diaryRepository.deleteAll()
         memberRepository.deleteAll()
 
@@ -178,10 +174,10 @@ class BatchTest extends Specification {
                 likeRepository.getCountSnapshotByFeed(feed.id.toString(), ChronoUnit.YEARS) == 0)
     }
 
-    def feed(long num){
+    def feed(long num) {
         def feed = Feed.builder()
                 .member(member)
-                .textContent("feed"+num)
+                .textContent("feed" + num)
                 .latitude(0)
                 .longitude(0)
                 .city("city" + num)

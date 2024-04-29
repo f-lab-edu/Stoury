@@ -12,6 +12,8 @@ spring:
     url: jdbc:mariadb://${db.host}:3306/stouryprod?allowPublicKeyRetrieval=true&useSSL=false&sendFractionalSeconds=false
     username: ${db.username}
     password: ${db.password}
+  flyway:
+    out-of-order: false
 logging:
   level:
     org.hibernate.orm.jdbc.bind: off
@@ -21,5 +23,6 @@ google:
   geocoding:
     api-key: ${geocode.apikey:NONE}
 origin: ${origin:NONE}
+path-prefix: /feeds
 token:
   secret: ${token.secret:NONE}

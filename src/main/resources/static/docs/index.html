@@ -494,6 +494,19 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <li><a href="#_delete_a_feed_path_parameters">Path parameters</a></li>
 </ul>
 </li>
+<li><a href="#_get_recommend_feeds">Get recommend feeds</a>
+<ul class="sectlevel2">
+<li><a href="#_get_recommend_feeds_http_request">HTTP request</a></li>
+<li><a href="#_get_recommend_feeds_http_response">HTTP response</a></li>
+</ul>
+</li>
+<li><a href="#_update_viewed_feeds">Update viewed feeds</a>
+<ul class="sectlevel2">
+<li><a href="#_update_viewed_feeds_http_request">HTTP request</a></li>
+<li><a href="#_update_viewed_feeds_http_response">HTTP response</a></li>
+<li><a href="#_update_viewed_feeds_path_parameters">Path parameters</a></li>
+</ul>
+</li>
 <li><a href="#_check_liked_or_not">Check liked or not</a>
 <ul class="sectlevel2">
 <li><a href="#_check_liked_or_not_http_request">HTTP request</a></li>
@@ -1160,6 +1173,146 @@ Host: localhost:8080</code></pre>
 </div>
 </div>
 <div class="sect1">
+<h2 id="_get_recommend_feeds">Get recommend feeds</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_get_recommend_feeds_http_request">HTTP request</h3>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">GET /feeds/recommend HTTP/1.1
+Host: localhost:8080</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_get_recommend_feeds_http_response">HTTP response</h3>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">HTTP/1.1 200 OK
+Content-Type: application/json;charset=UTF-8
+Content-Length: 1388
+
+[ {
+  "feedId" : 10,
+  "writer" : {
+    "id" : 2,
+    "username" : "tester2"
+  },
+  "graphicContentsPaths" : [ {
+    "id" : 20,
+    "path" : "/file1.jpeg"
+  }, {
+    "id" : 21,
+    "path" : "/file2.jpeg"
+  } ],
+  "textContent" : "recommend feed1",
+  "latitude" : 36.5,
+  "longitude" : 127.5,
+  "tagNames" : [ "tag1", "tag2", "tag3" ],
+  "location" : {
+    "city" : "city1",
+    "country" : "Country1"
+  },
+  "likes" : 3,
+  "createdAt" : "2024-12-31T00:00:00"
+}, {
+  "feedId" : 233,
+  "writer" : {
+    "id" : 3,
+    "username" : "tester3"
+  },
+  "graphicContentsPaths" : [ {
+    "id" : 45,
+    "path" : "/file3.jpeg"
+  }, {
+    "id" : 46,
+    "path" : "/file4.jpeg"
+  } ],
+  "textContent" : "recommend feed2",
+  "latitude" : 36.5,
+  "longitude" : 127.5,
+  "tagNames" : [ "tag5", "tag2", "tag3" ],
+  "location" : {
+    "city" : "city1",
+    "country" : "Country1"
+  },
+  "likes" : 99,
+  "createdAt" : "2024-12-31T00:00:00"
+}, {
+  "feedId" : 3456,
+  "writer" : {
+    "id" : 3,
+    "username" : "tester3"
+  },
+  "graphicContentsPaths" : [ {
+    "id" : 99,
+    "path" : "/file6.jpeg"
+  }, {
+    "id" : 100,
+    "path" : "/file7.jpeg"
+  } ],
+  "textContent" : "recommend feed3",
+  "latitude" : 36.5,
+  "longitude" : 127.5,
+  "tagNames" : [ "tag1", "tag2", "tag99" ],
+  "location" : {
+    "city" : "city1",
+    "country" : "Country1"
+  },
+  "likes" : 3,
+  "createdAt" : "2024-12-31T00:00:00"
+} ]</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_update_viewed_feeds">Update viewed feeds</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_update_viewed_feeds_http_request">HTTP request</h3>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">POST /feeds/viewed/1 HTTP/1.1
+Host: localhost:8080
+Content-Type: application/x-www-form-urlencoded</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_update_viewed_feeds_http_response">HTTP response</h3>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">HTTP/1.1 200 OK</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_update_viewed_feeds_path_parameters">Path parameters</h3>
+<table class="tableblock frame-all grid-all stretch">
+<caption class="title">Table 1. /feeds/viewed/{feedId}</caption>
+<colgroup>
+<col style="width: 50%;">
+<col style="width: 50%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Parameter</th>
+<th class="tableblock halign-left valign-top">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>feedId</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">id of feed</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div class="sect1">
 <h2 id="_check_liked_or_not">Check liked or not</h2>
 <div class="sectionbody">
 <div class="sect2">
@@ -1448,7 +1601,7 @@ Content-Length: 626
   "feedId" : 1,
   "hasNestedComments" : false,
   "textContent" : "First comment",
-  "createdAt" : "2024-04-07T21:40:26.449217"
+  "createdAt" : "2024-04-20T21:04:02.566029"
 }, {
   "id" : 2,
   "writer" : {
@@ -1458,7 +1611,7 @@ Content-Length: 626
   "feedId" : 1,
   "hasNestedComments" : true,
   "textContent" : "This comment was deleted",
-  "createdAt" : "2024-04-07T21:40:26.451538"
+  "createdAt" : "2024-04-20T21:04:02.568001"
 }, {
   "id" : 3,
   "writer" : {
@@ -1468,7 +1621,7 @@ Content-Length: 626
   "feedId" : 1,
   "hasNestedComments" : true,
   "textContent" : "Third comment",
-  "createdAt" : "2024-04-07T21:40:26.452142"
+  "createdAt" : "2024-04-20T21:04:02.568308"
 } ]</code></pre>
 </div>
 </div>
@@ -1546,7 +1699,7 @@ Content-Length: 602
   },
   "parentCommentId" : 1,
   "textContent" : "First child comment",
-  "createdAt" : "2024-04-07T21:40:26.473684"
+  "createdAt" : "2024-04-20T21:04:02.587327"
 }, {
   "id" : 12,
   "writerResponse" : {
@@ -1555,7 +1708,7 @@ Content-Length: 602
   },
   "parentCommentId" : 1,
   "textContent" : "Second child comment",
-  "createdAt" : "2024-04-07T21:40:26.474563"
+  "createdAt" : "2024-04-20T21:04:02.588017"
 }, {
   "id" : 13,
   "writerResponse" : {
@@ -1564,7 +1717,7 @@ Content-Length: 602
   },
   "parentCommentId" : 1,
   "textContent" : "This comment was deleted",
-  "createdAt" : "2024-04-07T21:40:26.474959"
+  "createdAt" : "2024-04-20T21:04:02.588349"
 } ]</code></pre>
 </div>
 </div>
@@ -1772,7 +1925,7 @@ Content-Length: 2027
         "country" : "United States"
       },
       "likes" : 20,
-      "createdAt" : "2024-04-07T21:40:26.546276"
+      "createdAt" : "2024-04-20T21:04:02.652722"
     } ],
     "2" : [ {
       "feedId" : 2,
@@ -1796,7 +1949,7 @@ Content-Length: 2027
         "country" : "United States"
       },
       "likes" : 13,
-      "createdAt" : "2024-04-08T21:40:26.552121"
+      "createdAt" : "2024-04-21T21:04:02.658349"
     }, {
       "feedId" : 3,
       "writer" : {
@@ -1819,11 +1972,11 @@ Content-Length: 2027
         "country" : "United States"
       },
       "likes" : 52,
-      "createdAt" : "2024-04-09T21:40:26.553636"
+      "createdAt" : "2024-04-22T21:04:02.659411"
     } ]
   },
-  "startDate" : "2024-04-07",
-  "endDate" : "2024-04-09",
+  "startDate" : "2024-04-20",
+  "endDate" : "2024-04-22",
   "city" : "Colorado",
   "country" : "United States",
   "likes" : 85,
@@ -2567,7 +2720,7 @@ Content-Length: 401
 <div id="footer">
 <div id="footer-text">
 Version 0.0.1-SNAPSHOT<br>
-Last updated 2024-03-05 19:46:06 +0900
+Last updated 2024-04-20 21:03:54 +0900
 </div>
 </div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.3/highlight.min.js"></script>
