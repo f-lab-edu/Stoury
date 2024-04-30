@@ -1,28 +1,29 @@
 package com.stoury.controller
 
-import com.stoury.domain.GraphicContent
+
 import com.stoury.dto.SimpleMemberResponse
 import com.stoury.dto.feed.FeedCreateRequest
 import com.stoury.dto.feed.FeedResponse
-import com.stoury.dto.feed.FeedUpdateRequest
 import com.stoury.dto.feed.GraphicContentResponse
 import com.stoury.dto.feed.LocationResponse
+import com.stoury.dto.feed.FeedUpdateRequest
 import com.stoury.dto.member.AuthenticatedMember
 import com.stoury.service.FeedService
 import com.stoury.utils.JsonMapper
 import org.spockframework.spring.SpringBean
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
-import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.http.MediaType
 import org.springframework.mock.web.MockMultipartFile
 import org.springframework.web.multipart.MultipartFile
 
 import java.time.LocalDateTime
 
-import static org.mockito.ArgumentMatchers.any
-import static org.mockito.Mockito.when
-import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.*
+import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get
+import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.put
+import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post
+import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.delete
+import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.multipart
 import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 

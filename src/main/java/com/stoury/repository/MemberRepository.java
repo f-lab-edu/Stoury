@@ -16,7 +16,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
-import static com.stoury.domain.QFollow.*;
+import static com.stoury.domain.QFollow.follow;
 import static com.stoury.domain.QMember.member;
 
 @Repository

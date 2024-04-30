@@ -4,7 +4,10 @@ import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.core.types.dsl.StringPath;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import com.stoury.domain.*;
+import com.stoury.domain.Feed;
+import com.stoury.domain.Member;
+import com.stoury.domain.Tag;
+import com.stoury.domain.RecommendFeed;
 import com.stoury.projection.FeedResponseEntity;
 import com.stoury.utils.PageSize;
 import jakarta.persistence.EntityManager;
@@ -18,9 +21,9 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
-import static com.stoury.domain.QClickLog.*;
+import static com.stoury.domain.QClickLog.clickLog;
 import static com.stoury.domain.QFeed.feed;
-import static com.stoury.domain.QRecommendFeed.*;
+import static com.stoury.domain.QRecommendFeed.recommendFeed;
 import static com.stoury.domain.QTag.tag;
 import static com.stoury.projection.QFeedResponseEntity.feedResponseEntity;
 

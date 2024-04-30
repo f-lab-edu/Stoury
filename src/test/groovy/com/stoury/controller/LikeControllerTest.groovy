@@ -5,7 +5,9 @@ import com.stoury.service.LikeService
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 import org.springframework.boot.test.mock.mockito.MockBean
 
-import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.*
+import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post
+import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get
+import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.delete
 import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 

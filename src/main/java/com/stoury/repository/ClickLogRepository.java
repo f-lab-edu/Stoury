@@ -2,13 +2,12 @@ package com.stoury.repository;
 
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.stoury.domain.ClickLog;
-import com.stoury.domain.QClickLog;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
-import static com.stoury.domain.QClickLog.*;
+import static com.stoury.domain.QClickLog.clickLog;
 
 @Repository
 @RequiredArgsConstructor
