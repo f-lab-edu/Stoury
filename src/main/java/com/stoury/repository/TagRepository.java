@@ -61,6 +61,7 @@ public class TagRepository {
         );
     }
 
+    @Transactional(readOnly = true)
     public List<Tag> findAllByMemberIdAndFrequency(Long memberId) {
         return jpaQueryFactory
                 .select(tag)
