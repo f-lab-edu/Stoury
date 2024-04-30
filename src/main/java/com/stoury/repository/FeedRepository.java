@@ -23,6 +23,7 @@ import java.util.Optional;
 
 import static com.stoury.domain.QClickLog.clickLog;
 import static com.stoury.domain.QFeed.feed;
+import static com.stoury.domain.QFollow.follow;
 import static com.stoury.domain.QRecommendFeed.recommendFeed;
 import static com.stoury.domain.QTag.tag;
 import static com.stoury.projection.QFeedResponseEntity.feedResponseEntity;
@@ -212,6 +213,7 @@ public class FeedRepository {
                 .fetch();
     }
 
+    @Transactional(readOnly = true)
     public List<Long> findRandomRecommendFeedIds(Long memberId) {
         return jpaQueryFactory
                 .select(recommendFeed.feedId)
@@ -219,6 +221,19 @@ public class FeedRepository {
                 .where(recommendFeed.memberId.eq(memberId))
                 .orderBy(Expressions.numberTemplate(Double.class, "function('rand')").asc())
                 .limit(PageSize.RANDOM_FEEDS_FETCH_SIZE)
+                .fetch();
+    }
+
+    @Transactional(readOnly = true)
+    public List<Long> findFollowerViewedFeedsOfMember(Long memberId) {
+        LocalDateTime current = LocalDateTime.now();
+        LocalDateTime aWeekAgo = current.minusDays(7);
+
+        return jpaQueryFactory
+                .select(clickLog.feedId)
+                .from(clickLog).join(follow).on(clickLog.memberId.eq(follow.follower.id))
+                .where(follow.followee.id.eq(memberId)
+                        .and(clickLog.createdAt.between(aWeekAgo, current)))
                 .fetch();
     }
 }

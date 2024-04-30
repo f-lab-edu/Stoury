@@ -31,27 +31,30 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @ConditionalOnExpression("'${spring.batch.job.names}'.contains('jobFollowersRecommendFeeds')")
 public class BatchFollowersRecommendFeedsConfig {
+    private static final int CHUNK_SIZE = 1000;
     private final LogJobExecutionListener logger;
     private final EntityManagerFactory entityManagerFactory;
+    private final JobRepository jobRepository;
+    private final PlatformTransactionManager transactionManager;
+    private final ThreadPoolTaskExecutor taskExecutor;
     private final FeedRepository feedRepository;
     private final FollowRepository followRepository;
 
     @Bean
-    public Job updateFollowersRecommendFeedsJob(JobRepository jobRepository, PlatformTransactionManager tm,
-                                                ThreadPoolTaskExecutor taskExecutor) {
+    public Job updateFollowersRecommendFeedsJob() {
         return new JobBuilder("jobFollowersRecommendFeeds", jobRepository)
                 .incrementer(new RunIdIncrementer())
-                .start(updateFollowersRecommendFeedsStep(jobRepository, tm, taskExecutor))
+                .start(updateFollowersRecommendFeedsStep())
                 .listener(logger)
                 .build();
     }
 
     @Bean
-    public Step updateFollowersRecommendFeedsStep(JobRepository jobRepository, PlatformTransactionManager tm, ThreadPoolTaskExecutor taskExecutor) {
+    public Step updateFollowersRecommendFeedsStep() {
         return new StepBuilder("stepFollowersRecommendFeeds", jobRepository)
-                .<Long, MemberRecommendFeedIds>chunk(1000, tm)
+                .<Long, MemberRecommendFeedIds>chunk(CHUNK_SIZE, transactionManager)
                 .reader(memberReader())
-                .processor(followViewedFeedsProcessor())
+                .processor(followerViewedFeedsAggregator())
                 .writer(recommendFeedsWriter())
                 .taskExecutor(taskExecutor)
                 .allowStartIfComplete(true)
@@ -61,27 +64,24 @@ public class BatchFollowersRecommendFeedsConfig {
     public JpaPagingItemReader<Long> memberReader() {
         return new JpaPagingItemReaderBuilder<Long>()
                 .name("memberReader")
-                .pageSize(1000)
+                .pageSize(CHUNK_SIZE)
                 .entityManagerFactory(entityManagerFactory)
                 .queryString("select m.id from Member m")
                 .build();
     }
 
-    public ItemProcessor<Long, MemberRecommendFeedIds> followViewedFeedsProcessor() {
+    public ItemProcessor<Long, MemberRecommendFeedIds> followerViewedFeedsAggregator() {
         return memberId -> {
-            Set<Long> recommendFeedIds = followRepository.findFollowerId(memberId).stream()
-                    .flatMap(follower -> feedRepository.findViewedFeedIdsByMember(follower).stream())
-                    .collect(Collectors.toSet());
-
-            return new MemberRecommendFeedIds(memberId, recommendFeedIds);
+            List<Long> followerViewedFeedsOfMember = feedRepository.findFollowerViewedFeedsOfMember(memberId);
+            return MemberRecommendFeedIds.of(memberId, followerViewedFeedsOfMember);
         };
     }
 
     public ItemWriter<MemberRecommendFeedIds> recommendFeedsWriter(){
-        return recommendFeedIds -> {
-            List<RecommendFeed> recommendFeeds = recommendFeedIds.getItems().stream()
-                    .flatMap(rf -> rf.feedIds().stream()
-                            .map(feedId -> new RecommendFeed(rf.memberId(), feedId, LocalDateTime.now())))
+        return memberRecommendFeedIds -> {
+            List<RecommendFeed> recommendFeeds = memberRecommendFeedIds.getItems().stream()
+                    .flatMap(memberRecommendFeeds -> memberRecommendFeeds.feedIds().stream()
+                            .map(feedId -> new RecommendFeed(memberRecommendFeeds.memberId(), feedId, LocalDateTime.now())))
                     .toList();
             feedRepository.saveRecommendFeeds(recommendFeeds);
         };

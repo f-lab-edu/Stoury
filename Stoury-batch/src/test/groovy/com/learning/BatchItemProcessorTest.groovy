@@ -8,15 +8,22 @@ import com.stoury.dto.MemberRecommendFeedIds
 import com.stoury.repository.FeedRepository
 import com.stoury.repository.FollowRepository
 import jakarta.persistence.EntityManagerFactory
+import org.springframework.batch.core.repository.JobRepository
 import org.springframework.batch.item.Chunk
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor
+import org.springframework.transaction.PlatformTransactionManager
 import spock.lang.Specification
 
 class BatchItemProcessorTest extends Specification {
     def logger = Mock(LogJobExecutionListener)
     def emf = Mock(EntityManagerFactory)
+    def jobRepository = Mock(JobRepository)
+    def transactionManager = Mock(PlatformTransactionManager)
+    def taskExecutor = Mock(ThreadPoolTaskExecutor)
     def feedRepository = Mock(FeedRepository)
     def followRepository = Mock(FollowRepository)
-    def batchConfig = new BatchFollowersRecommendFeedsConfig(logger, emf, feedRepository, followRepository)
+    def batchConfig = new BatchFollowersRecommendFeedsConfig(logger, emf, jobRepository, transactionManager,
+            taskExecutor, feedRepository, followRepository)
 
     def "recommendFeedsWriter 테스트"() {
         given:
@@ -35,20 +42,11 @@ class BatchItemProcessorTest extends Specification {
 
     def "followViewedFeedsProcessor 테스트"() {
         given:
-        def feedProcessor = batchConfig.followViewedFeedsProcessor()
-        def follower2 = new Member(id: 2L)
-        def follower3 = new Member(id: 3L)
-        def follower4 = new Member(id: 4L)
-        def member = new Member(id:1L, followers: [
-                new Follow(Mock(Member), follower2),
-                new Follow(Mock(Member), follower3),
-                new Follow(Mock(Member), follower4),
-        ] as Set)
-        followRepository.findFollowerId(1L) >> [follower2, follower3, follower4]
+        def feedProcessor = batchConfig.followerViewedFeedsAggregator()
         when:
-        def output = feedProcessor.process(member.id)
+        def output = feedProcessor.process(1L)
         then:
         output.memberId() == 1L
-        3 * feedRepository.findViewedFeedIdsByMember(_) >> []
+        1 * feedRepository.findFollowerViewedFeedsOfMember(_) >> [1L,2L,3L]
     }
 }
