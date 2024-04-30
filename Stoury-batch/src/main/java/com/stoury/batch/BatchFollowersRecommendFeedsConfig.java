@@ -22,10 +22,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.transaction.PlatformTransactionManager;
 
-import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 @Configuration
 @RequiredArgsConstructor
@@ -77,11 +74,10 @@ public class BatchFollowersRecommendFeedsConfig {
         };
     }
 
-    public ItemWriter<MemberRecommendFeedIds> recommendFeedsWriter(){
+    public ItemWriter<MemberRecommendFeedIds> recommendFeedsWriter() {
         return memberRecommendFeedIds -> {
             List<RecommendFeed> recommendFeeds = memberRecommendFeedIds.getItems().stream()
-                    .flatMap(memberRecommendFeeds -> memberRecommendFeeds.feedIds().stream()
-                            .map(feedId -> new RecommendFeed(memberRecommendFeeds.memberId(), feedId, LocalDateTime.now())))
+                    .flatMap(MemberRecommendFeedIds::feedIdsToRecommendFeeds)
                     .toList();
             feedRepository.saveRecommendFeeds(recommendFeeds);
         };

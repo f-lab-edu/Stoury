@@ -188,16 +188,6 @@ public class FeedRepository {
                 .fetch();
     }
 
-    @Transactional(readOnly = true)
-    public List<Long> findViewedFeedIdsByMember(Member member) {
-        return jpaQueryFactory
-                .select(feed.id)
-                .from(clickLog).join(feed).on(clickLog.feedId.eq(feed.id))
-                .where(clickLog.memberId.eq(member.getId())
-                        .and(clickLog.createdAt.between(LocalDateTime.now().minusDays(7), LocalDateTime.now())))
-                .fetch();
-    }
-
     @Transactional
     public List<RecommendFeed> saveRecommendFeeds(Collection<RecommendFeed> recommendFeeds) {
         recommendFeeds.forEach(entityManager::persist);
