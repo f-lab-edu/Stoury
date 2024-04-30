@@ -35,7 +35,6 @@ public class BatchFollowersRecommendFeedsConfig {
     private final PlatformTransactionManager transactionManager;
     private final ThreadPoolTaskExecutor taskExecutor;
     private final FeedRepository feedRepository;
-    private final FollowRepository followRepository;
 
     @Bean
     public Job updateFollowersRecommendFeedsJob() {

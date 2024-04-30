@@ -2,8 +2,6 @@ package com.learning
 
 import com.stoury.batch.BatchFollowersRecommendFeedsConfig
 import com.stoury.batch.LogJobExecutionListener
-import com.stoury.domain.Follow
-import com.stoury.domain.Member
 import com.stoury.dto.MemberRecommendFeedIds
 import com.stoury.repository.FeedRepository
 import com.stoury.repository.FollowRepository
@@ -21,9 +19,8 @@ class BatchItemProcessorTest extends Specification {
     def transactionManager = Mock(PlatformTransactionManager)
     def taskExecutor = Mock(ThreadPoolTaskExecutor)
     def feedRepository = Mock(FeedRepository)
-    def followRepository = Mock(FollowRepository)
     def batchConfig = new BatchFollowersRecommendFeedsConfig(logger, emf, jobRepository, transactionManager,
-            taskExecutor, feedRepository, followRepository)
+            taskExecutor, feedRepository)
 
     def "recommendFeedsWriter 테스트"() {
         given:
