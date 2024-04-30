@@ -101,7 +101,7 @@ public class BatchHotDiariesConfig {
         return list -> {
             for (Pair<SimpleDiaryResponse, Long> pair : list) {
                 SimpleDiaryResponse rawSimpleDiary = pair.getFirst();
-                Long likeIncrease = pair.getSecond();
+                long likeIncrease = pair.getSecond();
 
                 if (likeIncrease > 0) {
                     rankingRepository.saveHotDiaries(rawSimpleDiary, likeIncrease);
