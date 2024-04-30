@@ -44,7 +44,7 @@ public class ChildCommentRepository {
 
     @Transactional
     public void deleteAll() {
-        jpaQueryFactory.selectFrom(childComment).fetch().forEach(entityManager::remove);
+        jpaQueryFactory.delete(childComment).execute();
     }
 
     @Transactional(readOnly = true)

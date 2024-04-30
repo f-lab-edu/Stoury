@@ -101,7 +101,7 @@ public class MemberRepository {
 
     @Transactional
     public void deleteAll() {
-        jpaQueryFactory.selectFrom(member).fetch().forEach(entityManager::remove);
+        jpaQueryFactory.delete(member).execute();
     }
 
     @Transactional

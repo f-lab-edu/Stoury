@@ -44,7 +44,7 @@ public class TagRepository {
 
     @Transactional
     public void deleteAll() {
-        jpaQueryFactory.selectFrom(tag).fetch().forEach(entityManager::remove);
+        jpaQueryFactory.delete(tag).execute();
     }
 
     @Transactional(readOnly = true)

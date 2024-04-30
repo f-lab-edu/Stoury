@@ -6,8 +6,8 @@ import com.querydsl.core.types.dsl.StringPath;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.stoury.domain.Feed;
 import com.stoury.domain.Member;
-import com.stoury.domain.Tag;
 import com.stoury.domain.RecommendFeed;
+import com.stoury.domain.Tag;
 import com.stoury.projection.FeedResponseEntity;
 import com.stoury.utils.PageSize;
 import jakarta.persistence.EntityManager;
@@ -24,6 +24,7 @@ import java.util.Optional;
 import static com.stoury.domain.QClickLog.clickLog;
 import static com.stoury.domain.QFeed.feed;
 import static com.stoury.domain.QFollow.follow;
+import static com.stoury.domain.QGraphicContent.graphicContent;
 import static com.stoury.domain.QRecommendFeed.recommendFeed;
 import static com.stoury.domain.QTag.tag;
 import static com.stoury.projection.QFeedResponseEntity.feedResponseEntity;
@@ -137,12 +138,13 @@ public class FeedRepository {
 
     @Transactional
     public void deleteAll() {
-        jpaQueryFactory.selectFrom(feed).fetch().forEach(entityManager::remove);
+        jpaQueryFactory.delete(graphicContent).execute();
+        jpaQueryFactory.delete(feed).execute();
     }
 
     @Transactional
     public void deleteAllFeedResponse() {
-        jpaQueryFactory.selectFrom(feedResponseEntity).fetch().forEach(entityManager::remove);
+        jpaQueryFactory.delete(feedResponseEntity).execute();
     }
 
     @Transactional

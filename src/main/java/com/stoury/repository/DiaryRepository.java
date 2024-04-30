@@ -57,7 +57,7 @@ public class DiaryRepository {
 
     @Transactional
     public void deleteAll() {
-        jpaQueryFactory.selectFrom(diary).fetch().forEach(entityManager::remove);
+        jpaQueryFactory.delete(diary).execute();
     }
 
     @Transactional

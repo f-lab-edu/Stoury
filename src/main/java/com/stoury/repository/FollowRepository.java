@@ -27,7 +27,7 @@ public class FollowRepository {
 
     @Transactional
     public void deleteAll() {
-        jpaQueryFactory.selectFrom(follow).fetch().forEach(entityManager::remove);
+        jpaQueryFactory.delete(follow).execute();
     }
 
     @Transactional(readOnly = true)

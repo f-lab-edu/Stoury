@@ -55,6 +55,6 @@ public class CommentRepository {
 
     @Transactional
     public void deleteAll() {
-        jpaQueryFactory.selectFrom(comment).fetch().forEach(entityManager::remove);
+        jpaQueryFactory.delete(comment).execute();
     }
 }
