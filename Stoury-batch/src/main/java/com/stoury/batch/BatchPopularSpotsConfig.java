@@ -28,42 +28,44 @@ import java.util.List;
 public class BatchPopularSpotsConfig {
     private final LogJobExecutionListener logger;
     Pageable pageable = PageRequest.of(0, 10);
+    private final JobRepository jobRepository;
+    private final PlatformTransactionManager transactionManager;
+    private final ThreadPoolTaskExecutor taskExecutor;
     private final FeedRepository feedRepository;
     private final RankingRepository rankingRepository;
 
 
     @Bean
-    public Step updatePopularDomesticCitiesStep(JobRepository jobRepository, PlatformTransactionManager tm) {
+    public Step updatePopularDomesticCitiesStep() {
         return new StepBuilder("stepUpdatePopularDomesticCities", jobRepository)
                 .tasklet((contribution, chunkContext) -> {
                     List<String> rankedDomesticCities = feedRepository.findTop10CitiesInKorea(pageable);
                     rankingRepository.update(PopularSpotsKey.POPULAR_DOMESTIC_SPOTS, rankedDomesticCities);
                     return RepeatStatus.FINISHED;
-                }, tm)
+                }, transactionManager)
                 .allowStartIfComplete(true)
                 .build();
     }
 
     @Bean
-    public Step updatePopularAbroadCitiesStep(JobRepository jobRepository, PlatformTransactionManager tm) {
+    public Step updatePopularAbroadCitiesStep() {
         return new StepBuilder("stepUpdatePopularAbroadCities", jobRepository)
                 .tasklet((contribution, chunkContext) -> {
                     List<String> rankedCountries = feedRepository.findTop10CountriesNotKorea(pageable);
                     rankingRepository.update(PopularSpotsKey.POPULAR_ABROAD_SPOTS, rankedCountries);
                     return RepeatStatus.FINISHED;
-                }, tm)
+                }, transactionManager)
                 .allowStartIfComplete(true)
                 .build();
     }
 
     @Bean
-    public Job updatePopularSpotsJob(JobRepository jobRepository, PlatformTransactionManager tm,
-                                     ThreadPoolTaskExecutor taskExecutor) {
+    public Job updatePopularSpotsJob() {
         Flow flowUpdatePopularAbroadCities = new FlowBuilder<Flow>("flowUpdatePopularAbroadCities")
-                .start(updatePopularAbroadCitiesStep(jobRepository, tm))
+                .start(updatePopularAbroadCitiesStep())
                 .build();
         Flow flowUpdatePopularDomesticCities = new FlowBuilder<Flow>("flowUpdatePopularDomesticCities")
-                .start(updatePopularDomesticCitiesStep(jobRepository, tm))
+                .start(updatePopularDomesticCitiesStep())
                 .build();
 
         return new JobBuilder("jobPopularSpots", jobRepository)

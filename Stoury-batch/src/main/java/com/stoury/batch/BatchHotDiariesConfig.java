@@ -31,27 +31,31 @@ import java.time.temporal.ChronoUnit;
 @RequiredArgsConstructor
 @ConditionalOnExpression("'${spring.batch.job.names}'.contains('jobYearlyDiaries')")
 public class BatchHotDiariesConfig {
+    private static final int CHUNK_SIZE = 1000;
     private final LogJobExecutionListener logger;
     private final EntityManagerFactory entityManagerFactory;
+    private final JobRepository jobRepository;
+    private final PlatformTransactionManager transactionManager;
+    private final ThreadPoolTaskExecutor taskExecutor;
+    private final LikeRepository likeRepository;
     private final RankingRepository rankingRepository;
 
     @Bean
-    public Job updateYearlyDiariesJob(JobRepository jobRepository, PlatformTransactionManager tm,
-                                    ThreadPoolTaskExecutor taskExecutor, LikeRepository likeRepository) {
+    public Job updateYearlyDiariesJob() {
         return new JobBuilder("jobYearlyDiaries", jobRepository)
                 .incrementer(new RunIdIncrementer())
-                .start(updateYearlyDiariesStep(jobRepository, tm, taskExecutor, likeRepository))
-                .next(initYearlyLikeCountSnapshot(jobRepository, tm, taskExecutor, likeRepository))
+                .start(updateYearlyDiariesStep())
+                .next(initYearlyLikeCountSnapshot())
                 .listener(logger)
                 .build();
     }
 
     @Bean
-    public Step updateYearlyDiariesStep(JobRepository jobRepository, PlatformTransactionManager tm, ThreadPoolTaskExecutor taskExecutor, LikeRepository likeRepository) {
+    public Step updateYearlyDiariesStep() {
         return new StepBuilder("stepYearlyDiaries", jobRepository)
-                .<Diary, Pair<SimpleDiaryResponse, Long>>chunk(100, tm)
+                .<Diary, Pair<SimpleDiaryResponse, Long>>chunk(CHUNK_SIZE, transactionManager)
                 .reader(diaryReader())
-                .processor(diaryProcessor(likeRepository))
+                .processor(diaryProcessor())
                 .writer(diaryWriter())
                 .taskExecutor(taskExecutor)
                 .allowStartIfComplete(true)
@@ -59,10 +63,9 @@ public class BatchHotDiariesConfig {
     }
 
     @Bean
-    public Step initYearlyLikeCountSnapshot(JobRepository jobRepository, PlatformTransactionManager tm,
-                                           ThreadPoolTaskExecutor taskExecutor, LikeRepository likeRepository) {
+    public Step initYearlyLikeCountSnapshot() {
         return new StepBuilder("stepInitLikeCountSnapshot", jobRepository)
-                .<Diary, Diary>chunk(100, tm)
+                .<Diary, Diary>chunk(CHUNK_SIZE, transactionManager)
                 .reader(diaryReader())
                 .writer(likeInitializer(likeRepository))
                 .taskExecutor(taskExecutor)
@@ -73,13 +76,13 @@ public class BatchHotDiariesConfig {
     public JpaPagingItemReader<Diary> diaryReader() {
         return new JpaPagingItemReaderBuilder<Diary>()
                 .name("diaryReader")
-                .pageSize(100)
+                .pageSize(CHUNK_SIZE)
                 .entityManagerFactory(entityManagerFactory)
                 .queryString("select d from Diary d")
                 .build();
     }
 
-    public ItemProcessor<Diary, Pair<SimpleDiaryResponse, Long>> diaryProcessor(LikeRepository likeRepository) {
+    public ItemProcessor<Diary, Pair<SimpleDiaryResponse, Long>> diaryProcessor() {
         return diary -> {
             long likeIncrease = diary.getFeeds().stream()
                     .mapToLong(Feed::getId)
