@@ -1,40 +1,36 @@
 package com.stoury.service;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.stoury.domain.ClickLog;
 import com.stoury.domain.Feed;
 import com.stoury.domain.GraphicContent;
 import com.stoury.domain.Member;
 import com.stoury.domain.Tag;
-import com.stoury.domain.ClickLog;
 import com.stoury.dto.SimpleMemberResponse;
-import com.stoury.dto.feed.FeedResponse;
 import com.stoury.dto.feed.FeedCreateRequest;
+import com.stoury.dto.feed.FeedResponse;
 import com.stoury.dto.feed.FeedUpdateRequest;
-import com.stoury.dto.feed.LocationResponse;
 import com.stoury.dto.feed.GraphicContentResponse;
+import com.stoury.dto.feed.LocationResponse;
 import com.stoury.event.FeedResponseCreateEvent;
-import com.stoury.event.FeedResponseUpdateEvent;
 import com.stoury.event.FeedResponseDeleteEvent;
+import com.stoury.event.FeedResponseUpdateEvent;
 import com.stoury.event.GraphicDeleteEvent;
-import com.stoury.event.GraphicSaveEvent;
 import com.stoury.exception.authentication.NotAuthorizedException;
 import com.stoury.exception.feed.FeedCreateException;
 import com.stoury.exception.feed.FeedSearchException;
 import com.stoury.exception.feed.FeedUpdateException;
 import com.stoury.exception.member.MemberSearchException;
 import com.stoury.projection.FeedResponseEntity;
-import com.stoury.repository.FeedRepository;
-import com.stoury.repository.MemberRepository;
-import com.stoury.repository.LikeRepository;
 import com.stoury.repository.ClickLogRepository;
+import com.stoury.repository.FeedRepository;
+import com.stoury.repository.LikeRepository;
+import com.stoury.repository.MemberRepository;
 import com.stoury.service.location.LocationService;
-import com.stoury.service.storage.StorageService;
-import com.stoury.utils.FileUtils;
 import com.stoury.utils.JsonMapper;
-import com.stoury.utils.SupportedFileType;
 import com.stoury.utils.PageSize;
+import com.stoury.utils.SupportedFileType;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -44,12 +40,11 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.nio.file.Paths;
 import java.time.LocalDateTime;
-import java.util.Objects;
-import java.util.List;
-import java.util.Set;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -59,9 +54,7 @@ import static com.stoury.utils.Values.MEMBER_ID_NOT_NULL_MESSAGE;
 @Service
 @RequiredArgsConstructor
 public class FeedService {
-    @Value("${path-prefix}")
-    public String pathPrefix;
-    private final StorageService storageService;
+    private final GraphicContentService graphicContentService;
     private final FeedRepository feedRepository;
     private final MemberRepository memberRepository;
     private final LikeRepository likeRepository;
@@ -77,7 +70,7 @@ public class FeedService {
         validate(writerId, feedCreateRequest, graphicContentsFiles);
 
         Member writer = memberRepository.findById(writerId).orElseThrow(MemberSearchException::new);
-        List<GraphicContent> graphicContents = saveGraphicContents(graphicContentsFiles);
+        List<GraphicContent> graphicContents = graphicContentService.createGraphicContents(graphicContentsFiles);
         LocationResponse locationResponse = locationService.getLocation(feedCreateRequest.latitude(), feedCreateRequest.longitude());
 
         Feed uploadedFeed = saveFeed(feedCreateRequest, writer, graphicContents, locationResponse);
@@ -85,23 +78,6 @@ public class FeedService {
         eventPublisher.publishEvent(new FeedResponseCreateEvent(this, uploadedFeed));
 
         return FeedResponse.from(uploadedFeed, 0);
-    }
-
-    private List<GraphicContent> saveGraphicContents(List<MultipartFile> graphicContents) {
-        List<GraphicContent> graphicContentList = new ArrayList<>();
-
-        for (int i = 0; i < graphicContents.size(); i++) {
-            MultipartFile file = graphicContents.get(i);
-
-            String path = FileUtils.createFilePath(file, pathPrefix);
-
-            graphicContentList.add(new GraphicContent(path, i));
-
-            storageService.saveFileAtPath(file, Paths.get(path));
-            eventPublisher.publishEvent(new GraphicSaveEvent(this, file, path)); // NOSONAR
-        }
-
-        return graphicContentList;
     }
 
     private Feed saveFeed(FeedCreateRequest feedCreateRequest, Member writer,

@@ -29,7 +29,7 @@ import org.springframework.mock.web.MockMultipartFile
 import spock.lang.Specification
 
 class FeedServiceTest extends Specification {
-    def storageService = Mock(StorageService)
+    def graphicContentService = Mock(GraphicContentService)
     def memberRepository = Mock(MemberRepository)
     def tagService = Mock(TagService)
     def feedRepository = Mock(FeedRepository)
@@ -38,7 +38,7 @@ class FeedServiceTest extends Specification {
     def locationService = Mock(LocationService)
     def jsonMapper = new JsonMapper(new ObjectMapper())
     def clickLogRepository = Mock(ClickLogRepository)
-    def feedService = new FeedService(storageService, feedRepository, memberRepository, likeRepository,
+    def feedService = new FeedService(graphicContentService, feedRepository, memberRepository, likeRepository,
             tagService, locationService, eventPublisher, jsonMapper,  clickLogRepository)
 
     def writer = Mock(Member)
@@ -67,6 +67,7 @@ class FeedServiceTest extends Specification {
         when:
         feedService.createFeed(1L, feedCreateRequest, graphicContents)
         then:
+        1 * graphicContentService.createGraphicContents(_) >> []
         1 * feedRepository.save(_ as Feed) >> savedFeed
         1 * locationService.getLocation(_, _) >> new LocationResponse("city", "country")
         1 * eventPublisher.publishEvent(_ as FeedResponseCreateEvent)

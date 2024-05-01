@@ -2,6 +2,7 @@ package com.stoury.service
 
 import com.stoury.service.storage.FileStorageService
 import com.stoury.utils.FileUtils
+import org.springframework.context.ApplicationEventPublisher
 import org.springframework.mock.web.MockMultipartFile
 import spock.lang.Specification
 
@@ -10,7 +11,8 @@ import java.nio.file.Path
 import java.nio.file.Paths
 
 class FileStorageServiceTest extends Specification {
-    def fileStorageService = new FileStorageService()
+    def eventPublisher = Mock(ApplicationEventPublisher)
+    def fileStorageService = new FileStorageService(eventPublisher)
     final String PATH_PREFIX = "src/test/resources/storagetest";
     final Path startPath = Paths.get(PATH_PREFIX);
 
