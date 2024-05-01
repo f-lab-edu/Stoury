@@ -153,14 +153,6 @@ public class FeedRepository {
         return saveFeed;
     }
 
-    @Transactional(readOnly = true)
-    public boolean existsById(Long id) {
-        return jpaQueryFactory
-                .selectFrom(feed)
-                .where(feed.id.eq(id))
-                .fetchFirst() != null;
-    }
-
     @Transactional
     public List<Feed> saveAll(Collection<Feed> feeds) {
         return feeds.stream().map(this::save).toList();
@@ -227,5 +219,15 @@ public class FeedRepository {
                 .where(follow.followee.id.eq(memberId)
                         .and(clickLog.createdAt.between(aWeekAgo, current)))
                 .fetch();
+    }
+
+    @Transactional(readOnly = true)
+    public boolean existsById(Long feedId) {
+        return !notExistsById(feedId);
+    }
+
+    @Transactional(readOnly = true)
+    public boolean notExistsById(Long feedId) {
+        return findById(feedId).isEmpty();
     }
 }

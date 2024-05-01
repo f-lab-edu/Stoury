@@ -46,6 +46,6 @@ public class ChatRoomRepository {
 
     @Transactional
     public void deleteAll() {
-        jpaQueryFactory.selectFrom(chatRoom).fetch().forEach(entityManager::remove);
+        jpaQueryFactory.delete(chatRoom).execute();
     }
 }

@@ -40,7 +40,7 @@ public class MemberRepository {
     }
 
     @Transactional(readOnly = true)
-    public Slice<Member> findMembersByUsernameMatches(String username, Pageable page){
+    public Slice<Member> findMembersByUsernameMatches(String username, Pageable page) {
         int pageSize = page.getPageSize();
         Query nativeQuery = entityManager.createNativeQuery("""
                 SELECT *
@@ -67,7 +67,7 @@ public class MemberRepository {
     }
 
     @Transactional(readOnly = true)
-    public List<Member> findAllByDeletedIsTrue(){
+    public List<Member> findAllByDeletedIsTrue() {
         return jpaQueryFactory
                 .selectFrom(member)
                 .where(member.deleted.isTrue())
@@ -75,7 +75,7 @@ public class MemberRepository {
     }
 
     @Transactional(readOnly = true)
-    public boolean existsByEmail(String email){
+    public boolean existsByEmail(String email) {
         return jpaQueryFactory
                 .select(member.count())
                 .from(member)
@@ -137,5 +137,15 @@ public class MemberRepository {
                 .offset(0)
                 .limit(PageSize.FOLLOWER_PAGE_SIZE)
                 .fetch();
+    }
+
+    @Transactional(readOnly = true)
+    public boolean existsById(Long memberId) {
+        return !notExistsById(memberId);
+    }
+
+    @Transactional(readOnly = true)
+    public boolean notExistsById(Long memberId) {
+        return findById(memberId).isEmpty();
     }
 }

@@ -46,6 +46,6 @@ public class ChatMessageRepository {
 
     @Transactional
     public void deleteAll() {
-        jpaQueryFactory.selectFrom(chatMessage).fetch().forEach(entityManager::remove);
+        jpaQueryFactory.delete(chatMessage).execute();
     }
 }
