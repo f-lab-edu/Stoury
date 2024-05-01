@@ -16,6 +16,8 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
+import static com.stoury.utils.Values.MEMBER_ID_NOT_NULL_MESSAGE;
+
 @Service
 @RequiredArgsConstructor
 public class FollowService {
@@ -47,7 +49,7 @@ public class FollowService {
 
     @Transactional(readOnly = true)
     public List<SimpleMemberResponse> getFollowingMembers(Long memberId) {
-        Long memberIdNonNull = Objects.requireNonNull(memberId, "MemberId can't be null");
+        Long memberIdNonNull = Objects.requireNonNull(memberId, MEMBER_ID_NOT_NULL_MESSAGE);
 
         Member member = memberRepository.findById(memberIdNonNull).orElseThrow(MemberSearchException::new);
 
@@ -58,7 +60,7 @@ public class FollowService {
 
     @Transactional(readOnly = true)
     public List<SimpleMemberResponse> getFollowersOfMember(Long memberId, String offsetUsername) {
-        Long memberIdNonNull = Objects.requireNonNull(memberId, "MemberId can't be null");
+        Long memberIdNonNull = Objects.requireNonNull(memberId, MEMBER_ID_NOT_NULL_MESSAGE);
         String offsetUsernameNonNull = offsetUsername == null ? "" : offsetUsername;
 
         Member member = memberRepository.findById(memberIdNonNull).orElseThrow(MemberSearchException::new);

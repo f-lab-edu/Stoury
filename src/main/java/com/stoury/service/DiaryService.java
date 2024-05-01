@@ -32,6 +32,8 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Objects;
 
+import static com.stoury.utils.Values.MEMBER_ID_NOT_NULL_MESSAGE;
+
 @Service
 @RequiredArgsConstructor
 public class DiaryService {
@@ -48,7 +50,7 @@ public class DiaryService {
             throw new DiaryCreateException("Feeds cannot be empty");
         }
 
-        Member member = memberRepository.findById(Objects.requireNonNull(memberId, "Member Id cannot be null"))
+        Member member = memberRepository.findById(Objects.requireNonNull(memberId, MEMBER_ID_NOT_NULL_MESSAGE))
                 .orElseThrow(MemberSearchException::new);
 
         List<Feed> feeds = feedIds.stream()
@@ -111,7 +113,7 @@ public class DiaryService {
 
     @Transactional(readOnly = true)
     public DiaryPageResponse getMemberDiaries(Long memberId, Long offsetId) {
-        Member member = memberRepository.findById(Objects.requireNonNull(memberId, "Member Id cannot be null"))
+        Member member = memberRepository.findById(Objects.requireNonNull(memberId, MEMBER_ID_NOT_NULL_MESSAGE))
                 .orElseThrow(MemberSearchException::new);
         Long offsetIdNotNull = Objects.requireNonNull(offsetId);
 

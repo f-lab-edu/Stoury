@@ -53,6 +53,9 @@ import java.util.ArrayList;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+import static com.stoury.utils.Values.FEED_ID_NOT_NULL_MESSAGE;
+import static com.stoury.utils.Values.MEMBER_ID_NOT_NULL_MESSAGE;
+
 @Service
 @RequiredArgsConstructor
 public class FeedService {
@@ -146,7 +149,7 @@ public class FeedService {
 
     @Transactional(readOnly = true)
     public List<FeedResponse> getFeedsOfMemberId(Long memberId, Long offsetId) {
-        validateId(memberId, () -> new FeedSearchException("Member id cannot be null."));
+        validateId(memberId, () -> new FeedSearchException(MEMBER_ID_NOT_NULL_MESSAGE));
         validateId(offsetId, () -> new FeedSearchException("Offset id cannot be null."));
 
         Member feedWriter = memberRepository.findById(memberId)
@@ -217,8 +220,8 @@ public class FeedService {
 
     @Transactional
     public FeedResponse updateFeedIfOwner(Long feedId, FeedUpdateRequest feedUpdateRequest, Long memberId) {
-        validateId(feedId, () -> new FeedUpdateException("Feed id cannot be null."));
-        validateId(memberId, () -> new FeedUpdateException("Member id cannot be null."));
+        validateId(feedId, () -> new FeedUpdateException(FEED_ID_NOT_NULL_MESSAGE));
+        validateId(memberId, () -> new FeedUpdateException(MEMBER_ID_NOT_NULL_MESSAGE));
 
         Feed feed = feedRepository.findById(feedId)
                 .orElseThrow(FeedSearchException::new);
@@ -294,8 +297,8 @@ public class FeedService {
 
     @Transactional(readOnly = true)
     public void clickLogUpdate(Long memberId, Long feedId) {
-        validateId(memberId, () -> new IllegalArgumentException("Member id cannot be null."));
-        validateId(feedId, () -> new IllegalArgumentException("Feed id cannot be null."));
+        validateId(memberId, () -> new IllegalArgumentException(MEMBER_ID_NOT_NULL_MESSAGE));
+        validateId(feedId, () -> new IllegalArgumentException(FEED_ID_NOT_NULL_MESSAGE));
 
         if (memberRepository.notExistsById(memberId)) {
             throw new MemberSearchException();
@@ -315,7 +318,7 @@ public class FeedService {
 
     @Transactional(readOnly = true)
     public List<FeedResponse> getFollowerViewedRecommendFeeds(Long memberId) {
-        validateId(memberId, () -> new IllegalArgumentException("Member id cannot be null."));
+        validateId(memberId, () -> new IllegalArgumentException(MEMBER_ID_NOT_NULL_MESSAGE));
 
         List<Long> recommendFeedIds = feedRepository.findRandomRecommendFeedIds(memberId);
         List<FeedResponseEntity> recommendFeeds = feedRepository.findAllFeedsByIdIn(recommendFeedIds);
