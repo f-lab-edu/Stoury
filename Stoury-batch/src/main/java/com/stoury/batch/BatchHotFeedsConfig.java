@@ -30,53 +30,53 @@ import java.time.temporal.ChronoUnit;
 public class BatchHotFeedsConfig {
     private final LogJobExecutionListener logger;
     private final EntityManagerFactory entityManagerFactory;
+    private final JobRepository jobRepository;
+    private final PlatformTransactionManager transactionManager;
+    private final ThreadPoolTaskExecutor taskExecutor;
+    private final LikeRepository likeRepository;
 
     private final RankingRepository rankingRepository;
 
     @Bean
     @ConditionalOnExpression("'${spring.batch.job.names}'.contains('jobDailyFeeds')")
-    public Job updateDailyFeedsJob(JobRepository jobRepository, PlatformTransactionManager tm,
-                                   ThreadPoolTaskExecutor taskExecutor, LikeRepository likeRepository) {
+    public Job updateDailyFeedsJob() {
         return new JobBuilder("jobDailyFeeds", jobRepository)
                 .incrementer(new RunIdIncrementer())
-                .start(updateDailyFeedsStep(jobRepository, tm, taskExecutor, likeRepository))
-                .next(initDailyLikeCountSnapshot(jobRepository, tm, taskExecutor, likeRepository))
+                .start(updateDailyFeedsStep())
+                .next(initDailyLikeCountSnapshot())
                 .listener(logger)
                 .build();
     }
 
     @Bean
     @ConditionalOnExpression("'${spring.batch.job.names}'.contains('jobWeeklyFeeds')")
-    public Job updateWeeklyFeedsJob(JobRepository jobRepository, PlatformTransactionManager tm,
-                                    ThreadPoolTaskExecutor taskExecutor, LikeRepository likeRepository) {
+    public Job updateWeeklyFeedsJob() {
         return new JobBuilder("jobWeeklyFeeds", jobRepository)
                 .incrementer(new RunIdIncrementer())
-                .start(updateWeeklyFeedsStep(jobRepository, tm, taskExecutor, likeRepository))
-                .next(initWeeklyLikeCountSnapshot(jobRepository, tm, taskExecutor, likeRepository))
+                .start(updateWeeklyFeedsStep())
+                .next(initWeeklyLikeCountSnapshot())
                 .listener(logger)
                 .build();
     }
 
     @Bean
     @ConditionalOnExpression("'${spring.batch.job.names}'.contains('jobMonthlyFeeds')")
-    public Job updateMonthlyFeedsJob(JobRepository jobRepository, PlatformTransactionManager tm,
-                                     ThreadPoolTaskExecutor taskExecutor, LikeRepository likeRepository) {
+    public Job updateMonthlyFeedsJob() {
         return new JobBuilder("jobMonthlyFeeds", jobRepository)
                 .incrementer(new RunIdIncrementer())
-                .start(updateMonthlyFeedsStep(jobRepository, tm, taskExecutor, likeRepository))
-                .next(initMonthlyLikeCountSnapshot(jobRepository, tm, taskExecutor, likeRepository))
+                .start(updateMonthlyFeedsStep())
+                .next(initransactionManageronthlyLikeCountSnapshot())
                 .listener(logger)
                 .build();
     }
 
     @Bean
     @ConditionalOnExpression("'${spring.batch.job.names}'.contains('jobDailyFeeds')")
-    public Step updateDailyFeedsStep(JobRepository jobRepository, PlatformTransactionManager tm,
-                                     ThreadPoolTaskExecutor taskExecutor, LikeRepository likeRepository) {
+    public Step updateDailyFeedsStep() {
         return new StepBuilder("stepDailyFeed", jobRepository)
-                .<Feed, Pair<SimpleFeedResponse, Long>>chunk(100, tm)
+                .<Feed, Pair<SimpleFeedResponse, Long>>chunk(100, transactionManager)
                 .reader(feedsReader())
-                .processor(feedsProcessor(likeRepository, ChronoUnit.DAYS))
+                .processor(feedsProcessor(ChronoUnit.DAYS))
                 .writer(feedsWriter(ChronoUnit.DAYS))
                 .taskExecutor(taskExecutor)
                 .allowStartIfComplete(true)
@@ -85,12 +85,11 @@ public class BatchHotFeedsConfig {
 
     @Bean
     @ConditionalOnExpression("'${spring.batch.job.names}'.contains('jobWeeklyFeeds')")
-    public Step updateWeeklyFeedsStep(JobRepository jobRepository, PlatformTransactionManager tm,
-                                      ThreadPoolTaskExecutor taskExecutor, LikeRepository likeRepository) {
+    public Step updateWeeklyFeedsStep() {
         return new StepBuilder("stepWeeklyFeed", jobRepository)
-                .<Feed, Pair<SimpleFeedResponse, Long>>chunk(100, tm)
+                .<Feed, Pair<SimpleFeedResponse, Long>>chunk(100, transactionManager)
                 .reader(feedsReader())
-                .processor(feedsProcessor(likeRepository, ChronoUnit.WEEKS))
+                .processor(feedsProcessor(ChronoUnit.WEEKS))
                 .writer(feedsWriter(ChronoUnit.WEEKS))
                 .taskExecutor(taskExecutor)
                 .allowStartIfComplete(true)
@@ -99,12 +98,11 @@ public class BatchHotFeedsConfig {
 
     @Bean
     @ConditionalOnExpression("'${spring.batch.job.names}'.contains('jobMonthlyFeeds')")
-    public Step updateMonthlyFeedsStep(JobRepository jobRepository, PlatformTransactionManager tm,
-                                       ThreadPoolTaskExecutor taskExecutor, LikeRepository likeRepository) {
+    public Step updateMonthlyFeedsStep() {
         return new StepBuilder("stepMonthlyFeed", jobRepository)
-                .<Feed, Pair<SimpleFeedResponse, Long>>chunk(100, tm)
+                .<Feed, Pair<SimpleFeedResponse, Long>>chunk(100, transactionManager)
                 .reader(feedsReader())
-                .processor(feedsProcessor(likeRepository, ChronoUnit.MONTHS))
+                .processor(feedsProcessor(ChronoUnit.MONTHS))
                 .writer(feedsWriter(ChronoUnit.MONTHS))
                 .taskExecutor(taskExecutor)
                 .allowStartIfComplete(true)
@@ -114,12 +112,11 @@ public class BatchHotFeedsConfig {
 
     @Bean
     @ConditionalOnExpression("'${spring.batch.job.names}'.contains('jobDailyFeeds')")
-    public Step initDailyLikeCountSnapshot(JobRepository jobRepository, PlatformTransactionManager tm,
-                                           ThreadPoolTaskExecutor taskExecutor, LikeRepository likeRepository) {
+    public Step initDailyLikeCountSnapshot() {
         return new StepBuilder("stepInitDailyLikeCountSnapshot", jobRepository)
-                .<Feed, Feed>chunk(100, tm)
+                .<Feed, Feed>chunk(100, transactionManager)
                 .reader(feedsReader())
-                .writer(likeInitializer(likeRepository, ChronoUnit.DAYS))
+                .writer(likeInitializer(ChronoUnit.DAYS))
                 .taskExecutor(taskExecutor)
                 .allowStartIfComplete(true)
                 .build();
@@ -127,12 +124,11 @@ public class BatchHotFeedsConfig {
 
     @Bean
     @ConditionalOnExpression("'${spring.batch.job.names}'.contains('jobWeeklyFeeds')")
-    public Step initWeeklyLikeCountSnapshot(JobRepository jobRepository, PlatformTransactionManager tm,
-                                            ThreadPoolTaskExecutor taskExecutor, LikeRepository likeRepository) {
+    public Step initWeeklyLikeCountSnapshot() {
         return new StepBuilder("stepInitWeeklyLikeCountSnapshot", jobRepository)
-                .<Feed, Feed>chunk(100, tm)
+                .<Feed, Feed>chunk(100, transactionManager)
                 .reader(feedsReader())
-                .writer(likeInitializer(likeRepository, ChronoUnit.WEEKS))
+                .writer(likeInitializer(ChronoUnit.WEEKS))
                 .taskExecutor(taskExecutor)
                 .allowStartIfComplete(true)
                 .build();
@@ -140,12 +136,11 @@ public class BatchHotFeedsConfig {
 
     @Bean
     @ConditionalOnExpression("'${spring.batch.job.names}'.contains('jobMonthlyFeeds')")
-    public Step initMonthlyLikeCountSnapshot(JobRepository jobRepository, PlatformTransactionManager tm,
-                                           ThreadPoolTaskExecutor taskExecutor, LikeRepository likeRepository) {
-        return new StepBuilder("stepInitMonthlyLikeCountSnapshot", jobRepository)
-                .<Feed, Feed>chunk(100, tm)
+    public Step initransactionManageronthlyLikeCountSnapshot() {
+        return new StepBuilder("stepInitransactionManageronthlyLikeCountSnapshot", jobRepository)
+                .<Feed, Feed>chunk(100, transactionManager)
                 .reader(feedsReader())
-                .writer(likeInitializer(likeRepository, ChronoUnit.MONTHS))
+                .writer(likeInitializer(ChronoUnit.MONTHS))
                 .taskExecutor(taskExecutor)
                 .allowStartIfComplete(true)
                 .build();
@@ -160,7 +155,7 @@ public class BatchHotFeedsConfig {
                 .build();
     }
 
-    public ItemProcessor<Feed, Pair<SimpleFeedResponse, Long>> feedsProcessor(LikeRepository likeRepository, ChronoUnit chronoUnit) {
+    public ItemProcessor<Feed, Pair<SimpleFeedResponse, Long>> feedsProcessor(ChronoUnit chronoUnit) {
         return feed -> {
             Long feedId = feed.getId();
 
@@ -176,7 +171,7 @@ public class BatchHotFeedsConfig {
         };
     }
 
-    private ItemWriter<Feed> likeInitializer(LikeRepository likeRepository, ChronoUnit chronoUnit) {
+    private ItemWriter<Feed> likeInitializer(ChronoUnit chronoUnit) {
         return list -> {
             for (Feed feed : list) {
                 likeRepository.initCountSnapshotByFeed(feed.getId().toString(), chronoUnit);
@@ -188,7 +183,7 @@ public class BatchHotFeedsConfig {
         return list -> {
             for (Pair<SimpleFeedResponse, Long> pair : list) {
                 SimpleFeedResponse rawSimpleFeed = pair.getFirst();
-                Long likeIncrease = pair.getSecond();
+                long likeIncrease = pair.getSecond();
 
                 if (likeIncrease > 0) {
                     rankingRepository.saveHotFeed(rawSimpleFeed, likeIncrease, chronoUnit);

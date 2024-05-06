@@ -40,6 +40,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
+import static com.stoury.utils.Values.MEMBER_ID_NOT_NULL_MESSAGE;
+
 @Service
 @RequiredArgsConstructor
 public class MemberService implements UserDetailsService {
@@ -103,7 +105,7 @@ public class MemberService implements UserDetailsService {
     @Transactional
     public void deleteMember(Long memberId) {
         if (memberId == null) {
-            throw new MemberDeleteException("Member id cannot be null!");
+            throw new MemberDeleteException(MEMBER_ID_NOT_NULL_MESSAGE);
         }
 
         Member deleteMember = memberRepository
@@ -208,7 +210,7 @@ public class MemberService implements UserDetailsService {
 
     @Transactional(readOnly = true)
     public List<OnlineMember> searchOnlineMembers(Long memberId, Double latitude, Double longitude, double radiusKm) {
-        long memberIdNotNull = Objects.requireNonNull(memberId, "Member id cannot be null.");
+        long memberIdNotNull = Objects.requireNonNull(memberId, MEMBER_ID_NOT_NULL_MESSAGE);
         double latitudeNotNull = Objects.requireNonNull(latitude, "Invalid points information.");
         double longitudeNotNull = Objects.requireNonNull(longitude, "Invalid points information.");
 

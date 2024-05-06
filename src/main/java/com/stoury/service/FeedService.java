@@ -1,24 +1,36 @@
 package com.stoury.service;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.stoury.domain.*;
+import com.stoury.domain.ClickLog;
+import com.stoury.domain.Feed;
+import com.stoury.domain.GraphicContent;
+import com.stoury.domain.Member;
+import com.stoury.domain.Tag;
 import com.stoury.dto.SimpleMemberResponse;
-import com.stoury.dto.feed.*;
-import com.stoury.event.*;
+import com.stoury.dto.feed.FeedCreateRequest;
+import com.stoury.dto.feed.FeedResponse;
+import com.stoury.dto.feed.FeedUpdateRequest;
+import com.stoury.dto.feed.GraphicContentResponse;
+import com.stoury.dto.feed.LocationResponse;
+import com.stoury.event.FeedResponseCreateEvent;
+import com.stoury.event.FeedResponseDeleteEvent;
+import com.stoury.event.FeedResponseUpdateEvent;
+import com.stoury.event.GraphicDeleteEvent;
 import com.stoury.exception.authentication.NotAuthorizedException;
 import com.stoury.exception.feed.FeedCreateException;
 import com.stoury.exception.feed.FeedSearchException;
+import com.stoury.exception.feed.FeedUpdateException;
 import com.stoury.exception.member.MemberSearchException;
 import com.stoury.projection.FeedResponseEntity;
-import com.stoury.repository.*;
+import com.stoury.repository.ClickLogRepository;
+import com.stoury.repository.FeedRepository;
+import com.stoury.repository.LikeRepository;
+import com.stoury.repository.MemberRepository;
 import com.stoury.service.location.LocationService;
-import com.stoury.service.storage.StorageService;
-import com.stoury.utils.FileUtils;
 import com.stoury.utils.JsonMapper;
-import com.stoury.utils.SupportedFileType;
 import com.stoury.utils.PageSize;
+import com.stoury.utils.SupportedFileType;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -28,17 +40,21 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.nio.file.Paths;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
+
+import static com.stoury.utils.Values.FEED_ID_NOT_NULL_MESSAGE;
+import static com.stoury.utils.Values.MEMBER_ID_NOT_NULL_MESSAGE;
 
 @Service
 @RequiredArgsConstructor
 public class FeedService {
-    @Value("${path-prefix}")
-    public String pathPrefix;
-    private final StorageService storageService;
+    private final GraphicContentService graphicContentService;
     private final FeedRepository feedRepository;
     private final MemberRepository memberRepository;
     private final LikeRepository likeRepository;
@@ -52,36 +68,23 @@ public class FeedService {
     public FeedResponse createFeed(Long writerId, FeedCreateRequest feedCreateRequest,
                                    List<MultipartFile> graphicContentsFiles) {
         validate(writerId, feedCreateRequest, graphicContentsFiles);
+
         Member writer = memberRepository.findById(writerId).orElseThrow(MemberSearchException::new);
-
-        List<GraphicContent> graphicContents = saveGraphicContents(graphicContentsFiles);
-
+        List<GraphicContent> graphicContents = graphicContentService.createGraphicContents(graphicContentsFiles);
         LocationResponse locationResponse = locationService.getLocation(feedCreateRequest.latitude(), feedCreateRequest.longitude());
 
-        Feed feedEntity = createFeedEntity(writer, feedCreateRequest, graphicContents, locationResponse);
-
-        Feed uploadedFeed = feedRepository.save(feedEntity);
+        Feed uploadedFeed = saveFeed(feedCreateRequest, writer, graphicContents, locationResponse);
 
         eventPublisher.publishEvent(new FeedResponseCreateEvent(this, uploadedFeed));
 
         return FeedResponse.from(uploadedFeed, 0);
     }
 
-    private List<GraphicContent> saveGraphicContents(List<MultipartFile> graphicContents) {
-        List<GraphicContent> graphicContentList = new ArrayList<>();
+    private Feed saveFeed(FeedCreateRequest feedCreateRequest, Member writer,
+                          List<GraphicContent> graphicContents, LocationResponse locationResponse) {
+        Feed feedEntity = createFeedEntity(writer, feedCreateRequest, graphicContents, locationResponse);
 
-        for (int i = 0; i < graphicContents.size(); i++) {
-            MultipartFile file = graphicContents.get(i);
-
-            String path = FileUtils.createFilePath(file, pathPrefix);
-
-            graphicContentList.add(new GraphicContent(path, i));
-
-            storageService.saveFileAtPath(file, Paths.get(path));
-            eventPublisher.publishEvent(new GraphicSaveEvent(this, file, path)); // NOSONAR
-        }
-
-        return graphicContentList;
+        return feedRepository.save(feedEntity);
     }
 
     private Feed createFeedEntity(Member writer, FeedCreateRequest feedCreateRequest,
@@ -97,26 +100,40 @@ public class FeedService {
     }
 
     private void validate(Long writerId, FeedCreateRequest feedCreateRequest, List<MultipartFile> graphicContents) {
-        if (writerId == null) {
-            throw new FeedCreateException("Writer id cannot be null");
-        }
-        if (graphicContents.isEmpty() || graphicContents.stream().anyMatch(SupportedFileType::isUnsupportedFile)) {
-            throw new FeedCreateException("Input files are empty or unsupported.");
-        }
+        validateId(writerId, () -> new FeedCreateException("Writer id cannot be null"));
+        validateGraphicContents(graphicContents);
+        validateFeedCreateRequest(feedCreateRequest);
+    }
+
+    private void validateFeedCreateRequest(FeedCreateRequest feedCreateRequest) {
         if (feedCreateRequest.longitude() == null || feedCreateRequest.latitude() == null) {
             throw new FeedCreateException("Location information is required.");
         }
     }
 
+    private void validateId(Long id, Supplier< ? extends RuntimeException> exceptionSupplier) {
+        if (id == null) {
+            throw exceptionSupplier.get();
+        }
+    }
+
+    private void validateGraphicContents(List<MultipartFile> graphicContents) {
+        if (graphicContents.isEmpty() || graphicContents.stream().anyMatch(SupportedFileType::isUnsupportedFile)) {
+            throw new FeedCreateException("Input files are empty or unsupported.");
+        }
+    }
+
     @Transactional(readOnly = true)
     public List<FeedResponse> getFeedsOfMemberId(Long memberId, Long offsetId) {
-        Member feedWriter = memberRepository.findById(Objects.requireNonNull(memberId))
+        validateId(memberId, () -> new FeedSearchException(MEMBER_ID_NOT_NULL_MESSAGE));
+        validateId(offsetId, () -> new FeedSearchException("Offset id cannot be null."));
+
+        Member feedWriter = memberRepository.findById(memberId)
                 .orElseThrow(() -> new FeedCreateException("Cannot find the member."));
-        Long offsetIdNotNull = Objects.requireNonNull(offsetId);
 
         Pageable page = PageRequest.of(0, PageSize.FEED_PAGE_SIZE, Sort.by("createdAt").descending());
 
-        List<FeedResponseEntity> feeds = feedRepository.findAllFeedsByMemberAndIdLessThan(feedWriter, offsetIdNotNull, page);
+        List<FeedResponseEntity> feeds = feedRepository.findAllFeedsByMemberAndIdLessThan(feedWriter, offsetId, page);
 
         return feeds.stream()
                 .map(this::toFeedResponse)
@@ -125,6 +142,8 @@ public class FeedService {
 
     @Transactional(readOnly = true)
     public List<FeedResponse> getFeedsByTag(String tagName, Long offsetId) {
+        validateId(offsetId, () -> new FeedSearchException("Offset id cannot be null."));
+
         Pageable page = PageRequest.of(0, PageSize.FEED_PAGE_SIZE, Sort.by("createdAt").descending());
         Long offsetIdNotNull = Objects.requireNonNull(offsetId);
 
@@ -137,18 +156,22 @@ public class FeedService {
 
     private FeedResponse toFeedResponse(FeedResponseEntity feedResponseEntity) {
         String feedIdStr = feedResponseEntity.getFeedId().toString();
-        long likes = likeRepository.getCountByFeedId(feedIdStr);
 
         SimpleMemberResponse writer = new SimpleMemberResponse(feedResponseEntity.getWriterId(), feedResponseEntity.getWriterUsername());
-        List<GraphicContentResponse> graphicContents =
-                jsonMapper.stringJsonToObject(feedResponseEntity.getGraphicContentPaths(), new TypeReference<List<GraphicContentResponse>>() {
-                });
-        Set<String> tags = jsonMapper.stringJsonToObject(feedResponseEntity.getTagNames(), new TypeReference<Set<String>>() {
-        });
+        List<GraphicContentResponse> graphicContents = jsonStringToGraphicContentResponseList(feedResponseEntity.getGraphicContentPaths());
+        Set<String> tags = jsonStringToTagSet(feedResponseEntity.getTagNames());
         LocationResponse location = new LocationResponse(feedResponseEntity.getCity(), feedResponseEntity.getCountry());
-
+        long likes = likeRepository.getCountByFeedId(feedIdStr);
 
         return FeedResponse.from(feedResponseEntity, writer, graphicContents, tags, location, likes);
+    }
+
+    private Set<String> jsonStringToTagSet(String tagNames) {
+        return jsonMapper.stringJsonToObject(tagNames, new TypeReference<Set<String>>() {});
+    }
+
+    private List<GraphicContentResponse> jsonStringToGraphicContentResponseList(String graphicContentPaths) {
+        return jsonMapper.stringJsonToObject(graphicContentPaths, new TypeReference<List<GraphicContentResponse>>() {});
     }
 
     protected FeedResponse updateFeed(Long feedId, FeedUpdateRequest feedUpdateRequest) {
@@ -173,7 +196,10 @@ public class FeedService {
 
     @Transactional
     public FeedResponse updateFeedIfOwner(Long feedId, FeedUpdateRequest feedUpdateRequest, Long memberId) {
-        Feed feed = feedRepository.findById(Objects.requireNonNull(feedId))
+        validateId(feedId, () -> new FeedUpdateException(FEED_ID_NOT_NULL_MESSAGE));
+        validateId(memberId, () -> new FeedUpdateException(MEMBER_ID_NOT_NULL_MESSAGE));
+
+        Feed feed = feedRepository.findById(feedId)
                 .orElseThrow(FeedSearchException::new);
 
         if (feed.notOwnedBy(memberId)) {
@@ -191,8 +217,11 @@ public class FeedService {
     }
 
     protected void deleteFeed(Long feedId) {
-        Feed feed = feedRepository.findById(Objects.requireNonNull(feedId))
+        validateId(feedId);
+
+        Feed feed = feedRepository.findById(feedId)
                 .orElseThrow(FeedSearchException::new);
+
         feedRepository.delete(feed);
 
         publishDeleteFileEvents(feed.getGraphicContents());
@@ -201,7 +230,9 @@ public class FeedService {
 
     @Transactional
     public void deleteFeedIfOwner(Long feedId, Long memberId) {
-        Feed feed = feedRepository.findById(Objects.requireNonNull(feedId))
+        validateId(feedId);
+
+        Feed feed = feedRepository.findById(feedId)
                 .orElseThrow(FeedSearchException::new);
 
         if (feed.notOwnedBy(memberId)) {
@@ -213,8 +244,9 @@ public class FeedService {
 
     @Transactional(readOnly = true)
     public FeedResponse getFeed(Long feedId) {
-        Long feedIdNonNull = Objects.requireNonNull(feedId);
-        FeedResponseEntity feedResponseEntity = feedRepository.findFeedResponseById(feedIdNonNull)
+        validateId(feedId);
+
+        FeedResponseEntity feedResponseEntity = feedRepository.findFeedResponseById(feedId)
                 .orElseThrow(FeedSearchException::new);
 
         return toFeedResponse(feedResponseEntity);
@@ -222,8 +254,9 @@ public class FeedService {
 
     @Transactional(readOnly = true)
     public List<FeedResponse> getRecommendedFeeds(Long memberId) {
-        Long memberIdNonNull = Objects.requireNonNull(memberId);
-        if (memberRepository.findById(memberIdNonNull).isEmpty()) {
+        validateId(memberId);
+
+        if (memberRepository.notExistsById(memberId)) {
             throw new MemberSearchException();
         }
 
@@ -234,20 +267,25 @@ public class FeedService {
         return recommendFeeds.stream().map(this::toFeedResponse).toList();
     }
 
+    private void validateId(Long id) {
+        validateId(id, () -> new IllegalArgumentException("Id cannot be null."));
+    }
+
     @Transactional(readOnly = true)
     public void clickLogUpdate(Long memberId, Long feedId) {
-        Long memberIdNonNull = Objects.requireNonNull(memberId);
-        Long feedIdNonNull = Objects.requireNonNull(feedId);
-        if (memberRepository.findById(memberIdNonNull).isEmpty()) {
+        validateId(memberId, () -> new IllegalArgumentException(MEMBER_ID_NOT_NULL_MESSAGE));
+        validateId(feedId, () -> new IllegalArgumentException(FEED_ID_NOT_NULL_MESSAGE));
+
+        if (memberRepository.notExistsById(memberId)) {
             throw new MemberSearchException();
         }
-        if (feedRepository.findById(feedIdNonNull).isEmpty()) {
+        if (feedRepository.notExistsById(feedId)) {
             throw new FeedSearchException();
         }
 
         ClickLog clickLog = ClickLog.builder()
-                .memberId(memberIdNonNull)
-                .feedId(feedIdNonNull)
+                .memberId(memberId)
+                .feedId(feedId)
                 .createdAt(LocalDateTime.now())
                 .build();
 
@@ -256,10 +294,11 @@ public class FeedService {
 
     @Transactional(readOnly = true)
     public List<FeedResponse> getFollowerViewedRecommendFeeds(Long memberId) {
-        Long memberIdNonNull = Objects.requireNonNull(memberId);
-        List<Long> recommendFeedIds = feedRepository.findRandomRecommendFeedIds(memberIdNonNull);
+        validateId(memberId, () -> new IllegalArgumentException(MEMBER_ID_NOT_NULL_MESSAGE));
 
+        List<Long> recommendFeedIds = feedRepository.findRandomRecommendFeedIds(memberId);
         List<FeedResponseEntity> recommendFeeds = feedRepository.findAllFeedsByIdIn(recommendFeedIds);
+
         return recommendFeeds.stream()
                 .map(this::toFeedResponse)
                 .toList();

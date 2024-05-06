@@ -20,7 +20,7 @@ class DiaryServiceTest extends Specification {
     def likeRepository = Mock(LikeRepository)
     def diaryService = new DiaryService(memberRepository, feedRepository, diaryRepository, likeRepository)
 
-    def writer = new Member("writer@email.com", "qwdqwdqwd", "writer", null)
+    def writer = new Member(id: 1L, email: "writer@email.com", encryptedPassword: "qwdqwdqwd", username: "writer", introduction: null)
 
     def setup() {
         memberRepository.findById(_) >> Optional.of(writer)

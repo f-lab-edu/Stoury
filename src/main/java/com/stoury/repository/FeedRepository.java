@@ -4,7 +4,10 @@ import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.core.types.dsl.StringPath;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import com.stoury.domain.*;
+import com.stoury.domain.Feed;
+import com.stoury.domain.Member;
+import com.stoury.domain.RecommendFeed;
+import com.stoury.domain.Tag;
 import com.stoury.projection.FeedResponseEntity;
 import com.stoury.utils.PageSize;
 import jakarta.persistence.EntityManager;
@@ -18,9 +21,11 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
-import static com.stoury.domain.QClickLog.*;
+import static com.stoury.domain.QClickLog.clickLog;
 import static com.stoury.domain.QFeed.feed;
-import static com.stoury.domain.QRecommendFeed.*;
+import static com.stoury.domain.QFollow.follow;
+import static com.stoury.domain.QGraphicContent.graphicContent;
+import static com.stoury.domain.QRecommendFeed.recommendFeed;
 import static com.stoury.domain.QTag.tag;
 import static com.stoury.projection.QFeedResponseEntity.feedResponseEntity;
 
@@ -133,26 +138,19 @@ public class FeedRepository {
 
     @Transactional
     public void deleteAll() {
-        jpaQueryFactory.selectFrom(feed).fetch().forEach(entityManager::remove);
+        jpaQueryFactory.delete(graphicContent).execute();
+        jpaQueryFactory.delete(feed).execute();
     }
 
     @Transactional
     public void deleteAllFeedResponse() {
-        jpaQueryFactory.selectFrom(feedResponseEntity).fetch().forEach(entityManager::remove);
+        jpaQueryFactory.delete(feedResponseEntity).execute();
     }
 
     @Transactional
     public Feed saveAndFlush(Feed saveFeed) {
         entityManager.persist(saveFeed);
         return saveFeed;
-    }
-
-    @Transactional(readOnly = true)
-    public boolean existsById(Long id) {
-        return jpaQueryFactory
-                .selectFrom(feed)
-                .where(feed.id.eq(id))
-                .fetchFirst() != null;
     }
 
     @Transactional
@@ -184,16 +182,6 @@ public class FeedRepository {
                 .fetch();
     }
 
-    @Transactional(readOnly = true)
-    public List<Long> findViewedFeedIdsByMember(Member member) {
-        return jpaQueryFactory
-                .select(feed.id)
-                .from(clickLog).join(feed).on(clickLog.feedId.eq(feed.id))
-                .where(clickLog.memberId.eq(member.getId())
-                        .and(clickLog.createdAt.between(LocalDateTime.now().minusDays(7), LocalDateTime.now())))
-                .fetch();
-    }
-
     @Transactional
     public List<RecommendFeed> saveRecommendFeeds(Collection<RecommendFeed> recommendFeeds) {
         recommendFeeds.forEach(entityManager::persist);
@@ -209,6 +197,7 @@ public class FeedRepository {
                 .fetch();
     }
 
+    @Transactional(readOnly = true)
     public List<Long> findRandomRecommendFeedIds(Long memberId) {
         return jpaQueryFactory
                 .select(recommendFeed.feedId)
@@ -217,5 +206,28 @@ public class FeedRepository {
                 .orderBy(Expressions.numberTemplate(Double.class, "function('rand')").asc())
                 .limit(PageSize.RANDOM_FEEDS_FETCH_SIZE)
                 .fetch();
+    }
+
+    @Transactional(readOnly = true)
+    public List<Long> findFollowerViewedFeedsOfMember(Long memberId) {
+        LocalDateTime current = LocalDateTime.now();
+        LocalDateTime aWeekAgo = current.minusDays(7);
+
+        return jpaQueryFactory
+                .select(clickLog.feedId)
+                .from(clickLog).join(follow).on(clickLog.memberId.eq(follow.follower.id))
+                .where(follow.followee.id.eq(memberId)
+                        .and(clickLog.createdAt.between(aWeekAgo, current)))
+                .fetch();
+    }
+
+    @Transactional(readOnly = true)
+    public boolean existsById(Long feedId) {
+        return !notExistsById(feedId);
+    }
+
+    @Transactional(readOnly = true)
+    public boolean notExistsById(Long feedId) {
+        return findById(feedId).isEmpty();
     }
 }

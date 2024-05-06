@@ -136,4 +136,12 @@ public class Feed {
     public boolean notOwnedBy(Long memberId) {
         return !isOwnedBy(memberId);
     }
+
+    public boolean isOwnedBy(Member member) {
+        return isOwnedBy(member.getId());
+    }
+
+    public boolean notOwnedBy(Member member) {
+        return notOwnedBy(member.getId());
+    }
 }

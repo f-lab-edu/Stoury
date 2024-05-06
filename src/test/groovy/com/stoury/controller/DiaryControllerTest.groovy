@@ -14,16 +14,14 @@ import com.stoury.utils.JsonMapper
 import org.spockframework.spring.SpringBean
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
-import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.http.MediaType
 
 import java.time.LocalDate
 import java.time.LocalDateTime
 
-import static org.mockito.ArgumentMatchers.any
-import static org.mockito.ArgumentMatchers.anyInt
-import static org.mockito.Mockito.when
-import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.*
+import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get
+import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post
+import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.delete
 import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 

@@ -32,47 +32,66 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Objects;
 
+import static com.stoury.utils.Values.MEMBER_ID_NOT_NULL_MESSAGE;
+
 @Service
 @RequiredArgsConstructor
 public class DiaryService {
+    public static final DateTimeFormatter dateFormatter = DateTimeFormatter.ISO_LOCAL_DATE;
     private final MemberRepository memberRepository;
     private final FeedRepository feedRepository;
     private final DiaryRepository diaryRepository;
     private final LikeRepository likeRepository;
-    public static final DateTimeFormatter dateFormatter = DateTimeFormatter.ISO_LOCAL_DATE;
 
     @Transactional
     public DiaryResponse createDiary(DiaryCreateRequest diaryCreateRequest, Long memberId) {
         List<Long> feedIds = diaryCreateRequest.feedIds();
+        validateFeedIds(feedIds);
+        validateMemberId(memberId);
+
+        Member member = memberRepository.findById(memberId).orElseThrow(MemberSearchException::new);
+
+        List<Feed> feeds = getFeeds(feedIds);
+
+        feeds.forEach(feed -> validateOwnership(member, feed));
+
+        GraphicContent thumbnail = getThumbnail(feeds, diaryCreateRequest.thumbnailId());
+        String title = getTitle(diaryCreateRequest, feeds);
+
+        Diary savedDiary = diaryRepository.save(new Diary(member, feeds, title, thumbnail));
+
+        return toDiaryResponse(savedDiary);
+    }
+
+    private GraphicContent getThumbnail(List<Feed> feeds, Long thumbnailId) {
+        return feeds.stream()
+                .flatMap(feed -> feed.getGraphicContents().stream())
+                .filter(GraphicContent::isImage)
+                .filter(graphicContent -> graphicContent.getId().equals(thumbnailId))
+                .findFirst()
+                .orElseThrow(() -> new DiaryCreateException("Select a thumbnail image from your feed images"));
+    }
+
+    private List<Feed> getFeeds(List<Long> feedIds) {
+        return feedIds.stream()
+                .map(feedRepository::findById)
+                .map(feedOptional -> feedOptional.orElseThrow(FeedSearchException::new))
+                .toList();
+    }
+
+    private void validateFeedIds(List<Long> feedIds) {
         if (feedIds == null || feedIds.isEmpty()) {
             throw new DiaryCreateException("Feeds cannot be empty");
         }
-
-        Member member = memberRepository.findById(Objects.requireNonNull(memberId, "Member Id cannot be null"))
-                .orElseThrow(MemberSearchException::new);
-
-        List<Feed> feeds = feedIds.stream()
-                .map(feedRepository::findById)
-                .map(feedOptional -> feedOptional.orElseThrow(FeedSearchException::new))
-                .filter(feed -> validateOwnership(member, feed))
-                .toList();
-
-        GraphicContent thumbnail = feeds.stream()
-                .flatMap(feed -> feed.getGraphicContents().stream())
-                .filter(GraphicContent::isImage)
-                .filter(graphicContent -> graphicContent.getId().equals(diaryCreateRequest.thumbnailId()))
-                .findFirst()
-                .orElseThrow(() -> new DiaryCreateException("Select a thumbnail image from your feed images"));
-
-        String title = getTitle(diaryCreateRequest, feeds);
-
-        Diary diary = new Diary(member, feeds, title, thumbnail);
-
-        Diary savedDiary = diaryRepository.save(diary);
-        return getDiaryResponse(savedDiary);
     }
 
-    private DiaryResponse getDiaryResponse(Diary diary) {
+    private void validateMemberId(Long memberId) {
+        if (memberId == null) {
+            throw new DiaryCreateException(MEMBER_ID_NOT_NULL_MESSAGE);
+        }
+    }
+
+    private DiaryResponse toDiaryResponse(Diary diary) {
         List<FeedResponse> feedResponses = diary.getFeeds().stream()
                 .map(feed -> FeedResponse.from(feed, likeRepository.getLikes(feed.getId().toString())))
                 .toList();
@@ -80,38 +99,33 @@ public class DiaryService {
         return DiaryResponse.from(diary, feedResponses);
     }
 
-    @NotNull
     private String getTitle(DiaryCreateRequest diaryCreateRequest, List<Feed> feeds) {
-        String title;
         if (StringUtils.hasText(diaryCreateRequest.title())) {
-            title = diaryCreateRequest.title();
-        } else {
-            title = getDefaultTitle(feeds);
+            return diaryCreateRequest.title();
         }
-        return title;
+        return getDefaultTitle(feeds);
     }
 
-    @NotNull
     private String getDefaultTitle(List<Feed> sortedFeeds) {
-        String title;
         Feed firstFeed = sortedFeeds.get(0);
         Feed lastFeed = sortedFeeds.get(sortedFeeds.size() - 1);
+        String country = firstFeed.getCountry();
+        String city = firstFeed.getCity();
+        String startDate = dateFormatter.format(firstFeed.getCreatedAt());
+        String lastDate = dateFormatter.format(lastFeed.getCreatedAt());
 
-        title = firstFeed.getCountry() + ", " + firstFeed.getCity() + ", "
-                + dateFormatter.format(firstFeed.getCreatedAt()) + "~" + dateFormatter.format(lastFeed.getCreatedAt());
-        return title;
+        return "%s, %s, %s~%s".formatted(country, city, startDate, lastDate);
     }
 
-    private boolean validateOwnership(Member member, Feed feed) {
-        if (!feed.getMember().equals(member)) {
+    private void validateOwnership(Member member, Feed feed) {
+        if (feed.notOwnedBy(member)) {
             throw new NotAuthorizedException("Not your feed");
         }
-        return true;
     }
 
     @Transactional(readOnly = true)
     public DiaryPageResponse getMemberDiaries(Long memberId, Long offsetId) {
-        Member member = memberRepository.findById(Objects.requireNonNull(memberId, "Member Id cannot be null"))
+        Member member = memberRepository.findById(Objects.requireNonNull(memberId, MEMBER_ID_NOT_NULL_MESSAGE))
                 .orElseThrow(MemberSearchException::new);
         Long offsetIdNotNull = Objects.requireNonNull(offsetId);
 
@@ -146,7 +160,7 @@ public class DiaryService {
         Long diaryIdNotNull = Objects.requireNonNull(diaryId, "Diary id cannot be null");
 
         return diaryRepository.findById(diaryIdNotNull)
-                .map(this::getDiaryResponse)
+                .map(this::toDiaryResponse)
                 .orElseThrow(DiarySearchException::new);
     }
 }

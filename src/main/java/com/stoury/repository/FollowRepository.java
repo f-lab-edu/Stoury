@@ -3,8 +3,6 @@ package com.stoury.repository;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.stoury.domain.Follow;
 import com.stoury.domain.Member;
-import com.stoury.domain.QFollow;
-import com.stoury.domain.QMember;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
@@ -12,8 +10,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
-import static com.stoury.domain.QFollow.*;
-import static com.stoury.domain.QMember.*;
+import static com.stoury.domain.QFollow.follow;
+import static com.stoury.domain.QMember.member;
 
 @Repository
 @RequiredArgsConstructor
@@ -29,7 +27,7 @@ public class FollowRepository {
 
     @Transactional
     public void deleteAll() {
-        jpaQueryFactory.selectFrom(follow).fetch().forEach(entityManager::remove);
+        jpaQueryFactory.delete(follow).execute();
     }
 
     @Transactional(readOnly = true)

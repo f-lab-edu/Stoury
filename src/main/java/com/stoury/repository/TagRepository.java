@@ -44,7 +44,7 @@ public class TagRepository {
 
     @Transactional
     public void deleteAll() {
-        jpaQueryFactory.selectFrom(tag).fetch().forEach(entityManager::remove);
+        jpaQueryFactory.delete(tag).execute();
     }
 
     @Transactional(readOnly = true)
@@ -61,6 +61,7 @@ public class TagRepository {
         );
     }
 
+    @Transactional(readOnly = true)
     public List<Tag> findAllByMemberIdAndFrequency(Long memberId) {
         return jpaQueryFactory
                 .select(tag)
